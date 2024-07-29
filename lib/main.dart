@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'homepage_top_bar.dart';
 
-
 void main() {
   runApp(MyApp());
 }
@@ -19,7 +18,7 @@ class MyApp extends StatelessWidget {
         title: 'Namer App',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+          visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
         home: MyHomePage(),
       ),
@@ -27,16 +26,20 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyAppState extends ChangeNotifier {
-}
+class MyAppState extends ChangeNotifier {}
 
 class MyHomePage extends StatelessWidget {
   @override
-  Widget build(BuildContext context){
-    return Text("hi");
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Column(children: <Widget>[
+      Container(
+          color: Colors.blueAccent,
+          padding: EdgeInsets.all(8),
+          child: HomeTopBar()),
+      Expanded(
+          child: Container(
+              color: Colors.white, child: Center(child: Text('body'))))
+    ]));
   }
 }
-
-
-
-
