@@ -33,8 +33,17 @@ class MyAppState extends ChangeNotifier {
 
 class MyHomePage extends StatelessWidget {
   @override
-  Widget build(BuildContext context){
-    return Text("hi");
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Column(children: <Widget>[
+      Container(
+          color: Colors.blueAccent,
+          padding: EdgeInsets.all(8),
+          child: HomeTopBar()),
+      Expanded(
+          child: Container(
+              color: Colors.white, child: Center(child: Text('body'))))
+    ]));
   }
 }
 
