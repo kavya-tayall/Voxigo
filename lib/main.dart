@@ -42,7 +42,7 @@ class MyHomePage extends StatelessWidget {
           child: HomeTopBar()),
       Expanded(
           child: Container(
-              color: Colors.white, child: Center(child: Text('body'))))
+              color: Colors.white, child: Center(child: Grid())))
     ]));
   }
 }
