@@ -70,7 +70,7 @@ class _ClickedBoxState extends State<ClickedBox> {
 
   void changeBox() {
     setState(() {
-      this.inside = FirstButton();
+      this.inside = FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 1');
     });
   }
 
