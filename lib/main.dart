@@ -31,6 +31,13 @@ class MyApp extends StatelessWidget {
 class MyAppState extends ChangeNotifier {
 }
 
+List<FirstButton> buttons = [
+   FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 1'),
+   FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
+   // Add more buttons as needed
+ ];
+
+
 class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -42,34 +49,30 @@ class MyHomePage extends StatelessWidget {
           child: HomeTopBar()),
       Expanded(
           child: Container(
-              color: Colors.white, child: Center(child: Grid())))
+              color: Colors.white, child: Center(child: Grid(buttons: buttons))))
     ]));
   }
 }
 
 
-class Grid extends StatelessWidget{
-  Widget build(BuildContext context){
+class Grid extends StatefulWidget {
+  final List<FirstButton> buttons;
+  const Grid({Key? key, required this.buttons}) : super(key: key);
+
+  @override
+  State<Grid> createState() => _GridState();
+}
+
+class _GridState extends State<Grid> {
+  @override
+  Widget build(BuildContext context) {
     return GridView.count(
       primary: false,
       padding: const EdgeInsets.all(20),
       crossAxisSpacing: 10,
       mainAxisSpacing: 10,
       crossAxisCount: 5,
-      children: [
-        FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 1'),
-        FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
-        FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 3'),
-        FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 4'),
-        FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 5'),
-        FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 6'),
-        FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 7'),
-        FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 8'),
-        FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 9'),
-        FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 10'),
-        FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 11'),
-        FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 12'),
-      ],
+      children: widget.buttons,
     );
   }
 }
