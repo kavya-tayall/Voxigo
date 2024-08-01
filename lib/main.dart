@@ -31,21 +31,31 @@ class MyApp extends StatelessWidget {
 class MyAppState extends ChangeNotifier {
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(children: <Widget>[
-      Container(
-          color: Colors.blueAccent,
-          padding: EdgeInsets.all(8),
-          child: HomeTopBar()),
-      Expanded(
-          child: Container(
-              color: Colors.white, child: Center(child: Grid())))
-    ]));
+          Container(
+              color: Colors.blueAccent,
+              padding: EdgeInsets.all(8),
+              child: HomeTopBar()),
+          Expanded(
+              child: Container(
+                  color: Colors.white, child: Center(child: Grid())))
+        ]));
   }
 }
+
+
+
 
 
 class Grid extends StatelessWidget{
