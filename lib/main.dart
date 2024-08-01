@@ -31,6 +31,14 @@ class MyApp extends StatelessWidget {
 class MyAppState extends ChangeNotifier {
 }
 
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
 List<FirstButton> buttons = [
    FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 1'),
    FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),

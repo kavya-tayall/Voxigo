@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 import 'Buttons.dart';
 
-class HomeTopBar extends StatefulWidget {
+
+class HomeTopBar extends StatelessWidget {
   const HomeTopBar({super.key});
 
-  @override
-  State<HomeTopBar> createState() => _HomeTopBarState();
-}
-
-class _HomeTopBarState extends State<HomeTopBar> {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -18,13 +14,13 @@ class _HomeTopBarState extends State<HomeTopBar> {
       children: [
         Expanded(
             child: Row(children: [
-          ClickedBox(),
-          ClickedBox(),
-          ClickedBox(),
-          ClickedBox(),
-          ClickedBox(),
-          ClickedBox(),
-          ClickedBox(),
+          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
+          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
+          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
+          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
+          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
+          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
+          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
         ])),
         Padding(
             padding: EdgeInsets.all(16),
@@ -54,28 +50,18 @@ class _HomeTopBarState extends State<HomeTopBar> {
   }
 }
 
-class ClickedBox extends StatefulWidget {
-  const ClickedBox({super.key});
 
-  @override
-  State<ClickedBox> createState() => _ClickedBoxState();
-}
+class ClickedBox extends StatelessWidget {
+  Widget inside = Placeholder();
 
-class _ClickedBoxState extends State<ClickedBox> {
-  Widget inside = SizedBox(
-    width: 150,
-    height: 100,
-    child: Icon(Icons.add_outlined),
-  );
-
-  void changeBox() {
-    setState(() {
-      this.inside = FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 1');
-    });
-  }
+  ClickedBox({required this.inside});
 
   @override
   Widget build(BuildContext context) {
     return Container(child: this.inside);
   }
 }
+
+
+
+
