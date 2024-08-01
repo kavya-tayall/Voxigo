@@ -39,6 +39,11 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearSelectedButtons(){
+    _selectedButtons.clear();
+    notifyListeners();
+  }
+
   List getSelectedButtons(){
     return this._selectedButtons;
   }
@@ -96,7 +101,9 @@ class _GridState extends State<Grid> {
       crossAxisSpacing: 10,
       mainAxisSpacing: 10,
       crossAxisCount: 5,
-      children: widget.buttons,
+      physics: NeverScrollableScrollPhysics(), // Disable scrolling
+      shrinkWrap: true,
+      children: widget.buttons, // Make the GridView wrap its content
     );
   }
 }
