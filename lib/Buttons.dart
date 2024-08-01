@@ -27,6 +27,7 @@ class _FirstButtonState extends State<FirstButton> {
 
           if (current_width <= available_width) {
             print(current_width);
+
             print(available_width);
             context.read<MyAppState>().addSelectedButton(widget);
           }
