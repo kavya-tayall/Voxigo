@@ -38,6 +38,11 @@ class MyAppState extends ChangeNotifier {
     _selectedButtons.add(button);
     notifyListeners();
   }
+
+  void clearSelectedButtons(){
+    _selectedButtons.clear();
+    notifyListeners();
+  }
 }
 
 class MyHomePage extends StatefulWidget {
