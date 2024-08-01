@@ -4,7 +4,7 @@ import 'Buttons.dart';
 
 
 class HomeTopBar extends StatelessWidget {
-  final List clickedButtons;
+  final List<FirstButton> clickedButtons;
 
   HomeTopBar({required this.clickedButtons});
 
@@ -16,15 +16,14 @@ class HomeTopBar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-            child: Row(children: [
-          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
-          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
-          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
-          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
-          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
-          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
-          ClickedBox(inside: SizedBox(width: 150, height: 100, child: Icon(Icons.add_outlined))),
-        ])),
+            child: Row(children: clickedButtons.map((button) {
+              return Container(
+                margin: EdgeInsets.symmetric(horizontal: 4.0),
+                width: 50, // Adjust size as needed
+                height: 50,
+                child: button,
+              );
+            }).toList(),)),
         Align(
           alignment: Alignment.centerRight,
           child: Row(

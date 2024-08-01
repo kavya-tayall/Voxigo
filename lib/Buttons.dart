@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
-import 'homepage_top_bar.dart';
+import 'package:provider/provider.dart';
+import 'main.dart';
 
 
-class FirstButton extends StatelessWidget {
+class FirstButton extends StatefulWidget {
   final String imagePath;
   final String text;
 
   const FirstButton({Key? key, required this.imagePath, required this.text}) : super(key: key);
 
+  @override
+  State<FirstButton> createState() => _FirstButtonState();
+}
+
+class _FirstButtonState extends State<FirstButton> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -15,8 +21,8 @@ class FirstButton extends StatelessWidget {
       height: 100, // Set the height of the button
       child: ElevatedButton(
         onPressed: () {
-          // You can access the passed parameters here
-          print(text);
+          context.read<MyAppState>().addSelectedButton(widget);
+
 
         },
         style: ElevatedButton.styleFrom(
@@ -31,14 +37,14 @@ class FirstButton extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: Image.asset(
-                imagePath, // Use the passed image path
+                widget.imagePath, // Use the passed image path
                 width: 50.0,
                 height: 20.0,
                 fit: BoxFit.cover, // Ensure the image covers the button
               ),
             ),
             Text(
-              text, // Use the passed text
+              widget.text, // Use the passed text
               textAlign: TextAlign.center, // Center text horizontally
             ),
           ],

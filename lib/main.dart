@@ -28,6 +28,15 @@ class MyApp extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {
+
+  List<FirstButton> _selectedButtons = [];
+
+  List<FirstButton> get selectedButtons => _selectedButtons;
+
+  void addSelectedButton(FirstButton button) {
+    _selectedButtons.add(button);
+    notifyListeners();
+  }
 }
 
 class MyHomePage extends StatefulWidget {
@@ -50,12 +59,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var selectedButtons = context.watch<MyAppState>().selectedButtons;
     return Scaffold(
         body: Column(children: <Widget>[
       Container(
           color: Colors.blueAccent,
           padding: EdgeInsets.all(8),
-          child: HomeTopBar()),
+          child: HomeTopBar(clickedButtons: selectedButtons)),
       Expanded(
           child: Container(
               color: Colors.white, child: Center(child: Grid(buttons: buttons))))
