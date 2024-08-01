@@ -18,9 +18,6 @@ class HomeTopBar extends StatelessWidget {
         Expanded(
             child: Row(children: clickedButtons.map((button) {
               return Container(
-                margin: EdgeInsets.symmetric(horizontal: 4.0),
-                width: 50, // Adjust size as needed
-                height: 50,
                 child: button,
               );
             }).toList(),)),
