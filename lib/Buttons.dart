@@ -21,9 +21,15 @@ class _FirstButtonState extends State<FirstButton> {
       height: 100, // Set the height of the button
       child: ElevatedButton(
         onPressed: () {
-          context.read<MyAppState>().addSelectedButton(widget);
+          double width = MediaQuery.sizeOf(context).width;
+          double available_width = width-409;
+          double current_width = (context.read<MyAppState>().getSelectedButtons().length+1) * 120;
 
-
+          if (current_width <= available_width) {
+            print(current_width);
+            print(available_width);
+            context.read<MyAppState>().addSelectedButton(widget);
+          }
         },
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero, // Remove default padding

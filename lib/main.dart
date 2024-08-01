@@ -38,6 +38,11 @@ class MyAppState extends ChangeNotifier {
     _selectedButtons.add(button);
     notifyListeners();
   }
+
+  List getSelectedButtons(){
+    return this._selectedButtons;
+  }
+
 }
 
 class MyHomePage extends StatefulWidget {
@@ -48,13 +53,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List _clickedButtons = [];
-
-  void _updateList(Widget button) {
-    setState(() {
-      _clickedButtons.add(button);
-    });
-  }
 
   List<FirstButton> buttons = [
     //list of buttons to pass into grid
