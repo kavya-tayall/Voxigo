@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'homepage_top_bar.dart';
 import 'Buttons.dart';
+import 'bottom_nav_bar.dart';
 
 
 void main() {
@@ -38,8 +39,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  List _clickedButtons = [];
 
-
+  void _updateList(Widget button) {
+    setState(() {
+      _clickedButtons.add(button);
+    });
+  }
 
   List<FirstButton> buttons = [
     //list of buttons to pass into grid
@@ -58,7 +64,8 @@ class _MyHomePageState extends State<MyHomePage> {
           child: HomeTopBar()),
       Expanded(
           child: Container(
-              color: Colors.white, child: Center(child: Grid(buttons: buttons))))
+              color: Colors.white, child: Center(child: Grid(buttons: buttons)))),
+      CustomNavigationBar()
     ]));
   }
 }
@@ -85,4 +92,3 @@ class _GridState extends State<Grid> {
     );
   }
 }
-

@@ -4,9 +4,6 @@ import 'Buttons.dart';
 
 
 class HomeTopBar extends StatelessWidget {
-  final List clickedButtons;
-
-  HomeTopBar({required this.clickedButtons});
 
 
   @override
