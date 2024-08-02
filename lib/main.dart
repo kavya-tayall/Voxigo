@@ -4,6 +4,7 @@ import 'homepage_top_bar.dart';
 import 'Buttons.dart';
 import 'bottom_nav_bar.dart';
 import 'EditBar.dart';
+import 'homePage.dart';
 
 //hi
 void main() {
@@ -59,33 +60,41 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int selectedIndex = 0;
 
-  List<FirstButton> buttons = [
-    //list of buttons to pass into grid
-     FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 1'),
-     FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
-    FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
-    FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
-    FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
-     // Add more buttons as needed
-   ];
+  void onItemTapped(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    var selectedButtons = context.watch<MyAppState>().selectedButtons;
+    Widget page;
+    switch (selectedIndex) {
+      case 0:
+        page = HomePage();
+      case 1:
+        page = Placeholder();
+      case 2:
+        page = Placeholder();
+      case 3:
+        page = Placeholder();
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }
+
     return Scaffold(
-        body: Column(children: <Widget>[
-      Container(
-          color: Colors.blueAccent,
-          padding: EdgeInsets.all(8),
-          child: HomeTopBar(clickedButtons: selectedButtons)),
-      Expanded(
-          child: Container(
-              color: Colors.white, child: Center(child: Grid(buttons: buttons)))),
-      EditBar(),
-          SizedBox(height: 20),
-          CustomNavigationBar()
-    ]));
+      body: Column(
+        children: <Widget>[
+          Expanded(child: page),
+          CustomNavigationBar(
+            selectedIndex: selectedIndex,
+            onItemTapped: onItemTapped,
+          ),
+        ],
+      ),
+    );
   }
 }
 
