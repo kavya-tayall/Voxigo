@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'homepage_top_bar.dart';
 import 'Buttons.dart';
 import 'bottom_nav_bar.dart';
+import 'EditBar.dart';
 
 //hi
 void main() {
@@ -63,6 +64,9 @@ class _MyHomePageState extends State<MyHomePage> {
     //list of buttons to pass into grid
      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 1'),
      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
+    FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
+    FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
+    FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
      // Add more buttons as needed
    ];
 
@@ -78,7 +82,9 @@ class _MyHomePageState extends State<MyHomePage> {
       Expanded(
           child: Container(
               color: Colors.white, child: Center(child: Grid(buttons: buttons)))),
-      CustomNavigationBar()
+      EditBar(),
+          SizedBox(height: 20),
+          CustomNavigationBar()
     ]));
   }
 }
@@ -100,7 +106,7 @@ class _GridState extends State<Grid> {
       padding: const EdgeInsets.all(20),
       crossAxisSpacing: 10,
       mainAxisSpacing: 10,
-      crossAxisCount: 5,
+      crossAxisCount: 7,
       physics: NeverScrollableScrollPhysics(), // Disable scrolling
       shrinkWrap: true,
       children: widget.buttons, // Make the GridView wrap its content
