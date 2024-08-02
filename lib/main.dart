@@ -6,6 +6,8 @@ import 'bottom_nav_bar.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'EditBar.dart';
+import 'homePage.dart';
+import 'Behaviour.dart';
 
 
 void main() {
@@ -81,22 +83,43 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int selectedIndex = 0;
+
+  void onItemTapped(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    var selectedButtons = context.watch<MyAppState>().selectedButtons;
+    Widget page;
+    switch (selectedIndex) {
+      case 0:
+        page = HomePage();
+      case 1:
+        page = Placeholder();
+      case 2:
+        page = Placeholder();
+      case 3:
+        page = BehaviourPage();
+      case 4:
+        page = Placeholder();
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }
+
     return Scaffold(
-        body: Column(children: <Widget>[
-      Container(
-          color: Colors.blueAccent,
-          padding: EdgeInsets.all(8),
-          child: HomeTopBar(clickedButtons: selectedButtons)),
-      Expanded(
-          child: Container(
-              color: Colors.transparent, child: Center(child: Grid()))),
-      EditBar(),
-          SizedBox(height: 20),
-          CustomNavigationBar()
-    ]));
+      body: Column(
+        children: <Widget>[
+          Expanded(child: page),
+          CustomNavigationBar(
+            selectedIndex: selectedIndex,
+            onItemTapped: onItemTapped,
+          ),
+        ],
+      ),
+    );
   }
 }
 
