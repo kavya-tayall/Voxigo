@@ -1,0 +1,54 @@
+{
+  "buttons": [
+    {
+      "id": "1",
+      "image_url": "assets/imgs/Screenshot 2024-07-29 at 4.31.43 PM.png",
+      "label": "Hi!",
+      "folder": false
+    },
+    {
+      "id": "2",
+      "image_url": "assets/imgs/Screenshot 2024-07-29 at 4.31.43 PM.png",
+      "label": "Hi!2",
+      "folder": false
+    },
+    {
+      "id": "3",
+      "image_url": "assets/imgs/Screenshot 2024-07-29 at 4.31.43 PM.png",
+      "label": "Hi!3",
+      "folder": false
+    },
+    {
+      "id": "4",
+      "image_url": "assets/imgs/Screenshot 2024-07-29 at 4.31.43 PM.png",
+      "label": "Hi!4",
+      "folder": false
+    },
+    {
+      "id": "5",
+      "image_url": "assets/imgs/Screenshot 2024-07-29 at 4.31.43 PM.png",
+      "label": "Hi!5",
+      "folder": false
+    },
+    {
+      "id": "6",
+      "image_url": "assets/imgs/OneDrive_Folder_Icon.png",
+      "label": "food",
+      "folder": true,
+      "buttons": [
+        {
+          "id": "7",
+          "image_url": "assets/imgs/Screenshot 2024-07-29 at 4.31.43 PM.png",
+          "label": "Hi!7",
+          "folder": false
+        },
+        {
+          "id": "8",
+          "image_url": "assets/imgs/Screenshot 2024-07-29 at 4.31.43 PM.png",
+          "label": "Hi!8",
+          "folder": false
+        }
+      ]
+    }
+  ]
+}

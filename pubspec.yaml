@@ -24,6 +24,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/Screenshot 2024-07-29 at 4.31.43 PM.png
+    - assets/imgs/Screenshot 2024-07-29 at 4.31.43 PM.png
+    - assets/board_info/board.json
+    - assets/imgs/OneDrive_Folder_Icon.png
 
 

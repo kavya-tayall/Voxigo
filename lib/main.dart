@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 import 'homepage_top_bar.dart';
 import 'Buttons.dart';
 import 'bottom_nav_bar.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 import 'EditBar.dart';
 
-//hi
+
 void main() {
   runApp(MyApp());
 }
@@ -32,8 +34,13 @@ class MyApp extends StatelessWidget {
 class MyAppState extends ChangeNotifier {
 
   List<FirstButton> _selectedButtons = [];
-
   List<FirstButton> get selectedButtons => _selectedButtons;
+
+  List <Map> _visibleButtons = [];
+  List<Map> get visibleButtons => _visibleButtons;
+
+  List <String> _pathOfBoard = [];
+  List<String> get pathOfBoard => _pathOfBoard;
 
   void addSelectedButton(FirstButton button) {
     _selectedButtons.add(button);
@@ -46,9 +53,24 @@ class MyAppState extends ChangeNotifier {
   }
 
   List getSelectedButtons(){
-    return this._selectedButtons;
+    return _selectedButtons;
   }
 
+  void updateGrid(List newButtons){
+    _visibleButtons = [for (var item in newButtons) item];
+  }
+
+  void updateGridPath(String folderPath){
+    _pathOfBoard.add(folderPath);
+  }
+
+  List getVisibleButtons(){
+    return _visibleButtons;
+  }
+
+  List getPath(){
+    return _pathOfBoard;
+  }
 }
 
 class MyHomePage extends StatefulWidget {
@@ -59,17 +81,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-  List<FirstButton> buttons = [
-    //list of buttons to pass into grid
-     FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 1'),
-     FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
-    FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
-    FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
-    FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png', text: 'Button 2'),
-     // Add more buttons as needed
-   ];
-
   @override
   Widget build(BuildContext context) {
     var selectedButtons = context.watch<MyAppState>().selectedButtons;
@@ -81,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: HomeTopBar(clickedButtons: selectedButtons)),
       Expanded(
           child: Container(
-              color: Colors.white, child: Center(child: Grid(buttons: buttons)))),
+              color: Colors.transparent, child: Center(child: Grid()))),
       EditBar(),
           SizedBox(height: 20),
           CustomNavigationBar()
@@ -89,27 +100,53 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-
 class Grid extends StatefulWidget {
-  final List<FirstButton> buttons;
-  const Grid({Key? key, required this.buttons}) : super(key: key);
+  const Grid({super.key});
 
   @override
   State<Grid> createState() => _GridState();
 }
 
 class _GridState extends State<Grid> {
+  Map <String, dynamic> _data = {};
+
+  @override
+  void initState(){
+    super.initState();
+    _loadJsonData();
+  }
+
+  Future<void> _loadJsonData() async{
+    final jsonString = await rootBundle.loadString("assets/board_info/board.json");
+    final jsonData = jsonDecode(jsonString);
+    setState(() {
+      _data = jsonData;
+      context.read()<MyAppState>().updateGrid([for (var info in _data["buttons"]) info]) ;
+    });
+  }
+
+
+
+
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      primary: false,
-      padding: const EdgeInsets.all(20),
-      crossAxisSpacing: 10,
-      mainAxisSpacing: 10,
-      crossAxisCount: 7,
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 7,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
       physics: NeverScrollableScrollPhysics(), // Disable scrolling
-      shrinkWrap: true,
-      children: widget.buttons, // Make the GridView wrap its content
+        shrinkWrap: true,
+        itemCount: context.watch<MyAppState>().visibleButtons.length,
+        itemBuilder: (BuildContext context, int index){
+        print("asdf");
+        if (context.watch<MyAppState>().visibleButtons[index]["folder"] == false){
+          return FirstButton(imagePath: context.watch<MyAppState>().visibleButtons[index]["image_url"], text: context.watch<MyAppState>().visibleButtons[index]["label"]);
+        } else{
+          return FolderButton(imagePath: context.watch<MyAppState>().visibleButtons[index]["image_url"], text: context.watch<MyAppState>().visibleButtons[index]["label"]);
+        }
+      }
     );
   }
 }

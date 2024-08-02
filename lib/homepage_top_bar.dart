@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io' show Platform;
 import 'Buttons.dart';
 import 'package:provider/provider.dart';
 import 'main.dart';
@@ -43,19 +42,6 @@ class HomeTopBar extends StatelessWidget {
     );
   }
 }
-
-
-class ClickedBox extends StatelessWidget {
-  Widget inside = Placeholder();
-
-  ClickedBox({required this.inside});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(child: this.inside);
-  }
-}
-
 
 
 

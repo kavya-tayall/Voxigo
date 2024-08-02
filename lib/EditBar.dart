@@ -12,14 +12,12 @@ class EditBar extends StatelessWidget {
     return Container(
       color: Colors.transparent,
       child: Row(
-
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 shape: CircleBorder(),
                 padding: EdgeInsets.all(30),
-
               ),
               onPressed: () {
                 print("add");
