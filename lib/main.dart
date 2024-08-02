@@ -5,6 +5,7 @@ import 'Buttons.dart';
 import 'bottom_nav_bar.dart';
 import 'EditBar.dart';
 import 'homePage.dart';
+import 'Behaviour.dart';
 
 //hi
 void main() {
@@ -79,6 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
       case 2:
         page = Placeholder();
       case 3:
+        page = BehaviourPage();
+      case 4:
         page = Placeholder();
       default:
         throw UnimplementedError('no widget for $selectedIndex');

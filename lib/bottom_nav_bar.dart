@@ -32,6 +32,10 @@ class CustomNavigationBar extends StatelessWidget {
           label: 'Music & Stories',
         ),
         BottomNavigationBarItem(
+          icon: Icon(Icons.calendar_month),
+          label: 'Behaviour',
+        ),
+        BottomNavigationBarItem(
           icon: Icon(Icons.settings),
           label: 'Settings',
         ),
