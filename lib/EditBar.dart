@@ -1,9 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'homepage_top_bar.dart';
-import 'Buttons.dart';
-import 'bottom_nav_bar.dart';
-import 'main.dart';
 
 
 class EditBar extends StatelessWidget {

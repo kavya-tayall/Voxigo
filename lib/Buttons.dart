@@ -61,10 +61,11 @@ class _FirstButtonState extends State<FirstButton> {
 
 
 class FolderButton extends StatefulWidget {
-  final String imagePath;
-  final String text;
-
-  const FolderButton({Key? key, required this.imagePath, required this.text}) : super(key: key);
+  String imagePath;
+  String text;
+  int ind;
+  List<Map> btns;
+  FolderButton({Key? key, required this.imagePath, required this.text, required this.ind, required this.btns}) : super(key: key);
 
   @override
   State<FolderButton> createState() => _FolderButton();
@@ -78,7 +79,9 @@ class _FolderButton extends State<FolderButton> {
       height: 100, // Set the height of the button
       child: ElevatedButton(
         onPressed: () {
-          context.read<MyAppState>().updateGrid(context.watch<MyAppState>().visibleButtons);
+          context.read<MyAppState>().updateGridPath(widget.ind.toString());
+          context.read<MyAppState>().updateGridPath("buttons");
+          context.read<MyAppState>().updateGrid(widget.btns[widget.ind]["buttons"]);
         },
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero, // Remove default padding

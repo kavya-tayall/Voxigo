@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'homepage_top_bar.dart';
 import 'Buttons.dart';
 import 'bottom_nav_bar.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
-import 'EditBar.dart';
 import 'homePage.dart';
 import 'Behaviour.dart';
 
@@ -60,19 +58,14 @@ class MyAppState extends ChangeNotifier {
 
   void updateGrid(List newButtons){
     _visibleButtons = [for (var item in newButtons) item];
+    notifyListeners();
   }
 
   void updateGridPath(String folderPath){
     _pathOfBoard.add(folderPath);
+    notifyListeners();
   }
 
-  List getVisibleButtons(){
-    return _visibleButtons;
-  }
-
-  List getPath(){
-    return _pathOfBoard;
-  }
 }
 
 class MyHomePage extends StatefulWidget {
@@ -84,6 +77,23 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 0;
+  Map <String, dynamic> _data = {};
+
+  @override
+  void initState(){
+    super.initState();
+    _loadJsonData();
+  }
+
+  Future<void> _loadJsonData() async{
+    final jsonString = await rootBundle.loadString("assets/board_info/board.json");
+    final jsonData = jsonDecode(jsonString);
+    setState(() {
+      _data = Map.from(jsonData);
+      context.read<MyAppState>().updateGrid([for (var info in _data["buttons"]) info]) ;
+    });
+  }
+
 
   void onItemTapped(int index) {
     setState(() {
@@ -124,33 +134,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class Grid extends StatefulWidget {
-  const Grid({super.key});
+class Grid extends StatelessWidget {
+  final List<Map> visibleButtons;
+  final List<String> pathOfBoard;
 
-  @override
-  State<Grid> createState() => _GridState();
-}
-
-class _GridState extends State<Grid> {
-  Map <String, dynamic> _data = {};
-
-  @override
-  void initState(){
-    super.initState();
-    _loadJsonData();
-  }
-
-  Future<void> _loadJsonData() async{
-    final jsonString = await rootBundle.loadString("assets/board_info/board.json");
-    final jsonData = jsonDecode(jsonString);
-    setState(() {
-      _data = jsonData;
-      context.read()<MyAppState>().updateGrid([for (var info in _data["buttons"]) info]) ;
-    });
-  }
-
-
-
+  Grid({required this.visibleButtons, required this.pathOfBoard});
 
   @override
   Widget build(BuildContext context) {
@@ -162,13 +150,12 @@ class _GridState extends State<Grid> {
       ),
       physics: NeverScrollableScrollPhysics(), // Disable scrolling
         shrinkWrap: true,
-        itemCount: context.watch<MyAppState>().visibleButtons.length,
+        itemCount: visibleButtons.length,
         itemBuilder: (BuildContext context, int index){
-        print("asdf");
-        if (context.watch<MyAppState>().visibleButtons[index]["folder"] == false){
-          return FirstButton(imagePath: context.watch<MyAppState>().visibleButtons[index]["image_url"], text: context.watch<MyAppState>().visibleButtons[index]["label"]);
+        if (visibleButtons[index]["folder"] == false){
+          return FirstButton(imagePath: visibleButtons[index]["image_url"], text: visibleButtons[index]["label"]);
         } else{
-          return FolderButton(imagePath: context.watch<MyAppState>().visibleButtons[index]["image_url"], text: context.watch<MyAppState>().visibleButtons[index]["label"]);
+          return FolderButton(imagePath: visibleButtons[index]["image_url"], text: visibleButtons[index]["label"], ind: index, btns: visibleButtons);
         }
       }
     );

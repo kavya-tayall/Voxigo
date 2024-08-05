@@ -1,17 +1,17 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'homepage_top_bar.dart';
 import 'Buttons.dart';
-import 'bottom_nav_bar.dart';
 import 'EditBar.dart';
 import 'main.dart';
 
 class HomePage extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
-    var selectedButtons = context
-        .watch<MyAppState>()
-        .selectedButtons;
+    var selectedButtons = context.watch<MyAppState>().selectedButtons;
+    var visibleButtonsVar = context.watch<MyAppState>().visibleButtons;
+    var pathOfBoardVar = context.watch<MyAppState>().pathOfBoard;
+
 
     List<FirstButton> buttons = [
       //list of buttons to pass into grid
@@ -54,7 +54,7 @@ class HomePage extends StatelessWidget {
       Expanded(
           child: Container(
               color: Colors.transparent,
-              child: Center(child: Grid(buttons: buttons)))),
+              child: Center(child: Grid(visibleButtons: visibleButtonsVar, pathOfBoard: pathOfBoardVar)))),
       EditBar(),
       SizedBox(height: 20),
     ]);
