@@ -13,39 +13,6 @@ class HomePage extends StatelessWidget {
     var pathOfBoardVar = context.watch<MyAppState>().pathOfBoard;
 
 
-    List<FirstButton> buttons = [
-      //list of buttons to pass into grid
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 1'),
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 2'),
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 2'),
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 2'),
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 2'),
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 1'),
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 1'),
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 1'),
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 1'),
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 1'),
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 1'),
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 1'),
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 1'),
-      FirstButton(imagePath: 'assets/Screenshot 2024-07-29 at 4.31.43 PM.png',
-          text: 'Button 1'),
-
-      // Add more buttons as needed
-    ];
     return Column(children: <Widget>[
       Container(
           color: Colors.blueAccent,

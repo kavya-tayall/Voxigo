@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'Buttons.dart';
 import 'bottom_nav_bar.dart';
 import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart';
 import 'homePage.dart';
 import 'Behaviour.dart';
 
@@ -31,37 +31,45 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyAppState extends ChangeNotifier {
 
+class MyAppState extends ChangeNotifier {
   List<FirstButton> _selectedButtons = [];
+
   List<FirstButton> get selectedButtons => _selectedButtons;
 
-  List <Map> _visibleButtons = [];
+  List<Map> _visibleButtons = [];
+
   List<Map> get visibleButtons => _visibleButtons;
 
-  List <String> _pathOfBoard = [];
+  List<String> _pathOfBoard = [];
+
   List<String> get pathOfBoard => _pathOfBoard;
+
+  List<String> _imageUrls = [];
+
+  List<String> get imageUrls => _imageUrls;
+
 
   void addSelectedButton(FirstButton button) {
     _selectedButtons.add(button);
     notifyListeners();
   }
 
-  void clearSelectedButtons(){
+  void clearSelectedButtons() {
     _selectedButtons.clear();
     notifyListeners();
   }
 
-  List getSelectedButtons(){
+  List getSelectedButtons() {
     return _selectedButtons;
   }
 
-  void updateGrid(List newButtons){
+  void updateGrid(List newButtons) {
     _visibleButtons = [for (var item in newButtons) item];
     notifyListeners();
   }
 
-  void updateGridPath(String folderPath){
+  void updateGridPath(String folderPath) {
     _pathOfBoard.add(folderPath);
     notifyListeners();
   }
@@ -142,22 +150,57 @@ class Grid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 7,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-      ),
-      physics: NeverScrollableScrollPhysics(), // Disable scrolling
-        shrinkWrap: true,
-        itemCount: visibleButtons.length,
-        itemBuilder: (BuildContext context, int index){
-        if (visibleButtons[index]["folder"] == false){
-          return FirstButton(imagePath: visibleButtons[index]["image_url"], text: visibleButtons[index]["label"]);
-        } else{
-          return FolderButton(imagePath: visibleButtons[index]["image_url"], text: visibleButtons[index]["label"], ind: index, btns: visibleButtons);
-        }
-      }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        int crossAxisCount = 7; // Fixed number of columns
+        int fixedRows = 5; // Fixed number of rows
+
+        // Calculate available height and width
+        double availableWidth = constraints.maxWidth;
+        double availableHeight = constraints.maxHeight;
+
+        // Calculate maximum number of items that can fit based on number of rows
+        int maxItems = crossAxisCount * fixedRows;
+        double itemHeight = availableHeight / fixedRows;
+
+        // Calculate the width based on the number of columns
+        double itemWidth = availableWidth / crossAxisCount;
+
+        // Calculate the size of each button
+        double buttonSize = itemWidth < itemHeight ? itemWidth : itemHeight;
+
+        // Limit the number of items shown to the maximum number that fits in the grid
+        int visibleItemCount = visibleButtons.length > maxItems ? maxItems : visibleButtons.length;
+
+        return GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 1.0, // Ensure the buttons are square
+          ),
+          physics: NeverScrollableScrollPhysics(), // Disable scrolling
+          shrinkWrap: true,
+          itemCount: visibleItemCount,
+          itemBuilder: (BuildContext context, int index) {
+            if (visibleButtons[index]["folder"] == false) {
+              return FirstButton(
+                imagePath: visibleButtons[index]["image_url"],
+                text: visibleButtons[index]["label"],
+                size: buttonSize, // Pass the size parameter
+              );
+            } else {
+              return FolderButton(
+                imagePath: visibleButtons[index]["image_url"],
+                text: visibleButtons[index]["label"],
+                ind: index,
+                btns: visibleButtons,
+                size: buttonSize, // Pass the size parameter
+              );
+            }
+          },
+        );
+      },
     );
   }
 }
