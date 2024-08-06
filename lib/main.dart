@@ -12,6 +12,7 @@ void main() {
   runApp(MyApp());
 }
 
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -39,8 +40,13 @@ class MyAppState extends ChangeNotifier {
   List <Map> _visibleButtons = [];
   List<Map> get visibleButtons => _visibleButtons;
 
+  Map _allButtons = {};
+  Map get allButtons => _allButtons;
+
   List <String> _pathOfBoard = [];
   List<String> get pathOfBoard => _pathOfBoard;
+
+
 
   void addSelectedButton(FirstButton button) {
     _selectedButtons.add(button);
@@ -66,6 +72,20 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void loadData(Map data){
+    _allButtons = Map.from(data);
+    updateGrid(_allButtons["buttons"]);
+  }
+
+  void goBack(){
+    _pathOfBoard.removeLast();
+    _pathOfBoard.removeLast();
+    dynamic temp = _allButtons["buttons"];
+    for (var i=0; i<_pathOfBoard.length;i++){
+      temp = _allButtons[_pathOfBoard[i]];
+    }
+    updateGrid(temp);
+  }
 }
 
 class MyHomePage extends StatefulWidget {
@@ -79,6 +99,12 @@ class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 0;
   Map <String, dynamic> _data = {};
 
+  void onItemTapped(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+  }
+
   @override
   void initState(){
     super.initState();
@@ -90,14 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final jsonData = jsonDecode(jsonString);
     setState(() {
       _data = Map.from(jsonData);
-      context.read<MyAppState>().updateGrid([for (var info in _data["buttons"]) info]) ;
-    });
-  }
-
-
-  void onItemTapped(int index) {
-    setState(() {
-      selectedIndex = index;
+      context.read<MyAppState>().loadData(_data);
     });
   }
 

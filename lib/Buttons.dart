@@ -22,10 +22,9 @@ class _FirstButtonState extends State<FirstButton> {
       child: ElevatedButton(
         onPressed: () {
           double width = MediaQuery.sizeOf(context).width;
-          double availableWidth = width-409;
           double currentWidth = (context.read<MyAppState>().getSelectedButtons().length+1) * 120;
 
-          if (currentWidth <= availableWidth) {
+          if (currentWidth <= width) {
             context.read<MyAppState>().addSelectedButton(widget);
           }
         },

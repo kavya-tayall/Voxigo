@@ -26,20 +26,6 @@ class HomeTopBar extends StatelessWidget {
                 child: button,
               );
             }).toList(),)),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Row(
-            children:[
-              Padding(padding: EdgeInsets.all(16), child: ElevatedButton.icon(icon: Icon(Icons.clear), onPressed: () {
-    context.read<MyAppState>().clearSelectedButtons();
-
-
-    }, label: const Text('Clear'),)),
-              Padding(padding: EdgeInsets.all(16), child: ElevatedButton.icon(icon: Icon(Icons.play_arrow), onPressed: () => {}, label: const Text('Play'),)),
-              Padding(padding: EdgeInsets.all(16), child: ElevatedButton.icon(icon: Icon(Icons.auto_mode), onPressed: () => {}, label: const Text('Helper'),))
-            ]
-          ),
-        )
       ],
     );
   }
