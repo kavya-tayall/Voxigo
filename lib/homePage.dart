@@ -54,7 +54,7 @@ class HomePage extends StatelessWidget {
       Expanded(
           child: Container(
               color: Colors.transparent,
-              child: Center(child: Grid(buttons: buttons)))),
+              child: Center(child: Grid()))),
       EditBar(),
       SizedBox(height: 20),
     ]);
