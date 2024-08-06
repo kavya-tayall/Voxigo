@@ -155,19 +155,14 @@ class Grid extends StatelessWidget {
         int crossAxisCount = 7; // Fixed number of columns
         int fixedRows = 5; // Fixed number of rows
 
-        // Calculate available height and width
-        double availableWidth = constraints.maxWidth;
+
         double availableHeight = constraints.maxHeight;
 
         // Calculate maximum number of items that can fit based on number of rows
-        int maxItems = crossAxisCount * fixedRows;
-        double itemHeight = availableHeight / fixedRows;
+        int maxItems = 35;
+        double buttonSize = ((availableHeight - 50) / fixedRows);
 
-        // Calculate the width based on the number of columns
-        double itemWidth = availableWidth / crossAxisCount;
 
-        // Calculate the size of each button
-        double buttonSize = itemWidth < itemHeight ? itemWidth : itemHeight;
 
         // Limit the number of items shown to the maximum number that fits in the grid
         int visibleItemCount = visibleButtons.length > maxItems ? maxItems : visibleButtons.length;
@@ -177,7 +172,6 @@ class Grid extends StatelessWidget {
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
-            childAspectRatio: 1.0, // Ensure the buttons are square
           ),
           physics: NeverScrollableScrollPhysics(), // Disable scrolling
           shrinkWrap: true,
