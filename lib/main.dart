@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'Buttons.dart';
 import 'bottom_nav_bar.dart';
 import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart';
 import 'homePage.dart';
 import 'Behaviour.dart';
 
@@ -161,22 +161,51 @@ class Grid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 7,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-      ),
-      physics: NeverScrollableScrollPhysics(), // Disable scrolling
-        shrinkWrap: true,
-        itemCount: visibleButtons.length,
-        itemBuilder: (BuildContext context, int index){
-        if (visibleButtons[index]["folder"] == false){
-          return FirstButton(imagePath: visibleButtons[index]["image_url"], text: visibleButtons[index]["label"]);
-        } else{
-          return FolderButton(imagePath: visibleButtons[index]["image_url"], text: visibleButtons[index]["label"], ind: index, btns: visibleButtons);
-        }
-      }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        int crossAxisCount = 7; // Fixed number of columns
+        int fixedRows = 5; // Fixed number of rows
+
+
+        double availableHeight = constraints.maxHeight;
+
+        // Calculate maximum number of items that can fit based on number of rows
+        int maxItems = 35;
+        double buttonSize = ((availableHeight - 50) / fixedRows);
+
+
+
+        // Limit the number of items shown to the maximum number that fits in the grid
+        int visibleItemCount = visibleButtons.length > maxItems ? maxItems : visibleButtons.length;
+
+        return GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+          ),
+          physics: NeverScrollableScrollPhysics(), // Disable scrolling
+          shrinkWrap: true,
+          itemCount: visibleItemCount,
+          itemBuilder: (BuildContext context, int index) {
+            if (visibleButtons[index]["folder"] == false) {
+              return FirstButton(
+                imagePath: visibleButtons[index]["image_url"],
+                text: visibleButtons[index]["label"],
+                size: buttonSize, // Pass the size parameter
+              );
+            } else {
+              return FolderButton(
+                imagePath: visibleButtons[index]["image_url"],
+                text: visibleButtons[index]["label"],
+                ind: index,
+                btns: visibleButtons,
+                size: buttonSize, // Pass the size parameter
+              );
+            }
+          },
+        );
+      },
     );
   }
 }
