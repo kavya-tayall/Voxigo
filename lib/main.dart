@@ -34,8 +34,7 @@ class MyApp extends StatelessWidget {
 
 class MyAppState extends ChangeNotifier {
 
-  List<FirstButton> _selectedButtons = [];
-  List<FirstButton> get selectedButtons => _selectedButtons;
+
 
   List <Map> _visibleButtons = [];
   List<Map> get visibleButtons => _visibleButtons;
@@ -47,20 +46,6 @@ class MyAppState extends ChangeNotifier {
   List<String> get pathOfBoard => _pathOfBoard;
 
 
-
-  void addSelectedButton(FirstButton button) {
-    _selectedButtons.add(button);
-    notifyListeners();
-  }
-
-  void clearSelectedButtons(){
-    _selectedButtons.clear();
-    notifyListeners();
-  }
-
-  List getSelectedButtons(){
-    return _selectedButtons;
-  }
 
   void updateGrid(List newButtons){
     _visibleButtons = [for (var item in newButtons) item];
@@ -157,8 +142,9 @@ class _MyHomePageState extends State<MyHomePage> {
 class Grid extends StatelessWidget {
   final List<Map> visibleButtons;
   final List<String> pathOfBoard;
+  final Function(FirstButton) onButtonPressed;
 
-  Grid({required this.visibleButtons, required this.pathOfBoard});
+  Grid({required this.visibleButtons, required this.pathOfBoard, required this.onButtonPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -193,7 +179,17 @@ class Grid extends StatelessWidget {
               return FirstButton(
                 imagePath: visibleButtons[index]["image_url"],
                 text: visibleButtons[index]["label"],
-                size: buttonSize, // Pass the size parameter
+                size: buttonSize,
+                onPressed: () {
+                  // Call the onButtonPressed callback with a new FirstButton
+                  onButtonPressed(
+                      FirstButton(
+                    imagePath: visibleButtons[index]["image_url"],
+                    text: visibleButtons[index]["label"],
+                    size: buttonSize,
+                    onPressed: () {},
+                  ));
+                },
               );
             } else {
               return FolderButton(
@@ -201,7 +197,8 @@ class Grid extends StatelessWidget {
                 text: visibleButtons[index]["label"],
                 ind: index,
                 btns: visibleButtons,
-                size: buttonSize, // Pass the size parameter
+                size: buttonSize,
+                // Pass the size parameter
               );
             }
           },

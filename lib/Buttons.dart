@@ -2,13 +2,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'main.dart';
+import 'homePage.dart';
+
 
 class FirstButton extends StatefulWidget {
   final String imagePath;
   final String text;
   final double size;
+  final VoidCallback onPressed;
 
-  const FirstButton({Key? key, required this.imagePath, required this.text, required this.size}) : super(key: key);
+  const FirstButton({Key? key, required this.imagePath, required this.text, required this.size, required this.onPressed}) : super(key: key);
 
   @override
   State<FirstButton> createState() => _FirstButtonState();
@@ -23,11 +26,14 @@ class _FirstButtonState extends State<FirstButton> {
       child: ElevatedButton(
         onPressed: () {
           double width = MediaQuery.sizeOf(context).width;
-          double currentWidth = (context.read<MyAppState>().getSelectedButtons().length+1) * 120;
+          double currentWidth = widget.size * (context.findAncestorStateOfType<HomePageState>()?.selectedButtons.length ?? 0 + 1);
+          print(width);
+          print(currentWidth);
 
           if (currentWidth <= width) {
-            context.read<MyAppState>().addSelectedButton(widget);
+            widget.onPressed();
           }
+          else print("oops overflowed");
         },
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero,
