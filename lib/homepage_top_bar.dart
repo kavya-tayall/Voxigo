@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'Buttons.dart';
-import 'package:provider/provider.dart';
-import 'main.dart';
 
 
 
