@@ -34,7 +34,6 @@ class HomePageState extends State<HomePage> {
     var pathOfBoardVar = context.watch<MyAppState>().pathOfBoard;
 
     return Column(
-
       children: <Widget>[
         Container(
           height: 130,
