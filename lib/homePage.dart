@@ -14,7 +14,9 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+
   FlutterTts flutterTts = FlutterTts();
+
   List<dynamic> _pathOfBoard = ["buttons"];
   Map<String, List> _data = {};
 
@@ -67,148 +69,33 @@ class HomePageState extends State<HomePage> {
   }
 
   void addButton(FirstButton button) {
-
-  void addButton(FirstButton button)  {
     setState(() {
-      _selectedButtons.add(button); // Modify the private _selectedButtons list directly
+      selectedButtons.add(button);
     });
-
   }
 
   void clearSelectedButtons() {
     setState(() {
-      _selectedButtons.clear();
+      selectedButtons.clear();
     });
   }
-
   void backspaceSelectedButtons() {
     setState(() {
       _selectedButtons.removeLast();
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-      if (_isLoading){
-        return Center(child: CircularProgressIndicator());
-      } else{
-        return Column(
-          children: <Widget>[
-            Container(
-              height: 130,
-              color: Colors.blueAccent,
-              padding: EdgeInsets.all(8),
-              child: HomeTopBar(clickedButtons: selectedButtons),
-            ),
-            Container(
-              padding: EdgeInsets.all(8),
-              child: SizedBox(
-                height: 50,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    PathWidget(
-                      onPathChange: _updatePathOfBoard,
-                      pathOfBoard: _pathOfBoard,
-                      child: Visibility(
-                        visible: true,
-                        child: TextButton.icon(
-                          icon: Icon(Icons.arrow_back_rounded),
-                          onPressed: () => goBack(),
-                          label: const Text('Back'),
-                          style: TextButton.styleFrom(
-                            shape: BeveledRectangleBorder(
-                              borderRadius: BorderRadius.zero, // Make the corners sharp
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 2,
-                      color: Colors.grey,
-                    ),
-                    Expanded(
-                      child: TextButton.icon(
-                        icon: Icon(Icons.clear),
-                        onPressed: clearSelectedButtons,
-                        label: const Text('Clear'),
-                        style: TextButton.styleFrom(
-                          shape: BeveledRectangleBorder(
-                            borderRadius: BorderRadius.zero, // Make the corners sharp
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 2,
-                      color: Colors.grey,
-                    ),
-                    Expanded(
-                      child: TextButton.icon(
-                        icon: Icon(Icons.play_arrow),
-                        onPressed: () {
-                          // Implement play logic
-                        },
-                        label: const Text('Play'),
-                        style: TextButton.styleFrom(
-                          shape: BeveledRectangleBorder(
-                            borderRadius: BorderRadius.zero, // Make the corners sharp
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 2,
-                      color: Colors.grey,
-                    ),
-                    Expanded(
-                      child: TextButton.icon(
-                        icon: Icon(Icons.auto_mode),
-                        onPressed: () {
-                          // Implement helper logic
-                        },
-                        label: const Text('Helper'),
-                        style: TextButton.styleFrom(
-                          shape: BeveledRectangleBorder(
-                            borderRadius: BorderRadius.zero, // Make the corners sharp
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: Container(
-                color: Colors.transparent,
-                child: Center(
-                  child: PathWidget(
-                    onPathChange: _updatePathOfBoard,
-                    pathOfBoard: _pathOfBoard,
-                    child: DataWidget(
-                      onDataChange: _modifyData,
-                      data: _data,
-                      child: Grid(onButtonPressed: addButton),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            EditBar(
-              data: _data,
-              onButtonAdded: (FirstButton button) {
-    if (_isLoading) {
+    if (_isLoading){
       return Center(child: CircularProgressIndicator());
-    } else {
+    } else{
       return Column(
         children: <Widget>[
           Container(
             height: 130,
             color: Colors.blueAccent,
+            padding: EdgeInsets.all(8),
             child: HomeTopBar(clickedButtons: selectedButtons),
           ),
           Container(
@@ -219,19 +106,25 @@ class HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Visibility(
-                    visible: true,
-                    child: TextButton.icon(
-                      icon: Icon(Icons.arrow_back_rounded),
-                      onPressed: () {},
-                      label: const Text('Back'),
-                      style: TextButton.styleFrom(
-                        shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero,
+                  PathWidget(
+                    onPathChange: _updatePathOfBoard,
+                    pathOfBoard: _pathOfBoard,
+                    child: Visibility(
+                      visible: true,
+                      child: TextButton.icon(
+                        icon: Icon(Icons.arrow_back_rounded),
+                        onPressed: () => goBack(),
+                        label: const Text('Back'),
+                        style: TextButton.styleFrom(
+                          shape: BeveledRectangleBorder(
+                            borderRadius: BorderRadius.zero, // Make the corners sharp
+                          ),
                         ),
                       ),
                     ),
-                  ),Container(
+                  ),
+
+                  Container(
                     width: 2,
                     color: Colors.grey,
                   ),
@@ -242,7 +135,7 @@ class HomePageState extends State<HomePage> {
                       label: const Text('Backspace'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero,
+                          borderRadius: BorderRadius.zero, // Make the corners sharp
                         ),
                       ),
                     ),
@@ -258,7 +151,7 @@ class HomePageState extends State<HomePage> {
                       label: const Text('Clear'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero,
+                          borderRadius: BorderRadius.zero, // Make the corners sharp
                         ),
                       ),
                     ),
@@ -271,14 +164,15 @@ class HomePageState extends State<HomePage> {
                     child: TextButton.icon(
                       icon: Icon(Icons.play_arrow),
                       onPressed: () async {
-                        for (FirstButton button in _selectedButtons){
-                          print (button.text);
-                          await flutterTts.speak(button.text);}
+    for (FirstButton button in _selectedButtons){
+    print (button.text);
+    await flutterTts.speak(button.text);}
+                        // Implement play logic
                       },
                       label: const Text('Play'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero,
+                          borderRadius: BorderRadius.zero, // Make the corners sharp
                         ),
                       ),
                     ),
@@ -296,7 +190,7 @@ class HomePageState extends State<HomePage> {
                       label: const Text('Helper'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero,
+                          borderRadius: BorderRadius.zero, // Make the corners sharp
                         ),
                       ),
                     ),
@@ -309,21 +203,27 @@ class HomePageState extends State<HomePage> {
             child: Container(
               color: Colors.transparent,
               child: Center(
-                child: Grid(
-                  data: _data,
-                  onButtonPressed: addButton,
+                child: PathWidget(
+                  onPathChange: _updatePathOfBoard,
+                  pathOfBoard: _pathOfBoard,
+                  child: DataWidget(
+                    onDataChange: _modifyData,
+                    data: _data,
+                    child: Grid(onButtonPressed: addButton),
+                  ),
                 ),
               ),
             ),
           ),
           EditBar(
+            data: _data,
             onButtonAdded: (FirstButton button) {
               addButton(button); // Add the button to visible buttons
             },),
-            SizedBox(height: 20),
-          ],
-        );
-      }
+          SizedBox(height: 20),
+        ],
+      );
+    }
 
   }
 }
