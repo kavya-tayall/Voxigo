@@ -48,6 +48,17 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  void goBack(){
+    setState(() {
+      if (_pathOfBoard.length > 1) {
+        _pathOfBoard.removeLast();
+        _pathOfBoard.removeLast();
+
+        _updatePathOfBoard(_pathOfBoard); // Notify that path has changed
+      }
+    });
+  }
+
   // Modify the data (you can customize this based on your app's logic)
   void _modifyData(Map<String, List> newData) {
     setState(() {
@@ -89,7 +100,6 @@ class HomePageState extends State<HomePage> {
               color: Colors.blueAccent,
               padding: EdgeInsets.all(8),
               child: HomeTopBar(clickedButtons: selectedButtons),
-
             ),
             Container(
               padding: EdgeInsets.all(8),
@@ -99,16 +109,19 @@ class HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Visibility(
-                      visible: true,
-                      child: TextButton.icon(
-                        icon: Icon(Icons.arrow_back_rounded),
-                        onPressed: () {
-                        },
-                        label: const Text('Back'),
-                        style: TextButton.styleFrom(
-                          shape: BeveledRectangleBorder(
-                            borderRadius: BorderRadius.zero, // Make the corners sharp
+                    PathWidget(
+                      onPathChange: _updatePathOfBoard,
+                      pathOfBoard: _pathOfBoard,
+                      child: Visibility(
+                        visible: true,
+                        child: TextButton.icon(
+                          icon: Icon(Icons.arrow_back_rounded),
+                          onPressed: () => goBack(),
+                          label: const Text('Back'),
+                          style: TextButton.styleFrom(
+                            shape: BeveledRectangleBorder(
+                              borderRadius: BorderRadius.zero, // Make the corners sharp
+                            ),
                           ),
                         ),
                       ),
