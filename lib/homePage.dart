@@ -152,7 +152,11 @@ class HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            EditBar(),
+            EditBar(
+              data: _data,
+              onButtonAdded: (FirstButton button) {
+              addButton(button); // Add the button to visible buttons
+            },),
             SizedBox(height: 20),
           ],
         );
