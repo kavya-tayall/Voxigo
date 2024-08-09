@@ -16,7 +16,6 @@ class Grid extends StatefulWidget {
 class _GridState extends State<Grid> {
   dynamic visibleButtons = [];
 
-
   @override
   void didChangeDependencies(){
     super.didChangeDependencies();
@@ -49,19 +48,6 @@ class _GridState extends State<Grid> {
     });
   }
 
-  void goBack(){
-    final pathWidget = PathWidget.of(context);
-
-    setState(() {
-      if (pathWidget!.pathOfBoard.length > 1) {
-        pathWidget.pathOfBoard.removeLast();
-        pathWidget.pathOfBoard.removeLast();
-
-        pathWidget.onPathChange(pathWidget.pathOfBoard); // Notify that path has changed
-        updateVisibleButtons();
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
