@@ -6,8 +6,6 @@ import 'main.dart';
 import 'homePage.dart';
 
 
-
-
 class HomeTopBar extends StatelessWidget {
   final List<FirstButton> clickedButtons;
 

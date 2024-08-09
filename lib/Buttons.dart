@@ -62,32 +62,24 @@ class _FirstButtonState extends State<FirstButton> {
   }
 }
 
-class FolderButton extends StatefulWidget {
+class FolderButton extends StatelessWidget {
   final String imagePath;
   final String text;
   final int ind;
-  final List<Map> btns;
   final double size;
 
-  FolderButton({Key? key, required this.imagePath, required this.text, required this.ind, required this.btns, required this.size}) : super(key: key);
+  final VoidCallback onPressed;
 
-  @override
-  State<FolderButton> createState() => _FolderButtonState();
-}
+  FolderButton({required this.imagePath, required this.text, required this.ind, required this.size, required this.onPressed});
 
-class _FolderButtonState extends State<FolderButton> {
   @override
   Widget build(BuildContext context) {
 
     return SizedBox(
-      width: widget.size,
-      height: widget.size,
+      width: size,
+      height: size,
       child: ElevatedButton(
-        onPressed: () {
-          context.read<MyAppState>().updateGridPath(widget.ind.toString());
-          context.read<MyAppState>().updateGridPath("buttons");
-          context.read<MyAppState>().updateGrid(widget.btns[widget.ind]["buttons"]);
-        },
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
@@ -100,12 +92,12 @@ class _FolderButtonState extends State<FolderButton> {
           children: <Widget>[
             Expanded(
               child: Image.asset(
-                widget.imagePath,
+                imagePath,
                 fit: BoxFit.cover,
               ),
             ),
             Text(
-              widget.text,
+              text,
               textAlign: TextAlign.center,
             ),
           ],

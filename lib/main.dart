@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'homePage.dart';
 import 'Behaviour.dart';
 
+typedef VoidCallBack = void Function();
+
 
 void main() {
   runApp(MyApp());
@@ -32,46 +34,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyAppState extends ChangeNotifier {
-
-
-
-  List <Map> _visibleButtons = [];
-  List<Map> get visibleButtons => _visibleButtons;
-
-  Map _allButtons = {};
-  Map get allButtons => _allButtons;
-
-  List <String> _pathOfBoard = [];
-  List<String> get pathOfBoard => _pathOfBoard;
-
-
-
-  void updateGrid(List newButtons){
-    _visibleButtons = [for (var item in newButtons) item];
-    notifyListeners();
-  }
-
-  void updateGridPath(String folderPath){
-    _pathOfBoard.add(folderPath);
-    notifyListeners();
-  }
-
-  void loadData(Map data){
-    _allButtons = Map.from(data);
-    updateGrid(_allButtons["buttons"]);
-  }
-
-  void goBack(){
-    _pathOfBoard.removeLast();
-    _pathOfBoard.removeLast();
-    dynamic temp = _allButtons["buttons"];
-    for (var i=0; i<_pathOfBoard.length;i++){
-      temp = _allButtons[_pathOfBoard[i]];
-    }
-    updateGrid(temp);
-  }
-}
+class MyAppState extends ChangeNotifier {}
 
 
 class MyHomePage extends StatefulWidget {
@@ -83,7 +46,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 0;
-  Map <String, dynamic> _data = {};
+
 
   void onItemTapped(int index) {
     setState(() {
@@ -91,20 +54,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  @override
-  void initState(){
-    super.initState();
-    _loadJsonData();
-  }
-
-  Future<void> _loadJsonData() async{
-    final jsonString = await rootBundle.loadString("assets/board_info/board.json");
-    final jsonData = jsonDecode(jsonString);
-    setState(() {
-      _data = Map.from(jsonData);
-      context.read<MyAppState>().loadData(_data);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,16 +88,65 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class Grid extends StatelessWidget {
-  final List<Map> visibleButtons;
-  final List<String> pathOfBoard;
-  final Function(FirstButton) onButtonPressed;
 
-  Grid({required this.visibleButtons, required this.pathOfBoard, required this.onButtonPressed});
+
+class Grid extends StatefulWidget {
+  List<dynamic> _pathOfBoard = ["buttons"];
+  List<dynamic> get pathOfBoard => _pathOfBoard;
+
+  final Function(FirstButton) onButtonPressed;
+  final Map <String, dynamic> data;
+
+  Grid({required this.data, required this.onButtonPressed});
+
+  @override
+  State<Grid> createState() => _GridState();
+}
+
+class _GridState extends State<Grid> {
+  dynamic visibleButtons = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Set initial visible buttons
+    updateVisibleButtons();
+  }
+
+  void updateVisibleButtons() {
+    setState(() {
+      dynamic buttons = widget.data;
+      for (var folder in widget.pathOfBoard) {
+        buttons = buttons[folder];
+      }
+      visibleButtons = buttons;
+
+    });
+  }
+
+  void _updateGridPath(int folderPath, String folderPath2){
+    setState(() {
+      widget.pathOfBoard.add(folderPath);
+      widget.pathOfBoard.add(folderPath2);
+      print("done");
+      updateVisibleButtons();
+    });
+  }
+
+  void goBack(){
+    setState(() {
+      if (widget.pathOfBoard.length >1){
+        widget.pathOfBoard.removeLast();
+        widget.pathOfBoard.removeLast();
+        updateVisibleButtons();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
+
       builder: (context, constraints) {
         int crossAxisCount = 7; // Fixed number of columns
         int fixedRows = 5; // Fixed number of rows
@@ -182,7 +180,7 @@ class Grid extends StatelessWidget {
                 size: buttonSize,
                 onPressed: () {
                   // Call the onButtonPressed callback with a new FirstButton
-                  onButtonPressed(
+                  widget.onButtonPressed(
                       FirstButton(
                     imagePath: visibleButtons[index]["image_url"],
                     text: visibleButtons[index]["label"],
@@ -196,8 +194,8 @@ class Grid extends StatelessWidget {
                 imagePath: visibleButtons[index]["image_url"],
                 text: visibleButtons[index]["label"],
                 ind: index,
-                btns: visibleButtons,
                 size: buttonSize,
+                onPressed: () => _updateGridPath(index, "buttons"),
                 // Pass the size parameter
               );
             }
