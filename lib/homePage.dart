@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'grid.dart';
 import 'homepage_top_bar.dart';
 import 'EditBar.dart';
 import 'main.dart';
@@ -13,11 +13,12 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  List<dynamic> _pathOfBoard = ["buttons"];
+  Map<String, List> _data = {};
 
   List<FirstButton> _selectedButtons = [];
   List<FirstButton> get selectedButtons => _selectedButtons;
 
-  Map<String, dynamic> _data = {}; // Initialize _data as an empty map
   bool _isLoading = true; // A flag to check if data is still loading
 
   @override
@@ -32,6 +33,20 @@ class HomePageState extends State<HomePage> {
     setState(() {
       _data = Map.from(jsonData);
       _isLoading = false; // Data loading complete
+    });
+  }
+
+  // Update the path of the board
+  void _updatePathOfBoard(List<dynamic> newPath) {
+    setState(() {
+      _pathOfBoard = List.from(newPath);
+    });
+  }
+
+  // Modify the data (you can customize this based on your app's logic)
+  void _modifyData(Map<String, List> newData) {
+    setState(() {
+      _data = Map.from(newData);
     });
   }
 
@@ -144,10 +159,14 @@ class HomePageState extends State<HomePage> {
               child: Container(
                 color: Colors.transparent,
                 child: Center(
-                  child: Grid(
-                    data: _data,
-
-                    onButtonPressed: addButton,
+                  child: PathWidget(
+                    onPathChange: _updatePathOfBoard,
+                    pathOfBoard: _pathOfBoard,
+                    child: DataWidget(
+                      onDataChange: _modifyData,
+                      data: _data,
+                      child: Grid(onButtonPressed: addButton),
+                    ),
                   ),
                 ),
               ),
@@ -158,5 +177,46 @@ class HomePageState extends State<HomePage> {
         );
       }
 
+  }
+}
+
+class PathWidget extends InheritedWidget {
+  const PathWidget({
+    required super.child,
+    required this.pathOfBoard,
+    required this.onPathChange,
+  });
+
+  final List pathOfBoard;
+  final void Function(List<dynamic> newPath) onPathChange;
+
+  static PathWidget? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<PathWidget>();
+  }
+
+  @override
+  bool updateShouldNotify(PathWidget oldWidget) {
+    return oldWidget.pathOfBoard != pathOfBoard;
+  }
+}
+
+
+class DataWidget extends InheritedWidget {
+  const DataWidget({
+    required super.child,
+    required this.data,
+    required this.onDataChange,
+  });
+
+  final Map <String, List> data;
+  final void Function(Map<String, List> newData) onDataChange;
+
+  static DataWidget? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<DataWidget>();
+  }
+
+  @override
+  bool updateShouldNotify(DataWidget oldWidget) {
+    return oldWidget.data != data;
   }
 }
