@@ -7,6 +7,50 @@ import 'Buttons.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+
+class DataWidget extends InheritedWidget {
+  const DataWidget({
+    required super.child,
+    required this.data,
+    required this.onDataChange,
+  });
+
+  final Map <String, List> data;
+  final void Function(Map<String, List> newData) onDataChange;
+
+  static DataWidget? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<DataWidget>();
+  }
+
+  @override
+  bool updateShouldNotify(DataWidget oldWidget) {
+    return oldWidget.data != data;
+  }
+}
+
+class PathWidget extends InheritedWidget {
+  const PathWidget({
+    required super.child,
+    required this.pathOfBoard,
+    required this.onPathChange,
+  });
+
+  final List pathOfBoard;
+  final void Function(List<dynamic> newPath) onPathChange;
+
+  static PathWidget? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<PathWidget>();
+  }
+
+  @override
+  bool updateShouldNotify(PathWidget oldWidget) {
+    return oldWidget.pathOfBoard != pathOfBoard;
+  }
+}
+
 
 class HomePage extends StatefulWidget {
   @override
@@ -35,13 +79,31 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadJsonData() async {
-    final jsonString = await rootBundle.loadString("assets/board_info/board.json");
-    final jsonData = jsonDecode(jsonString);
-    setState(() {
-      _data = Map.from(jsonData);
-      _isLoading = false; // Data loading complete
-    });
+    final directory = await getApplicationDocumentsDirectory();
+    String filePath = '${directory.path}/board.json';
+
+    // Check if the file exists
+    File file = File(filePath);
+    if (await file.exists()) {
+      // Read from file if it exists
+      final jsonString = await file.readAsString();
+      final jsonData = jsonDecode(jsonString);
+      setState(() {
+        _data = Map.from(jsonData);
+        _isLoading = false; // Data loading complete
+      });
+    } else {
+      // If the file doesn't exist, load from assets
+      final assetJsonString = await rootBundle.loadString("assets/board_info/board.json");
+      await file.writeAsString(assetJsonString); // Copy asset to file
+      final jsonData = jsonDecode(assetJsonString);
+      setState(() {
+        _data = Map.from(jsonData);
+        _isLoading = false; // Data loading complete
+      });
+    }
   }
+
 
   // Update the path of the board
   void _updatePathOfBoard(List<dynamic> newPath) {
@@ -62,7 +124,7 @@ class HomePageState extends State<HomePage> {
   }
 
   // Modify the data (you can customize this based on your app's logic)
-  void _modifyData(Map<String, List> newData) {
+  void modifyData(Map<String, List> newData) {
     setState(() {
       _data = Map.from(newData);
     });
@@ -207,7 +269,7 @@ class HomePageState extends State<HomePage> {
                   onPathChange: _updatePathOfBoard,
                   pathOfBoard: _pathOfBoard,
                   child: DataWidget(
-                    onDataChange: _modifyData,
+                    onDataChange: modifyData,
                     data: _data,
                     child: Grid(onButtonPressed: addButton),
                   ),
@@ -215,11 +277,17 @@ class HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          EditBar(
-            data: _data,
-            onButtonAdded: (FirstButton button) {
-              addButton(button); // Add the button to visible buttons
-            },),
+          PathWidget(
+            onPathChange: _updatePathOfBoard,
+            pathOfBoard: _pathOfBoard,
+            child: DataWidget(
+              data: _data,
+              onDataChange: modifyData,
+              child: EditBar(
+                data: _data,
+                ),
+            ),
+          ),
           SizedBox(height: 20),
         ],
       );
@@ -228,43 +296,5 @@ class HomePageState extends State<HomePage> {
   }
 }
 
-class PathWidget extends InheritedWidget {
-  const PathWidget({
-    required super.child,
-    required this.pathOfBoard,
-    required this.onPathChange,
-  });
-
-  final List pathOfBoard;
-  final void Function(List<dynamic> newPath) onPathChange;
-
-  static PathWidget? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<PathWidget>();
-  }
-
-  @override
-  bool updateShouldNotify(PathWidget oldWidget) {
-    return oldWidget.pathOfBoard != pathOfBoard;
-  }
-}
 
 
-class DataWidget extends InheritedWidget {
-  const DataWidget({
-    required super.child,
-    required this.data,
-    required this.onDataChange,
-  });
-
-  final Map <String, List> data;
-  final void Function(Map<String, List> newData) onDataChange;
-
-  static DataWidget? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<DataWidget>();
-  }
-
-  @override
-  bool updateShouldNotify(DataWidget oldWidget) {
-    return oldWidget.data != data;
-  }
-}

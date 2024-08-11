@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:test_app/homePage.dart';
 import 'Buttons.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
+import 'package:uuid/uuid.dart';
 
 class Grid extends StatefulWidget {
 
@@ -9,11 +10,11 @@ class Grid extends StatefulWidget {
   Grid({required this.onButtonPressed});
 
   @override
-  State<Grid> createState() => _GridState();
+  State<Grid> createState() => GridState();
 }
 
 
-class _GridState extends State<Grid> {
+class GridState extends State<Grid> {
   dynamic visibleButtons = [];
 
   @override
@@ -25,14 +26,14 @@ class _GridState extends State<Grid> {
   void updateVisibleButtons() {
     final pathWidget = PathWidget.of(context);
     final dataWidget = DataWidget.of(context);
+      setState(() {
+        dynamic buttons = dataWidget?.data;
+        for (var folder in pathWidget!.pathOfBoard) {
+          buttons = buttons[folder];
+        }
+        visibleButtons = List.from(buttons);
 
-    setState(() {
-      dynamic buttons = dataWidget!.data;
-      for (var folder in pathWidget!.pathOfBoard) {
-        buttons = buttons[folder];
-      }
-      visibleButtons = List.from(buttons);
-    });
+      });
   }
 
   void updateGridPath(int folderPath, String folderPath2) {
@@ -81,6 +82,7 @@ class _GridState extends State<Grid> {
             if (visibleButtons[index]["folder"] == false) {
               return FirstButton(
                 key: ValueKey(visibleButtons[index]),
+                id: visibleButtons[index]["id"],
                 imagePath: visibleButtons[index]["image_url"],
                 text: visibleButtons[index]["label"],
                 size: buttonSize,
@@ -88,6 +90,7 @@ class _GridState extends State<Grid> {
                   // Call the onButtonPressed callback with a new FirstButton
                   widget.onButtonPressed(
                       FirstButton(
+                        id: visibleButtons[index]["id"],
                         imagePath: visibleButtons[index]["image_url"],
                         text: visibleButtons[index]["label"],
                         size: buttonSize,

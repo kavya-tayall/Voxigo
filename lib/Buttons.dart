@@ -6,19 +6,32 @@ import 'homePage.dart';
 
 
 class FirstButton extends StatefulWidget {
+  final String id;
   final String imagePath;
   final String text;
   final double size;
   final VoidCallback onPressed;
 
-  const FirstButton({Key? key, required this.imagePath, required this.text, required this.size, required this.onPressed}) : super(key: key);
+  const FirstButton({Key? key, required this.id, required this.imagePath, required this.text, required this.size, required this.onPressed}) : super(key: key);
+
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "image_url": imagePath,
+      "label": text,
+      "folder": false
+    };
+  }
 
   @override
   State<FirstButton> createState() => _FirstButtonState();
 }
 
 class _FirstButtonState extends State<FirstButton> {
-  @override
+
+
+
+@override
   Widget build(BuildContext context) {
     return SizedBox(
       width: widget.size,
