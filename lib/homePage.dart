@@ -61,74 +61,28 @@ class HomePageState extends State<HomePage> {
 
   FlutterTts flutterTts = FlutterTts();
 
-  List<dynamic> _pathOfBoard = ["buttons"];
-  Map<String, List> _data = {};
-
   List<FirstButton> _selectedButtons = [];
   List<FirstButton> get selectedButtons => _selectedButtons;
 
-  bool _isLoading = true; // A flag to check if data is still loading
+  bool inRemovalState = false;
 
   @override
   void initState() {
     super.initState();
-    _loadJsonData();
     flutterTts.setLanguage("en-US");
     flutterTts.setPitch(1.0);
     flutterTts.setSpeechRate(0.5);
   }
 
-  Future<void> _loadJsonData() async {
-    final directory = await getApplicationDocumentsDirectory();
-    String filePath = '${directory.path}/board.json';
 
-    // Check if the file exists
-    File file = File(filePath);
-    if (await file.exists()) {
-      // Read from file if it exists
-      final jsonString = await file.readAsString();
-      final jsonData = jsonDecode(jsonString);
-      setState(() {
-        _data = Map.from(jsonData);
-        _isLoading = false; // Data loading complete
-      });
-    } else {
-      // If the file doesn't exist, load from assets
-      final assetJsonString = await rootBundle.loadString("assets/board_info/board.json");
-      await file.writeAsString(assetJsonString); // Copy asset to file
-      final jsonData = jsonDecode(assetJsonString);
-      setState(() {
-        _data = Map.from(jsonData);
-        _isLoading = false; // Data loading complete
-      });
-    }
+
+  void changeRemovalState(){
+    setState((){
+
+    inRemovalState = !inRemovalState;});
+
   }
 
-
-  // Update the path of the board
-  void _updatePathOfBoard(List<dynamic> newPath) {
-    setState(() {
-      _pathOfBoard = List.from(newPath);
-    });
-  }
-
-  void goBack(){
-    setState(() {
-      if (_pathOfBoard.length > 1) {
-        _pathOfBoard.removeLast();
-        _pathOfBoard.removeLast();
-
-        _updatePathOfBoard(_pathOfBoard); // Notify that path has changed
-      }
-    });
-  }
-
-  // Modify the data (you can customize this based on your app's logic)
-  void modifyData(Map<String, List> newData) {
-    setState(() {
-      _data = Map.from(newData);
-    });
-  }
 
   void addButton(FirstButton button) {
     setState(() {
@@ -147,9 +101,70 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  void removeVisibleButton(FirstButton button) {
+    final dataWidget = DataWidget.of(context);
+
+    if (dataWidget != null) {
+      setState(() {
+        Map<String, dynamic> nestedData = dataWidget.data;
+
+        // Check if the 'buttons' key exists at the top level
+        if (nestedData.containsKey('buttons')) {
+          List<dynamic> buttonList = nestedData['buttons'] as List<dynamic>;
+
+          // Find and remove the button with the specified ID
+          buttonList.removeWhere((b) => b['id'] == button.id);
+
+          // Notify the widget that the data has changed
+          dataWidget.onDataChange(dataWidget.data);
+
+          // Save the updated data to file
+          saveUpdatedData(dataWidget.data);
+
+          // Update the UI
+          updateGrid();
+
+        } else {
+          print('No buttons found at the top level');
+        }
+      });
+    } else {
+      print('DataWidget is null');
+    }
+
+
+
+    print("Button with ID ${button.id} is removed");
+  }
+
+  Future<void> updateGrid() async {
+    final gridState = context.findAncestorStateOfType<GridState>();
+    gridState?.updateVisibleButtons();
+  }
+
+  Future<void> saveUpdatedData(Map<String, dynamic> updatedData) async {
+    String jsonString = jsonEncode(updatedData);
+    await writeJsonToFile(jsonString);
+    print('Data saved to board.json in documents directory');
+  }
+
+  Future<void> writeJsonToFile(String jsonString) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/board.json');
+    await file.writeAsString(jsonString);
+  }
+
+  Function(FirstButton button) selectOnPressedfunction(){
+    if (!inRemovalState) {
+      return addButton;
+    } else {
+      return removeVisibleButton;
+
+    }
+  }
   @override
   Widget build(BuildContext context) {
-    if (_isLoading){
+    if (context.findAncestorStateOfType<BasePageState>()!.isLoading){
       return Center(child: CircularProgressIndicator());
     } else{
       return Column(
@@ -169,13 +184,13 @@ class HomePageState extends State<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   PathWidget(
-                    onPathChange: _updatePathOfBoard,
-                    pathOfBoard: _pathOfBoard,
+                    onPathChange: context.findAncestorStateOfType<BasePageState>()!.updatePathOfBoard,
+                    pathOfBoard: context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
                     child: Visibility(
                       visible: true,
                       child: TextButton.icon(
                         icon: Icon(Icons.arrow_back_rounded),
-                        onPressed: () => goBack(),
+                        onPressed: () => context.findAncestorStateOfType<BasePageState>()?.goBack(),
                         label: const Text('Back'),
                         style: TextButton.styleFrom(
                           shape: BeveledRectangleBorder(
@@ -266,25 +281,27 @@ class HomePageState extends State<HomePage> {
               color: Colors.transparent,
               child: Center(
                 child: PathWidget(
-                  onPathChange: _updatePathOfBoard,
-                  pathOfBoard: _pathOfBoard,
+                  onPathChange: context.findAncestorStateOfType<BasePageState>()!.updatePathOfBoard,
+                  pathOfBoard: context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
                   child: DataWidget(
-                    onDataChange: modifyData,
-                    data: _data,
-                    child: Grid(onButtonPressed: addButton),
+                    onDataChange: context.findAncestorStateOfType<BasePageState>()!.modifyData,
+                    data: context.findAncestorStateOfType<BasePageState>()!.data,
+                    child: Grid(
+                        onButtonPressed: selectOnPressedfunction()
+                    ),
                   ),
                 ),
               ),
             ),
           ),
           PathWidget(
-            onPathChange: _updatePathOfBoard,
-            pathOfBoard: _pathOfBoard,
+            onPathChange: context.findAncestorStateOfType<BasePageState>()!.updatePathOfBoard,
+            pathOfBoard: context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
             child: DataWidget(
-              data: _data,
-              onDataChange: modifyData,
+              data: context.findAncestorStateOfType<BasePageState>()!.data,
+              onDataChange: context.findAncestorStateOfType<BasePageState>()!.modifyData,
               child: EditBar(
-                data: _data,
+                data: context.findAncestorStateOfType<BasePageState>()?.data,
                 ),
             ),
           ),

@@ -7,6 +7,8 @@ import 'package:path_provider/path_provider.dart';
 import 'grid.dart';
 import 'package:uuid/uuid.dart';
 
+import 'main.dart';
+
 class EditBar extends StatelessWidget {
   final dynamic data;
 
@@ -19,10 +21,8 @@ class EditBar extends StatelessWidget {
             DataWidget(
 
             data: data,
-            onDataChange: context.findAncestorStateOfType<HomePageState>()!.modifyData,
+            onDataChange: context.findAncestorStateOfType<BasePageState>()!.modifyData,
             child: AddButton(data: data)),
-            MoveButton(),
-            EditButton(),
             RemoveButton(),
           ],
       );
@@ -35,12 +35,13 @@ class AddButton extends StatefulWidget {
   AddButton({required this.data});
 
   @override
-  State<AddButton> createState() => _AddButtonState();
+  State<AddButton> createState() => AddButtonState();
 }
 
-class _AddButtonState extends State<AddButton> {
+class AddButtonState extends State<AddButton> {
 
   void addVisibleButtons(FirstButton button) {
+
     final dataWidget = DataWidget.of(context);
 
     if (dataWidget != null) {
@@ -54,7 +55,8 @@ class _AddButtonState extends State<AddButton> {
 
         // Generate a unique ID for the new button
         final buttonId = Uuid().v4(); // Generate a UUID
-        final newButton = button.toJson()..['id'] = buttonId;
+        final newButton = button.toJson()
+          ..['id'] = buttonId;
 
         // Add the button to the top-level buttons list
         nestedData['buttons'].add(newButton); // Add button to the list
@@ -63,30 +65,16 @@ class _AddButtonState extends State<AddButton> {
         dataWidget.onDataChange(dataWidget.data);
 
         // Save the updated data to file
-        saveUpdatedData(dataWidget.data);
+        context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
 
         // Update the UI
-        updateGrid();
+        context.findAncestorStateOfType<HomePageState>()?.updateGrid();
       });
     } else {
       print('DataWidget is null');
     }
-  }
-  Future<void> updateGrid() async {
-    final gridState = context.findAncestorStateOfType<GridState>();
-    gridState?.updateVisibleButtons();
-  }
 
-  Future<void> saveUpdatedData(Map<String, dynamic> updatedData) async {
-    String jsonString = jsonEncode(updatedData);
-    await writeJsonToFile(jsonString);
-    print('Data saved to board.json in documents directory');
-  }
 
-  Future<void> writeJsonToFile(String jsonString) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/board.json');
-    await file.writeAsString(jsonString);
   }
 
 
@@ -113,10 +101,8 @@ class _AddButtonState extends State<AddButton> {
       },
       child: Icon(Icons.add),
     );
-
-
   }
-}
+
 
   dynamic searchButtonData(Map<String, dynamic> data, String label) {
     for (var key in data.keys) {
@@ -141,7 +127,8 @@ class _AddButtonState extends State<AddButton> {
       id: data["id"],
       imagePath: data["image_url"],
       text: data["label"],
-      size: 60.0, // Adjust the size as needed
+      size: 60.0,
+      // Adjust the size as needed
       onPressed: () {
         // Implement what happens when the button is pressed
       },
@@ -178,49 +165,56 @@ class _AddButtonState extends State<AddButton> {
       },
     );
   }
-
-
-
-
-
-
-
-
-class MoveButton extends StatelessWidget{
-  @override
-  Widget build(BuildContext context){
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        shape: CircleBorder(),
-        padding: EdgeInsets.all(30),
-
-      ),
-      onPressed: () {
-        print("move");
-      },
-      child: Icon(Icons.open_with),
-    );
-  }
 }
 
-class EditButton extends StatelessWidget{
-  @override
-  Widget build(BuildContext context){
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        shape: CircleBorder(),
-        padding: EdgeInsets.all(30),
 
-      ),
-      onPressed: () {
-        print("edit");
-      },
-      child: Icon(Icons.edit),
-    );
-  }
+
+
+
+
+class RemoveButton extends StatefulWidget{
+  @override
+  State<RemoveButton> createState() => RemoveButtonState();
 }
 
-class RemoveButton extends StatelessWidget{
+class RemoveButtonState extends State<RemoveButton> {
+  bool isRemovalMode = false;
+
+
+  void removeVisibleButton(FirstButton button) {
+    final dataWidget = DataWidget.of(context);
+
+    if (dataWidget != null) {
+      setState(() {
+        Map<String, dynamic> nestedData = dataWidget.data;
+
+        // Check if the 'buttons' key exists at the top level
+        if (nestedData.containsKey('buttons')) {
+          List<dynamic> buttonList = nestedData['buttons'] as List<dynamic>;
+
+          // Find and remove the button with the specified ID
+          buttonList.removeWhere((b) => b['id'] == button.id);
+
+          // Notify the widget that the data has changed
+          dataWidget.onDataChange(dataWidget.data);
+
+          // Save the updated data to file
+          context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
+
+          // Update the UI
+          context.findAncestorStateOfType<HomePageState>()?.updateGrid();
+
+        } else {
+          print('No buttons found at the top level');
+        }
+      });
+    } else {
+      print('DataWidget is null');
+    }
+
+    print("Button with ID ${button.id} is removed");
+  }
+
   @override
   Widget build(BuildContext context){
     return ElevatedButton(
@@ -230,9 +224,12 @@ class RemoveButton extends StatelessWidget{
 
       ),
       onPressed: () {
-        print("remove");
+        context.findAncestorStateOfType<HomePageState>()?.changeRemovalState();
+        isRemovalMode = !isRemovalMode;
+
+
       },
-      child: Icon(Icons.delete),
+      child: Icon(isRemovalMode ? Icons.check : Icons.delete),
     );
   }
 }
