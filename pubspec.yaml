@@ -36,5 +36,6 @@ flutter:
     - assets/board_info/board.json
     - assets/imgs/OneDrive_Folder_Icon.png
     - assets/imgs/sun.png
+    - assets/board_info/pictograms.json
 
 
