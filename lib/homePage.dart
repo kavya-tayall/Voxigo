@@ -16,7 +16,7 @@ class DataWidget extends InheritedWidget {
     required this.onDataChange,
   });
 
-  final Map <String, List> data;
+  final Map<String, List> data;
   final void Function(Map<String, List> newData) onDataChange;
 
   static DataWidget? of(BuildContext context) {
@@ -49,17 +49,16 @@ class PathWidget extends InheritedWidget {
   }
 }
 
-
 class HomePage extends StatefulWidget {
   @override
   State<HomePage> createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
-
   FlutterTts flutterTts = FlutterTts();
 
   List<FirstButton> _selectedButtons = [];
+
   List<FirstButton> get selectedButtons => _selectedButtons;
 
   bool inRemovalState = false;
@@ -72,15 +71,11 @@ class HomePageState extends State<HomePage> {
     flutterTts.setSpeechRate(0.5);
   }
 
-
-
-  void changeRemovalState(){
-    setState((){
-
-    inRemovalState = !inRemovalState;});
-
+  void changeRemovalState() {
+    setState(() {
+      inRemovalState = !inRemovalState;
+    });
   }
-
 
   void addButton(FirstButton button) {
     setState(() {
@@ -93,6 +88,7 @@ class HomePageState extends State<HomePage> {
       selectedButtons.clear();
     });
   }
+
   void backspaceSelectedButtons() {
     setState(() {
       _selectedButtons.removeLast();
@@ -121,7 +117,6 @@ class HomePageState extends State<HomePage> {
 
           // Update the UI
           updateGrid();
-
         } else {
           print('No buttons found at the top level');
         }
@@ -129,8 +124,6 @@ class HomePageState extends State<HomePage> {
     } else {
       print('DataWidget is null');
     }
-
-
 
     print("Button with ID ${button.id} is removed");
   }
@@ -152,19 +145,19 @@ class HomePageState extends State<HomePage> {
     await file.writeAsString(jsonString);
   }
 
-  Function(FirstButton button) selectOnPressedfunction(){
+  Function(FirstButton button) selectOnPressedfunction() {
     if (!inRemovalState) {
       return addButton;
     } else {
       return removeVisibleButton;
-
     }
   }
+
   @override
   Widget build(BuildContext context) {
-    if (context.findAncestorStateOfType<BasePageState>()!.isLoading){
+    if (context.findAncestorStateOfType<BasePageState>()!.isLoading) {
       return Center(child: CircularProgressIndicator());
-    } else{
+    } else {
       return Column(
         children: <Widget>[
           Container(
@@ -188,17 +181,19 @@ class HomePageState extends State<HomePage> {
                       visible: true,
                       child: TextButton.icon(
                         icon: Icon(Icons.arrow_back_rounded),
-                        onPressed: () => context.findAncestorStateOfType<BasePageState>()?.goBack(),
+                        onPressed: () => context
+                            .findAncestorStateOfType<BasePageState>()
+                            ?.goBack(),
                         label: const Text('Back'),
                         style: TextButton.styleFrom(
                           shape: BeveledRectangleBorder(
-                            borderRadius: BorderRadius.zero, // Make the corners sharp
+                            borderRadius:
+                                BorderRadius.zero, // Make the corners sharp
                           ),
                         ),
                       ),
                     ),
                   ),
-
                   Container(
                     width: 2,
                     color: Colors.grey,
@@ -210,7 +205,8 @@ class HomePageState extends State<HomePage> {
                       label: const Text('Backspace'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero, // Make the corners sharp
+                          borderRadius:
+                              BorderRadius.zero, // Make the corners sharp
                         ),
                       ),
                     ),
@@ -226,7 +222,8 @@ class HomePageState extends State<HomePage> {
                       label: const Text('Clear'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero, // Make the corners sharp
+                          borderRadius:
+                              BorderRadius.zero, // Make the corners sharp
                         ),
                       ),
                     ),
@@ -239,15 +236,17 @@ class HomePageState extends State<HomePage> {
                     child: TextButton.icon(
                       icon: Icon(Icons.play_arrow),
                       onPressed: () async {
-    for (FirstButton button in _selectedButtons){
-    print (button.text);
-    await flutterTts.speak(button.text);}
+                        for (FirstButton button in _selectedButtons) {
+                          print(button.text);
+                          await flutterTts.speak(button.text);
+                        }
                         // Implement play logic
                       },
                       label: const Text('Play'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero, // Make the corners sharp
+                          borderRadius:
+                              BorderRadius.zero, // Make the corners sharp
                         ),
                       ),
                     ),
@@ -265,7 +264,8 @@ class HomePageState extends State<HomePage> {
                       label: const Text('Helper'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero, // Make the corners sharp
+                          borderRadius:
+                              BorderRadius.zero, // Make the corners sharp
                         ),
                       ),
                     ),
@@ -283,33 +283,32 @@ class HomePageState extends State<HomePage> {
                   pathOfBoard: context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
                   child: DataWidget(
                     onDataChange: context.findAncestorStateOfType<BasePageState>()!.modifyData,
-                    data: context.findAncestorStateOfType<BasePageState>()!.data,
-                    child: Grid(
-                        onButtonPressed: selectOnPressedfunction()
-                    ),
+                    data:
+                        context.findAncestorStateOfType<BasePageState>()!.data,
+                    child: Grid(onButtonPressed: selectOnPressedfunction()),
                   ),
                 ),
               ),
             ),
           ),
           PathWidget(
-            onPathChange: context.findAncestorStateOfType<BasePageState>()!.updatePathOfBoard,
-            pathOfBoard: context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
+            onPathChange: context
+                .findAncestorStateOfType<BasePageState>()!
+                .updatePathOfBoard,
+            pathOfBoard:
+                context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
             child: DataWidget(
               data: context.findAncestorStateOfType<BasePageState>()!.data,
-              onDataChange: context.findAncestorStateOfType<BasePageState>()!.modifyData,
+              onDataChange:
+                  context.findAncestorStateOfType<BasePageState>()!.modifyData,
               child: EditBar(
                 data: context.findAncestorStateOfType<BasePageState>()?.data,
-                ),
+              ),
             ),
           ),
           SizedBox(height: 20),
         ],
       );
     }
-
   }
 }
-
-
-

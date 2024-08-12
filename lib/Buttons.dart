@@ -26,8 +26,6 @@ class FirstButton extends StatefulWidget {
 
 class _FirstButtonState extends State<FirstButton> {
 
-
-
 @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -36,14 +34,16 @@ class _FirstButtonState extends State<FirstButton> {
       child: ElevatedButton(
         onPressed: () {
           double width = MediaQuery.sizeOf(context).width;
-          double currentWidth = widget.size * (context.findAncestorStateOfType<HomePageState>()?.selectedButtons.length ?? 0 + 1);
+          double currentWidth = (widget.size + 21) * (context.findAncestorStateOfType<HomePageState>()!.selectedButtons.length + 1);
           print(width);
           print(currentWidth);
 
           if (currentWidth <= width) {
             widget.onPressed();
           }
-          else print("oops overflowed");
+          else {
+            print("oops overflowed");
+          }
         },
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero,
@@ -80,7 +80,7 @@ class FolderButton extends StatelessWidget {
 
   final VoidCallback onPressed;
 
-  FolderButton({required this.imagePath, required this.text, required this.ind, required this.size, required this.onPressed});
+  FolderButton({Key? key, required this.imagePath, required this.text, required this.ind, required this.size, required this.onPressed}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

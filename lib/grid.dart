@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:test_app/homePage.dart';
 import 'Buttons.dart';
-import 'package:reorderable_grid_view/reorderable_grid_view.dart';
+import 'package:reorderable_grid/reorderable_grid.dart';
 
 class Grid extends StatefulWidget {
 
@@ -32,6 +32,7 @@ class GridState extends State<Grid> {
         }
         visibleButtons = List.from(buttons);
 
+        print("updated visible buttons");
       });
   }
 
@@ -48,27 +49,56 @@ class GridState extends State<Grid> {
     });
   }
 
+  void reorderGrid(int oldIndex, int newIndex){
+    final dataWidget = DataWidget.of(context);
+    final pathWidget = PathWidget.of(context);
+
+    setState(() {
+      dynamic nestedData = dataWidget!.data;
+
+      for (var folder in pathWidget!.pathOfBoard) {
+        nestedData = nestedData[folder];
+      }
+
+      Map<String, dynamic> btnVar = nestedData[oldIndex];
+
+      print(oldIndex);
+      print(newIndex);
+
+      nestedData.removeAt(oldIndex);
+      nestedData.insert(newIndex, btnVar);
+      print(nestedData);
+
+      // Notify the widget that the data has changed
+      dataWidget.onDataChange(dataWidget.data);
+
+      // Save the updated data to file
+      context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
+
+      // Update the UI
+      context.findAncestorStateOfType<HomePageState>()?.updateGrid();
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        int crossAxisCount = 7; // Fixed number of columns
+        int crossAxisCount = 10; // Fixed number of columns
         int fixedRows = 5; // Fixed number of rows
 
 
         double availableHeight = constraints.maxHeight;
 
         // Calculate maximum number of items that can fit based on number of rows
-        int maxItems = 35;
+        int maxItems = 50;
         double buttonSize = ((availableHeight - 50) / fixedRows);
-
-
 
         // Limit the number of items shown to the maximum number that fits in the grid
         int visibleItemCount = visibleButtons.length > maxItems ? maxItems : visibleButtons.length;
 
-        return GridView.builder(
+        return ReorderableGridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 10,
@@ -77,6 +107,7 @@ class GridState extends State<Grid> {
           physics: NeverScrollableScrollPhysics(), // Disable scrolling
           shrinkWrap: true,
           itemCount: visibleItemCount,
+          onReorder: reorderGrid,
           itemBuilder: (BuildContext context, int index) {
             if (visibleButtons[index]["folder"] == false) {
               return FirstButton(
@@ -99,6 +130,7 @@ class GridState extends State<Grid> {
               );
             } else {
               return FolderButton(
+                key: ValueKey(visibleButtons[index]),
                 imagePath: visibleButtons[index]["image_url"],
                 text: visibleButtons[index]["label"],
                 ind: index,

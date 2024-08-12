@@ -132,7 +132,7 @@ class AddButtonState extends State<AddButton> {
   }
 
   Future<String?> _showTextInputDialog(BuildContext context) async {
-    TextEditingController _controller = TextEditingController();
+    TextEditingController controller = TextEditingController();
 
     return showDialog<String>(
       context: context,
@@ -140,7 +140,7 @@ class AddButtonState extends State<AddButton> {
         return AlertDialog(
           title: Text('Add Button'),
           content: TextField(
-            controller: _controller,
+            controller: controller,
             decoration: InputDecoration(hintText: "Type here"),
           ),
           actions: <Widget>[
@@ -153,7 +153,7 @@ class AddButtonState extends State<AddButton> {
             TextButton(
               child: Text('Submit'),
               onPressed: () {
-                Navigator.of(context).pop(_controller.text);
+                Navigator.of(context).pop(controller.text);
               },
             ),
           ],
