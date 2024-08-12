@@ -9,19 +9,20 @@ class EditBar extends StatelessWidget {
   final dynamic data;
 
   EditBar({required this.data});
+
   @override
   Widget build(BuildContext context) {
     return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            DataWidget(
-
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        DataWidget(
             data: data,
-            onDataChange: context.findAncestorStateOfType<BasePageState>()!.modifyData,
+            onDataChange:
+                context.findAncestorStateOfType<BasePageState>()!.modifyData,
             child: AddButton(data: data)),
-            RemoveButton(),
-          ],
-      );
+        RemoveButton(),
+      ],
+    );
   }
 }
 
@@ -35,27 +36,24 @@ class AddButton extends StatefulWidget {
 }
 
 class AddButtonState extends State<AddButton> {
-
   void addVisibleButtons(FirstButton button) {
-
     final dataWidget = DataWidget.of(context);
+    final pathWidget = PathWidget.of(context);
 
     if (dataWidget != null) {
       setState(() {
-        Map<String, dynamic> nestedData = dataWidget.data;
+        dynamic nestedData = dataWidget.data;
 
-        // Ensure the 'buttons' key exists at the top level
-        if (!nestedData.containsKey('buttons')) {
-          nestedData['buttons'] = []; // Initialize if not present
+        for (var folder in pathWidget!.pathOfBoard) {
+          nestedData = nestedData[folder];
         }
 
         // Generate a unique ID for the new button
         final buttonId = Uuid().v4(); // Generate a UUID
-        final newButton = button.toJson()
-          ..['id'] = buttonId;
+        final newButton = button.toJson()..['id'] = buttonId;
 
         // Add the button to the top-level buttons list
-        nestedData['buttons'].add(newButton); // Add button to the list
+        nestedData.add(newButton); // Add button to the list
 
         // Notify the widget that the data has changed
         dataWidget.onDataChange(dataWidget.data);
@@ -69,11 +67,7 @@ class AddButtonState extends State<AddButton> {
     } else {
       print('DataWidget is null');
     }
-
-
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +92,6 @@ class AddButtonState extends State<AddButton> {
       child: Icon(Icons.add),
     );
   }
-
 
   dynamic searchButtonData(Map<String, dynamic> data, String label) {
     for (var key in data.keys) {
@@ -163,19 +156,13 @@ class AddButtonState extends State<AddButton> {
   }
 }
 
-
-
-
-
-
-class RemoveButton extends StatefulWidget{
+class RemoveButton extends StatefulWidget {
   @override
   State<RemoveButton> createState() => RemoveButtonState();
 }
 
 class RemoveButtonState extends State<RemoveButton> {
   bool isRemovalMode = false;
-
 
   void removeVisibleButton(FirstButton button) {
     final dataWidget = DataWidget.of(context);
@@ -195,11 +182,12 @@ class RemoveButtonState extends State<RemoveButton> {
           dataWidget.onDataChange(dataWidget.data);
 
           // Save the updated data to file
-          context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
+          context
+              .findAncestorStateOfType<HomePageState>()
+              ?.saveUpdatedData(dataWidget.data);
 
           // Update the UI
           context.findAncestorStateOfType<HomePageState>()?.updateGrid();
-
         } else {
           print('No buttons found at the top level');
         }
@@ -212,21 +200,17 @@ class RemoveButtonState extends State<RemoveButton> {
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         shape: CircleBorder(),
         padding: EdgeInsets.all(30),
-
       ),
       onPressed: () {
         context.findAncestorStateOfType<HomePageState>()?.changeRemovalState();
         isRemovalMode = !isRemovalMode;
-
-
       },
       child: Icon(isRemovalMode ? Icons.check : Icons.delete),
     );
   }
 }
-

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'bottom_nav_bar.dart';
 import 'homePage.dart';
 import 'Behaviour.dart';
+import 'settings.dart';
 
 typedef VoidCallBack = void Function();
 
@@ -132,7 +133,7 @@ class BasePageState extends State<BasePage> {
       case 3:
         page = BehaviourPage();
       case 4:
-        page = Placeholder();
+        page = CustomSettings();
       default:
         throw UnimplementedError('no widget for $selectedIndex');
     }
