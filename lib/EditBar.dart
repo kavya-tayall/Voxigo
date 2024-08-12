@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'Buttons.dart';
 import 'homePage.dart';
-import 'dart:convert';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'grid.dart';
 import 'package:uuid/uuid.dart';
 
 import 'main.dart';
