@@ -125,7 +125,10 @@ class BasePageState extends State<BasePage> {
         page = DataWidget(
             data: data,
             onDataChange: modifyData,
-            child: HomePage());
+            child: PathWidget(
+                onPathChange: updatePathOfBoard,
+                pathOfBoard: pathOfBoard,
+                child: HomePage()));
       case 1:
         page = Placeholder();
       case 2:

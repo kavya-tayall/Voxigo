@@ -97,33 +97,24 @@ class HomePageState extends State<HomePage> {
 
   void removeVisibleButton(FirstButton button) {
     final dataWidget = DataWidget.of(context);
+    final pathWidget = PathWidget.of(context);
 
-    if (dataWidget != null) {
-      setState(() {
-        Map<String, dynamic> nestedData = dataWidget.data;
 
-        // Check if the 'buttons' key exists at the top level
-        if (nestedData.containsKey('buttons')) {
-          List<dynamic> buttonList = nestedData['buttons'] as List<dynamic>;
+    setState(() {
+      dynamic nestedData = dataWidget?.data;
+      for (var folder in pathWidget!.pathOfBoard) {
+        nestedData = nestedData[folder];
+      }
 
-          // Find and remove the button with the specified ID
-          buttonList.removeWhere((b) => b['id'] == button.id);
+      print(pathWidget.pathOfBoard);
+      print(nestedData);
 
-          // Notify the widget that the data has changed
-          dataWidget.onDataChange(dataWidget.data);
+      nestedData.removeWhere((b) => b['id'] == button.id);
+      dataWidget?.onDataChange(dataWidget.data);
+      saveUpdatedData(dataWidget!.data.cast<String, List<String>>());
 
-          // Save the updated data to file
-          saveUpdatedData(dataWidget.data);
-
-          // Update the UI
-          updateGrid();
-        } else {
-          print('No buttons found at the top level');
-        }
-      });
-    } else {
-      print('DataWidget is null');
-    }
+      updateGrid();
+    });
 
     print("Button with ID ${button.id} is removed");
   }

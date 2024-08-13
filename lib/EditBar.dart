@@ -166,31 +166,27 @@ class RemoveButtonState extends State<RemoveButton> {
 
   void removeVisibleButton(FirstButton button) {
     final dataWidget = DataWidget.of(context);
+    final pathWidget = PathWidget.of(context);
 
     if (dataWidget != null) {
       setState(() {
-        Map<String, dynamic> nestedData = dataWidget.data;
+        dynamic nestedData = dataWidget.data;
 
-        // Check if the 'buttons' key exists at the top level
-        if (nestedData.containsKey('buttons')) {
-          List<dynamic> buttonList = nestedData['buttons'] as List<dynamic>;
-
-          // Find and remove the button with the specified ID
-          buttonList.removeWhere((b) => b['id'] == button.id);
-
-          // Notify the widget that the data has changed
-          dataWidget.onDataChange(dataWidget.data);
-
-          // Save the updated data to file
-          context
-              .findAncestorStateOfType<HomePageState>()
-              ?.saveUpdatedData(dataWidget.data);
-
-          // Update the UI
-          context.findAncestorStateOfType<HomePageState>()?.updateGrid();
-        } else {
-          print('No buttons found at the top level');
+        for (var folder in pathWidget!.pathOfBoard) {
+          nestedData = nestedData[folder];
         }
+
+        // Find and remove the button with the specified ID
+        nestedData.removeWhere((b) => b['id'] == button.id);
+
+        // Notify the widget that the data has changed
+        dataWidget.onDataChange(dataWidget.data);
+
+        // Save the updated data to file
+        context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
+
+        // Update the UI
+        context.findAncestorStateOfType<HomePageState>()?.updateGrid();
       });
     } else {
       print('DataWidget is null');

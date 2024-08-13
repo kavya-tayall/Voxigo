@@ -4,14 +4,12 @@ import 'Buttons.dart';
 import 'package:reorderable_grid/reorderable_grid.dart';
 
 class Grid extends StatefulWidget {
-
   final Function(FirstButton) onButtonPressed;
   Grid({required this.onButtonPressed});
 
   @override
   State<Grid> createState() => GridState();
 }
-
 
 class GridState extends State<Grid> {
   dynamic visibleButtons = [];
