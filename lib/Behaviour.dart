@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class BehaviourPage extends StatelessWidget{
-
   @override
   Widget build(BuildContext context){
     return Calendar();
@@ -18,6 +17,7 @@ class _CalendarState extends State<Calendar> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+
 
   @override
   Widget build(BuildContext context) {

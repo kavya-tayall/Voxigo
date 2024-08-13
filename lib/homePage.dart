@@ -106,12 +106,11 @@ class HomePageState extends State<HomePage> {
         nestedData = nestedData[folder];
       }
 
-      print(pathWidget.pathOfBoard);
-      print(nestedData);
 
       nestedData.removeWhere((b) => b['id'] == button.id);
       dataWidget?.onDataChange(dataWidget.data);
-      saveUpdatedData(dataWidget!.data.cast<String, List<String>>());
+
+      saveUpdatedData(dataWidget!.data);
 
       updateGrid();
     });
