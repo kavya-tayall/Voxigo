@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'Buttons.dart';
-import 'homePage.dart';
+import 'buttons.dart';
+import '../child_pages/home_page.dart';
 import 'package:uuid/uuid.dart';
 
-import 'main.dart';
+import '../main.dart';
 
 class EditBar extends StatelessWidget {
   final dynamic data;

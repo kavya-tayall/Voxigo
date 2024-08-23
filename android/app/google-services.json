@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "662430635566",
+    "firebase_url": "https://aac-app-24-default-rtdb.firebaseio.com",
+    "project_id": "aac-app-24",
+    "storage_bucket": "aac-app-24.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:662430635566:android:41e9dfda73ba0dae5771bf",
+        "android_client_info": {
+          "package_name": "com.autismhelper.autismaid"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdbQv3GYIjQ1IXsyz2Hfgff0vrc21ZlOw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

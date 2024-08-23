@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'grid.dart';
-import 'homepage_top_bar.dart';
-import 'EditBar.dart';
-import 'main.dart';
-import 'Buttons.dart';
+import '../widgets/grid.dart';
+import '../widgets/homepage_top_bar.dart';
+import '../widgets/edit_bar.dart';
+import '../main.dart';
+import '../widgets/buttons.dart';
 import 'dart:convert';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:io';
@@ -247,11 +247,11 @@ class HomePageState extends State<HomePage> {
                   ),
                   Expanded(
                     child: TextButton.icon(
-                      icon: Icon(Icons.auto_mode),
+                      icon: Icon(Icons.stop),
                       onPressed: () {
-                        // Implement helper logic
+                        flutterTts.stop();
                       },
-                      label: const Text('Helper'),
+                      label: const Text('Stop'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
                           borderRadius:

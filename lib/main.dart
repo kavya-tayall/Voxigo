@@ -1,19 +1,28 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/scheduler.dart';
+import 'firebase_options.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'bottom_nav_bar.dart';
-import 'homePage.dart';
-import 'Behaviour.dart';
-import 'settings.dart';
+import 'widgets/bottom_nav_bar.dart';
+import 'child_pages/home_page.dart';
+import 'child_pages/behavior_page.dart';
+import 'child_pages/settings_page.dart';
+import 'child_pages/login_page.dart';
 
 typedef VoidCallBack = void Function();
 
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(MyApp());
 }
 
@@ -23,15 +32,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
         title: 'Namer App',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
         ),
         home: BasePage(),
+        initialRoute: '/login', routes: {'/login': (_) => ParentLoginPage()},
       ),
     );
   }
@@ -56,8 +67,11 @@ class BasePageState extends State<BasePage> {
   @override
   void initState() {
     super.initState();
-    _loadJsonData();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _loadJsonData();
+    });
   }
+
   void onItemTapped(int index) {
     setState(() {
       selectedIndex = index;
@@ -140,7 +154,6 @@ class BasePageState extends State<BasePage> {
       default:
         throw UnimplementedError('no widget for $selectedIndex');
     }
-
 
     return Scaffold(
       body: Column(

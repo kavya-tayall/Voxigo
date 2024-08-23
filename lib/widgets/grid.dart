@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:test_app/homePage.dart';
-import 'Buttons.dart';
+import '../child_pages/home_page.dart';
+import 'buttons.dart';
 import 'package:reorderable_grid/reorderable_grid.dart';
 
 class Grid extends StatefulWidget {
