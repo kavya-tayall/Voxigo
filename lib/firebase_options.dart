@@ -28,10 +28,7 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         return windows;
       case TargetPlatform.linux:
@@ -76,4 +73,15 @@ class DefaultFirebaseOptions {
     storageBucket: 'aac-app-24.appspot.com',
     measurementId: 'G-QJ0X1ZPL0D',
   );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyBPY7ngSGol9gA65rqMRtHHt7fels1Yt7E',
+    appId: '1:662430635566:ios:91dde89dcf62d08e5771bf',
+    messagingSenderId: '662430635566',
+    projectId: 'aac-app-24',
+    databaseURL: 'https://aac-app-24-default-rtdb.firebaseio.com',
+    storageBucket: 'aac-app-24.appspot.com',
+    iosBundleId: 'com.example.testt',
+  );
+
 }
