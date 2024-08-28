@@ -34,7 +34,7 @@ class _FirstButtonState extends State<FirstButton> {
       child: ElevatedButton(
         onPressed: () {
           double width = MediaQuery.sizeOf(context).width;
-          double currentWidth = (widget.size + 21) * (context.findAncestorStateOfType<HomePageState>()!.selectedButtons.length + 1);
+          double currentWidth = (widget.size + 21) * (context.findAncestorStateOfType<HomePageState>()!.selectedButtons.length );
           print(width);
           print(currentWidth);
 

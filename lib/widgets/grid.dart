@@ -4,18 +4,18 @@ import 'buttons.dart';
 import 'package:reorderable_grid/reorderable_grid.dart';
 
 class Grid extends StatefulWidget {
-  final Function(FirstButton) onButtonPressed;
-  Grid({required this.onButtonPressed});
+final Function(FirstButton) onButtonPressed;
+Grid({required this.onButtonPressed});
 
-  @override
-  State<Grid> createState() => GridState();
+@override
+State<Grid> createState() => GridState();
 }
 
 class GridState extends State<Grid> {
   dynamic visibleButtons = [];
 
   @override
-  void didChangeDependencies(){
+  void didChangeDependencies() {
     super.didChangeDependencies();
     updateVisibleButtons();
   }
@@ -23,15 +23,23 @@ class GridState extends State<Grid> {
   void updateVisibleButtons() {
     final pathWidget = PathWidget.of(context);
     final dataWidget = DataWidget.of(context);
-      setState(() {
-        dynamic buttons = dataWidget?.data;
-        for (var folder in pathWidget!.pathOfBoard) {
-          buttons = buttons[folder];
-        }
-        visibleButtons = List.from(buttons);
 
-        print("updated visible buttons");
-      });
+    setState(() {
+      dynamic buttons = dataWidget?.data;
+
+      for (var folder in pathWidget!.pathOfBoard) {
+        buttons = buttons[folder];
+      }
+
+      // Safeguard to ensure buttons is a list
+      if (buttons is List) {
+        visibleButtons = List.from(buttons);
+      } else {
+        visibleButtons = [];
+      }
+
+      print("Updated visible buttons");
+    });
   }
 
   void updateGridPath(int folderPath, String folderPath2) {
@@ -47,7 +55,7 @@ class GridState extends State<Grid> {
     });
   }
 
-  void reorderGrid(int oldIndex, int newIndex){
+  void reorderGrid(int oldIndex, int newIndex) {
     final dataWidget = DataWidget.of(context);
     final pathWidget = PathWidget.of(context);
 
@@ -78,7 +86,6 @@ class GridState extends State<Grid> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -86,15 +93,23 @@ class GridState extends State<Grid> {
         int crossAxisCount = 10; // Fixed number of columns
         int fixedRows = 5; // Fixed number of rows
 
-
         double availableHeight = constraints.maxHeight;
 
         // Calculate maximum number of items that can fit based on number of rows
         int maxItems = 50;
-        double buttonSize = ((availableHeight - 50) / fixedRows);
+        double buttonSize = ((availableHeight - 50) / fixedRows) + 40;
 
         // Limit the number of items shown to the maximum number that fits in the grid
         int visibleItemCount = visibleButtons.length > maxItems ? maxItems : visibleButtons.length;
+
+        if (visibleButtons.isEmpty) {
+          return Center(
+            child: Text(
+              "No items to display",
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+          );
+        }
 
         return ReorderableGridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -107,34 +122,38 @@ class GridState extends State<Grid> {
           itemCount: visibleItemCount,
           onReorder: reorderGrid,
           itemBuilder: (BuildContext context, int index) {
-            if (visibleButtons[index]["folder"] == false) {
+            final item = visibleButtons[index];
+            final imagePath = item["image_url"] ?? ''; // Default to empty string if null
+            final label = item["label"] ?? 'No Label'; // Default to 'No Label' if null
+
+            if (item["folder"] == false) {
               return FirstButton(
-                key: ValueKey(visibleButtons[index]),
-                id: visibleButtons[index]["id"],
-                imagePath: visibleButtons[index]["image_url"],
-                text: visibleButtons[index]["label"],
+                key: ValueKey(item),
+                id: item["id"],
+                imagePath: imagePath,
+                text: label,
                 size: buttonSize,
                 onPressed: () {
                   // Call the onButtonPressed callback with a new FirstButton
                   widget.onButtonPressed(
-                      FirstButton(
-                        id: visibleButtons[index]["id"],
-                        imagePath: visibleButtons[index]["image_url"],
-                        text: visibleButtons[index]["label"],
-                        size: buttonSize,
-                        onPressed: () {},
-                      ));
+                    FirstButton(
+                      id: item["id"],
+                      imagePath: imagePath,
+                      text: label,
+                      size: buttonSize,
+                      onPressed: () {},
+                    ),
+                  );
                 },
               );
             } else {
               return FolderButton(
-                key: ValueKey(visibleButtons[index]),
-                imagePath: visibleButtons[index]["image_url"],
-                text: visibleButtons[index]["label"],
+                key: ValueKey(item),
+                imagePath: imagePath,
+                text: label,
                 ind: index,
                 size: buttonSize,
                 onPressed: () => updateGridPath(index, "buttons"),
-                // Pass the size parameter
               );
             }
           },

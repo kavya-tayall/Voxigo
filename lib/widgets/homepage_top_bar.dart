@@ -19,7 +19,7 @@ class HomeTopBar extends StatelessWidget {
         Expanded(
             child: Row(children: clickedButtons.map((button) {
               return Padding(
-                padding: EdgeInsets.all(10),
+                padding: EdgeInsets.all(5),
                 child: button,
               );
             }).toList(),)),
