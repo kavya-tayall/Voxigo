@@ -118,6 +118,59 @@ class HomePageState extends State<HomePage> {
     print("Button with ID ${button.id} is removed");
   }
 
+  Future<void> removeFolder(int folderIndex) async {
+    final dataWidget = DataWidget.of(context);
+    final pathWidget = PathWidget.of(context);
+
+    dynamic nestedData = dataWidget?.data;
+    for (var folder in pathWidget!.pathOfBoard) {
+      nestedData = nestedData[folder];
+    }
+
+    // Show confirmation dialog before deleting the folder
+    bool? confirmed = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Delete Folder"),
+          content: Text("Are you sure you want to delete this folder and all its contents?"),
+          actions: [
+            TextButton(
+              child: Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: Text("Delete"),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    // If confirmed, remove the folder
+    if (confirmed == true) {
+      setState(() {
+        nestedData.removeAt(folderIndex); // Remove the folder from the list
+
+        // Notify that the data has changed
+        dataWidget?.onDataChange(dataWidget.data);
+
+        // Save the updated data to file
+        context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget!.data);
+
+        // Update the UI
+        context.findAncestorStateOfType<HomePageState>()?.updateGrid();
+      });
+
+      print("Folder at index $folderIndex removed");
+    }
+  }
+
   Future<void> updateGrid() async {
     final gridState = context.findAncestorStateOfType<GridState>();
     gridState?.updateVisibleButtons();

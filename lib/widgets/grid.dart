@@ -123,8 +123,8 @@ class GridState extends State<Grid> {
           onReorder: reorderGrid,
           itemBuilder: (BuildContext context, int index) {
             final item = visibleButtons[index];
-            final imagePath = item["image_url"] ?? ''; // Default to empty string if null
-            final label = item["label"] ?? 'No Label'; // Default to 'No Label' if null
+            final imagePath = item["image_url"] ?? '';
+            final label = item["label"] ?? 'No Label';
 
             if (item["folder"] == false) {
               return FirstButton(
@@ -134,7 +134,6 @@ class GridState extends State<Grid> {
                 text: label,
                 size: buttonSize,
                 onPressed: () {
-                  // Call the onButtonPressed callback with a new FirstButton
                   widget.onButtonPressed(
                     FirstButton(
                       id: item["id"],
@@ -153,7 +152,16 @@ class GridState extends State<Grid> {
                 text: label,
                 ind: index,
                 size: buttonSize,
-                onPressed: () => updateGridPath(index, "buttons"),
+                onPressed: () {
+                  final homePageState = context.findAncestorStateOfType<HomePageState>();
+                  if (homePageState == null) print("null");
+
+                  if (homePageState?.inRemovalState == true) {
+                    homePageState?.removeFolder(index); // Call removeFolder if in removal mode
+                  } else {
+                    updateGridPath(index, "buttons"); // Navigate into the folder
+                  }
+                },
               );
             }
           },
