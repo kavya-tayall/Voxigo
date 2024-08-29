@@ -5,6 +5,7 @@ import 'package:reorderable_grid/reorderable_grid.dart';
 
 class Grid extends StatefulWidget {
   final Function(FirstButton) onButtonPressed;
+
   Grid({required this.onButtonPressed});
 
   @override
@@ -15,7 +16,7 @@ class GridState extends State<Grid> {
   dynamic visibleButtons = [];
 
   @override
-  void didChangeDependencies(){
+  void didChangeDependencies() {
     super.didChangeDependencies();
     updateVisibleButtons();
   }
@@ -23,15 +24,23 @@ class GridState extends State<Grid> {
   void updateVisibleButtons() {
     final pathWidget = PathWidget.of(context);
     final dataWidget = DataWidget.of(context);
-      setState(() {
-        dynamic buttons = dataWidget?.data;
-        for (var folder in pathWidget!.pathOfBoard) {
-          buttons = buttons[folder];
-        }
-        visibleButtons = List.from(buttons);
 
-        print("updated visible buttons");
-      });
+    setState(() {
+      dynamic buttons = dataWidget?.data;
+
+      for (var folder in pathWidget!.pathOfBoard) {
+        buttons = buttons[folder];
+      }
+
+      // Ensure buttons is a list
+      if (buttons is List) {
+        visibleButtons = List.from(buttons);
+      } else {
+        visibleButtons = [];
+      }
+
+      print("Updated visible buttons");
+    });
   }
 
   void updateGridPath(int folderPath, String folderPath2) {
@@ -47,7 +56,7 @@ class GridState extends State<Grid> {
     });
   }
 
-  void reorderGrid(int oldIndex, int newIndex){
+  void reorderGrid(int oldIndex, int newIndex) {
     final dataWidget = DataWidget.of(context);
     final pathWidget = PathWidget.of(context);
 
@@ -58,14 +67,10 @@ class GridState extends State<Grid> {
         nestedData = nestedData[folder];
       }
 
+      // Handle reorder logic
       Map<String, dynamic> btnVar = nestedData[oldIndex];
-
-      print(oldIndex);
-      print(newIndex);
-
       nestedData.removeAt(oldIndex);
       nestedData.insert(newIndex, btnVar);
-      print(nestedData);
 
       // Notify the widget that the data has changed
       dataWidget.onDataChange(dataWidget.data);
@@ -78,7 +83,6 @@ class GridState extends State<Grid> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -86,15 +90,23 @@ class GridState extends State<Grid> {
         int crossAxisCount = 10; // Fixed number of columns
         int fixedRows = 5; // Fixed number of rows
 
-
         double availableHeight = constraints.maxHeight;
 
         // Calculate maximum number of items that can fit based on number of rows
         int maxItems = 50;
-        double buttonSize = ((availableHeight - 50) / fixedRows);
+        double buttonSize = ((availableHeight - 50) / fixedRows) + 40;
 
         // Limit the number of items shown to the maximum number that fits in the grid
         int visibleItemCount = visibleButtons.length > maxItems ? maxItems : visibleButtons.length;
+
+        if (visibleButtons.isEmpty) {
+          return Center(
+            child: Text(
+              "No items to display",
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+          );
+        }
 
         return ReorderableGridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -107,34 +119,114 @@ class GridState extends State<Grid> {
           itemCount: visibleItemCount,
           onReorder: reorderGrid,
           itemBuilder: (BuildContext context, int index) {
-            if (visibleButtons[index]["folder"] == false) {
-              return FirstButton(
-                key: ValueKey(visibleButtons[index]),
-                id: visibleButtons[index]["id"],
-                imagePath: visibleButtons[index]["image_url"],
-                text: visibleButtons[index]["label"],
-                size: buttonSize,
-                onPressed: () {
-                  // Call the onButtonPressed callback with a new FirstButton
-                  widget.onButtonPressed(
+            final item = visibleButtons[index];
+            final imagePath = item["image_url"] ?? '';
+            final label = item["label"] ?? 'No Label';
+
+            // Combine 'id' with 'index' to ensure uniqueness, in case 'id' alone isn't unique
+            final itemKey = ValueKey('${item["id"]}_$index');
+
+            if (item["folder"] == false) {
+              return LongPressDraggable<Map<String, dynamic>>(
+                key: itemKey, // Ensure the item has a unique key
+                data: item,
+                feedback: Material(
+                  child: FirstButton(
+                    id: item["id"],
+                    imagePath: imagePath,
+                    text: label,
+                    size: buttonSize,
+                    onPressed: () {},
+                  ),
+                ),
+                childWhenDragging: Opacity(
+                  opacity: 0.5,
+                  child: FirstButton(
+                    id: item["id"],
+                    imagePath: imagePath,
+                    text: label,
+                    size: buttonSize,
+                    onPressed: () {},
+                  ),
+                ),
+                child: FirstButton(
+                  id: item["id"],
+                  imagePath: imagePath,
+                  text: label,
+                  size: buttonSize,
+                  onPressed: () {
+                    widget.onButtonPressed(
                       FirstButton(
-                        id: visibleButtons[index]["id"],
-                        imagePath: visibleButtons[index]["image_url"],
-                        text: visibleButtons[index]["label"],
+                        id: item["id"],
+                        imagePath: imagePath,
+                        text: label,
                         size: buttonSize,
                         onPressed: () {},
-                      ));
-                },
+                      ),
+                    );
+                  },
+                ),
               );
             } else {
-              return FolderButton(
-                key: ValueKey(visibleButtons[index]),
-                imagePath: visibleButtons[index]["image_url"],
-                text: visibleButtons[index]["label"],
-                ind: index,
-                size: buttonSize,
-                onPressed: () => updateGridPath(index, "buttons"),
-                // Pass the size parameter
+              return DragTarget<Map<String, dynamic>>(
+                key: itemKey, // Ensure the FolderButton also has a unique key
+                onWillAccept: (receivedItem) {
+                  // Allow dragging over folder to drop
+                  return true;
+                },
+                onAccept: (receivedItem) {
+                  final dataWidget = DataWidget.of(context);
+                  final pathWidget = PathWidget.of(context);
+
+                  setState(() {
+                    // Get the current path to where the grid is pointing
+                    dynamic nestedData = dataWidget!.data;
+                    for (var folder in pathWidget!.pathOfBoard) {
+                      nestedData = nestedData[folder];
+                    }
+
+                    // Find the folder where the item will be moved
+                    dynamic targetFolder = nestedData[index]; // Use the correct index here
+
+                    if (targetFolder["folder"] == true) {
+                      // Move the item into the folder's buttons list
+                      targetFolder["buttons"].add(receivedItem);
+
+                      // Remove the item from its original location
+                      nestedData.remove(receivedItem);
+
+                      // Notify the widget that the data has changed
+                      dataWidget.onDataChange(dataWidget.data);
+
+                      // Save the updated data to file
+                      context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
+
+                      // Update the UI
+                      context.findAncestorStateOfType<HomePageState>()?.updateGrid();
+                    } else {
+                      print("Target index is not a folder.");
+                    }
+                  });
+                },
+                builder: (context, acceptedItems, rejectedItems) {
+                  return FolderButton(
+                    key: itemKey,
+                    imagePath: imagePath,
+                    text: label,
+                    ind: index,
+                    size: buttonSize,
+                    onPressed: () {
+                      final homePageState = context.findAncestorStateOfType<HomePageState>();
+                      if (homePageState == null) print("null");
+
+                      if (homePageState?.inRemovalState == true) {
+                        homePageState?.removeFolder(index); // Call removeFolder if in removal mode
+                      } else {
+                        updateGridPath(index, "buttons"); // Navigate into the folder
+                      }
+                    },
+                  );
+                },
               );
             }
           },
@@ -142,4 +234,4 @@ class GridState extends State<Grid> {
       },
     );
   }
-}
+} 

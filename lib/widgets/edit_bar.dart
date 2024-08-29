@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'buttons.dart';
-import '../child_pages/home_page.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:uuid/uuid.dart';
 
+import '../child_pages/home_page.dart';
 import '../main.dart';
+import 'buttons.dart';
 
 class EditBar extends StatelessWidget {
   final dynamic data;
@@ -15,11 +16,7 @@ class EditBar extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        DataWidget(
-            data: data,
-            onDataChange:
-                context.findAncestorStateOfType<BasePageState>()!.modifyData,
-            child: AddButton(data: data)),
+        AddButton(data: data),
         RemoveButton(),
       ],
     );
@@ -36,6 +33,11 @@ class AddButton extends StatefulWidget {
 }
 
 class AddButtonState extends State<AddButton> {
+  // Define consistent colors and sizes
+  final Color buttonColor = Colors.lightBlue;
+  final Color iconColor = Colors.white;
+  final double buttonSize = 60.0;
+
   void addVisibleButtons(FirstButton button) {
     final dataWidget = DataWidget.of(context);
     final pathWidget = PathWidget.of(context);
@@ -69,27 +71,88 @@ class AddButtonState extends State<AddButton> {
     }
   }
 
+  void addFolder(String folderName) {
+    final dataWidget = DataWidget.of(context);
+    final pathWidget = PathWidget.of(context);
+
+    if (dataWidget != null) {
+      setState(() {
+        dynamic nestedData = dataWidget.data;
+
+        for (var folder in pathWidget!.pathOfBoard) {
+          nestedData = nestedData[folder];
+        }
+
+        // Generate a unique ID for the new folder
+        final folderId = Uuid().v4(); // Generate a UUID
+        final newFolder = {
+          "id": folderId,
+          "image_url": "assets/imgs/OneDrive_Folder_Icon.png",
+          "label": folderName,
+          "folder": true,
+          "buttons": [], // Empty list to hold buttons inside this folder
+        };
+
+        // Add the folder to the top-level buttons list
+        nestedData.add(newFolder); // Add folder to the list
+
+        // Notify the widget that the data has changed
+        dataWidget.onDataChange(dataWidget.data);
+
+        // Save the updated data to file
+        context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
+
+        // Update the UI
+        context.findAncestorStateOfType<HomePageState>()?.updateGrid();
+      });
+    } else {
+      print('DataWidget is null');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        shape: CircleBorder(),
-        padding: EdgeInsets.all(30),
+    return Container(
+      width: buttonSize,
+      height: buttonSize,
+      child: SpeedDial(
+        icon: Icons.add,
+        activeIcon: Icons.close,
+        backgroundColor: buttonColor, iconTheme:
+      IconThemeData(color: iconColor),
+        children: [
+          SpeedDialChild(
+            child: Icon(Icons.add, color: iconColor),
+            backgroundColor: buttonColor,
+            label: 'Add Button',
+            onTap: () async {
+              String? enteredText = await _showTextInputDialog(context, "Enter button label:");
+              if (enteredText != null) {
+                dynamic buttonData = searchButtonData(widget.data, enteredText);
+                if (buttonData != null) {
+                  FirstButton button = _createFirstButtonFromData(buttonData);
+                  addVisibleButtons(button);
+                } else {
+                  print("Button not found");
+                }
+              }
+            },
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.create_new_folder, color: iconColor),
+            backgroundColor: buttonColor,
+            label: 'Add Folder',
+            onTap: () async {
+              String? folderName = await _showTextInputDialog(context, "Enter folder name:");
+              if (folderName != null) {
+                addFolder(folderName);
+              }
+            },
+          ),
+        ],
+        // Remove shadow
+        elevation: 0,
       ),
-      onPressed: () async {
-        String? enteredText = await _showTextInputDialog(context);
-        if (enteredText != null) {
-          dynamic buttonData = searchButtonData(widget.data, enteredText);
-          if (buttonData != null) {
-            FirstButton button = _createFirstButtonFromData(buttonData);
-            addVisibleButtons(button);
-          } else {
-            // Handle case where no button is found
-            print("Button not found");
-          }
-        }
-      },
-      child: Icon(Icons.add),
     );
   }
 
@@ -117,21 +180,20 @@ class AddButtonState extends State<AddButton> {
       imagePath: data["image_url"],
       text: data["label"],
       size: 60.0,
-      // Adjust the size as needed
       onPressed: () {
         // Implement what happens when the button is pressed
       },
     );
   }
 
-  Future<String?> _showTextInputDialog(BuildContext context) async {
+  Future<String?> _showTextInputDialog(BuildContext context, String hintText) async {
     TextEditingController controller = TextEditingController();
 
     return showDialog<String>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Add Button'),
+          title: Text(hintText),
           content: TextField(
             controller: controller,
             decoration: InputDecoration(hintText: "Type here"),
@@ -163,6 +225,11 @@ class RemoveButton extends StatefulWidget {
 
 class RemoveButtonState extends State<RemoveButton> {
   bool isRemovalMode = false;
+
+  // Define consistent colors and sizes
+  final Color buttonColor = Colors.lightBlue;
+  final Color iconColor = Colors.white;
+  final double buttonSize = 60.0;
 
   void removeVisibleButton(FirstButton button) {
     final dataWidget = DataWidget.of(context);
@@ -197,16 +264,24 @@ class RemoveButtonState extends State<RemoveButton> {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        shape: CircleBorder(),
-        padding: EdgeInsets.all(30),
+    return Container(
+      width: buttonSize,
+      height: buttonSize,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          shape: CircleBorder(),
+          padding: EdgeInsets.all(16), // Adjust padding to fit the size
+          backgroundColor: buttonColor, // Match the AddButton color
+          minimumSize: Size(buttonSize, buttonSize), // Ensure button size is consistent
+        ),
+        onPressed: () {
+          context.findAncestorStateOfType<HomePageState>()?.changeRemovalState();
+          setState(() {
+            isRemovalMode = !isRemovalMode;
+          });
+        },
+        child: Icon(isRemovalMode ? Icons.check : Icons.delete, color: iconColor), // Match the AddButton icon color
       ),
-      onPressed: () {
-        context.findAncestorStateOfType<HomePageState>()?.changeRemovalState();
-        isRemovalMode = !isRemovalMode;
-      },
-      child: Icon(isRemovalMode ? Icons.check : Icons.delete),
     );
   }
 }
