@@ -151,7 +151,7 @@ class AddButtonState extends State<AddButton> {
               if (enteredText != null) {
                 dynamic buttonData = searchButtonData(pictogramsData, enteredText);
                 if (buttonData != null) {
-                  FirstButton button = _createFirstButtonFromData(buttonData);
+                  FirstButton button = _createFirstButtonFromData(buttonData, enteredText);
                   addVisibleButtons(button);
                 } else {
                   print("Button not found");
@@ -191,12 +191,12 @@ class AddButtonState extends State<AddButton> {
     return null;
   }
 
-  FirstButton _createFirstButtonFromData(Map<String, dynamic> data) {
+  FirstButton _createFirstButtonFromData(Map<String, dynamic> data, String enteredText) {
     // Construct the image URL using the _id and required resolution
     String imageUrl = "https://static.arasaac.org/pictograms/${data['_id']}/${data['_id']}_2500.png";
 
     // Get the keyword to use as the label
-    String label = data["keywords"][0]["keyword"]; // Assuming you use the first keyword as the label
+    String label = enteredText;
 
     return FirstButton(
       id: data["_id"].toString(), // Convert _id to string
