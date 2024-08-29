@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../child_pages/home_page.dart';
 
+import '../child_pages/home_page.dart';
 
 class FirstButton extends StatefulWidget {
   final String id;
@@ -9,14 +9,21 @@ class FirstButton extends StatefulWidget {
   final double size;
   final VoidCallback onPressed;
 
-  const FirstButton({Key? key, required this.id, required this.imagePath, required this.text, required this.size, required this.onPressed}) : super(key: key);
+  const FirstButton({
+    Key? key,
+    required this.id,
+    required this.imagePath,
+    required this.text,
+    required this.size,
+    required this.onPressed,
+  }) : super(key: key);
 
   Map<String, dynamic> toJson() {
     return {
       "id": id,
       "image_url": imagePath,
       "label": text,
-      "folder": false
+      "folder": false,
     };
   }
 
@@ -25,8 +32,7 @@ class FirstButton extends StatefulWidget {
 }
 
 class _FirstButtonState extends State<FirstButton> {
-
-@override
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: widget.size,
@@ -34,15 +40,15 @@ class _FirstButtonState extends State<FirstButton> {
       child: ElevatedButton(
         onPressed: () {
           double width = MediaQuery.sizeOf(context).width;
-          double currentWidth = (widget.size + 21) * (context.findAncestorStateOfType<HomePageState>()!.selectedButtons.length );
+          double currentWidth = (widget.size + 21) *
+              (context.findAncestorStateOfType<HomePageState>()!.selectedButtons.length);
           print(width);
           print(currentWidth);
 
           if (currentWidth <= width) {
             widget.onPressed();
-          }
-          else {
-            print("oops overflowed");
+          } else {
+            print("Oops, overflowed");
           }
         },
         style: ElevatedButton.styleFrom(
@@ -56,10 +62,7 @@ class _FirstButtonState extends State<FirstButton> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Expanded(
-              child: Image.asset(
-                widget.imagePath,
-                fit: BoxFit.cover,
-              ),
+              child: _loadImage(widget.imagePath),
             ),
             Text(
               widget.text,
@@ -68,6 +71,24 @@ class _FirstButtonState extends State<FirstButton> {
           ],
         ),
       ),
+    );
+  }
+
+  // Helper method to load images from assets or URL
+  Widget _loadImage(String imagePath) {
+    bool isUrl = Uri.tryParse(imagePath)?.hasAbsolutePath ?? false;
+
+    return isUrl
+        ? Image.network(
+      imagePath,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Icon(Icons.broken_image); // Fallback for broken image URLs
+      },
+    )
+        : Image.asset(
+      imagePath,
+      fit: BoxFit.cover,
     );
   }
 }
