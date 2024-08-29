@@ -82,13 +82,8 @@ class BasePageState extends State<BasePage> {
     final directory = await getApplicationDocumentsDirectory();
     String filePath = '${directory.path}/board.json';
 
-    // Delete the existing file if it exists
     File file = File(filePath);
-    if (await file.exists()) {
-      await file.delete(); // Delete the file
-    }
 
-    // Load from assets
     final assetJsonString = await rootBundle.loadString("assets/board_info/board.json");
     await file.writeAsString(assetJsonString); // Copy asset to file
 
