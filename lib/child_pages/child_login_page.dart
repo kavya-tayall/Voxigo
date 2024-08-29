@@ -47,7 +47,6 @@ class ChildLoginPage extends StatelessWidget {
         onRecoverPassword: _recoverPassword,
         userValidator: checkUsername,
         title: "Child Login",
-
         userType: LoginUserType.name,
         theme: LoginTheme(primaryColor: Color(0xFF56B1FB),),
         onSubmitAnimationCompleted: () {
