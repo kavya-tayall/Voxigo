@@ -13,7 +13,7 @@ import 'widgets/bottom_nav_bar.dart';
 import 'child_pages/home_page.dart';
 import 'child_pages/behavior_page.dart';
 import 'child_pages/settings_page.dart';
-import 'child_pages/login_page.dart';
+import 'parent_pages/parent_login_page.dart';
 
 typedef VoidCallBack = void Function();
 
