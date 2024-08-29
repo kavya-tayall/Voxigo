@@ -2,7 +2,7 @@
   "buttons": [
     {
       "id": "1",
-      "image_url": "assets/imgs/Screenshot 2024-07-29 at 4.31.43 PM.png",
+      "image_url": "https://static.arasaac.org/pictograms/34567/34567_2500.png",
       "label": "Hi!",
       "folder": false
     },

@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:uuid/uuid.dart';
 
@@ -110,6 +113,24 @@ class AddButtonState extends State<AddButton> {
     }
   }
 
+  List<dynamic> pictogramsData = [];
+
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    // Load the JSON string from the asset
+    String jsonString = await rootBundle.loadString('assets/board_info/pictograms.json');
+    // Parse the JSON string into a Dart object
+    List<dynamic> data = jsonDecode(jsonString);
+
+    setState(() {
+      pictogramsData = data; // Store the parsed data
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -128,7 +149,7 @@ class AddButtonState extends State<AddButton> {
             onTap: () async {
               String? enteredText = await _showTextInputDialog(context, "Enter button label:");
               if (enteredText != null) {
-                dynamic buttonData = searchButtonData(widget.data, enteredText);
+                dynamic buttonData = searchButtonData(pictogramsData, enteredText);
                 if (buttonData != null) {
                   FirstButton button = _createFirstButtonFromData(buttonData);
                   addVisibleButtons(button);
@@ -156,16 +177,12 @@ class AddButtonState extends State<AddButton> {
     );
   }
 
-  dynamic searchButtonData(Map<String, dynamic> data, String label) {
-    for (var key in data.keys) {
-      if (data[key] is Map<String, dynamic>) {
-        var result = searchButtonData(data[key], label);
-        if (result != null) {
-          return result;
-        }
-      } else if (data[key] is List) {
-        for (var item in data[key]) {
-          if (item["label"] == label) {
+  dynamic searchButtonData(List<dynamic> data, String keyword) {
+    keyword = keyword.trim().toLowerCase(); // Trim and convert to lowercase
+    for (var item in data) {
+      if (item is Map<String, dynamic> && item.containsKey("keywords")) {
+        for (var keywordData in item["keywords"]) {
+          if (keywordData["keyword"].toString().toLowerCase() == keyword) {
             return item;
           }
         }
@@ -175,16 +192,23 @@ class AddButtonState extends State<AddButton> {
   }
 
   FirstButton _createFirstButtonFromData(Map<String, dynamic> data) {
+    // Construct the image URL using the _id and required resolution
+    String imageUrl = "https://static.arasaac.org/pictograms/${data['_id']}/${data['_id']}_2500.png";
+
+    // Get the keyword to use as the label
+    String label = data["keywords"][0]["keyword"]; // Assuming you use the first keyword as the label
+
     return FirstButton(
-      id: data["id"],
-      imagePath: data["image_url"],
-      text: data["label"],
+      id: data["_id"].toString(), // Convert _id to string
+      imagePath: imageUrl,
+      text: label,
       size: 60.0,
       onPressed: () {
         // Implement what happens when the button is pressed
       },
     );
   }
+
 
   Future<String?> _showTextInputDialog(BuildContext context, String hintText) async {
     TextEditingController controller = TextEditingController();

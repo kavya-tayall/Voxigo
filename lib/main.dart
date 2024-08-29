@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
         ),
-        home: BasePage(),
+        home: BasePage() ,
         initialRoute: '/login', routes: {'/login': (_) => ParentLoginPage()},
       ),
     );
@@ -82,28 +82,23 @@ class BasePageState extends State<BasePage> {
     final directory = await getApplicationDocumentsDirectory();
     String filePath = '${directory.path}/board.json';
 
-    // Check if the file exists
+    // Delete the existing file if it exists
     File file = File(filePath);
     if (await file.exists()) {
-      // Read from file if it exists
-      final jsonString = await file.readAsString();
-      final jsonData = jsonDecode(jsonString);
-      setState(() {
-        data = Map.from(jsonData);
-        isLoading = false; // Data loading complete
-      });
-    } else {
-      // If the file doesn't exist, load from assets
-      final assetJsonString = await rootBundle.loadString("assets/board_info/board.json");
-      await file.writeAsString(assetJsonString); // Copy asset to file
-      final jsonData = jsonDecode(assetJsonString);
-      setState(() {
-        data = Map.from(jsonData);
-        isLoading = false; // Data loading complete
-      });
+      await file.delete(); // Delete the file
     }
-  }
 
+    // Load from assets
+    final assetJsonString = await rootBundle.loadString("assets/board_info/board.json");
+    await file.writeAsString(assetJsonString); // Copy asset to file
+
+    // Parse JSON data
+    final jsonData = jsonDecode(assetJsonString);
+    setState(() {
+      data = Map.from(jsonData);
+      isLoading = false; // Data loading complete
+    });
+  }
 
   // Update the path of the board
   void updatePathOfBoard(List<dynamic> newPath) {

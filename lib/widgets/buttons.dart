@@ -83,6 +83,7 @@ class _FirstButtonState extends State<FirstButton> {
       imagePath,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
+        print(error);
         return Icon(Icons.broken_image); // Fallback for broken image URLs
       },
     )
