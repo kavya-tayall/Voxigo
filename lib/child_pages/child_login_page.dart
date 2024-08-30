@@ -2,36 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../main.dart';
 import 'package:test_app/parent_pages/parent_login_page.dart';
+import '../auth_logic.dart';
 
-Map<String, String> users = {"kavya": "password1", "nihanth": "password2"};
 
-class ChildLoginID {
-  String username;
-  String password;
-  String accountType;
-
-  String? email;
-
-  ChildLoginID(this.username, this.password, this.accountType, {this.email});
-}
 
 class ChildLoginPage extends StatelessWidget {
-  const ChildLoginPage({super.key});
+  ChildLoginPage({super.key});
+  final AuthService _auth = AuthService();
 
   String? checkUsername(input) {
     return null;
   }
 
   Future<String?> _authUser(LoginData data) async {
-    if (!users.containsKey(data.name)) {
-      return 'User not exists';
+    try{
+      _auth.signInChild(data.name, data.password);
+    } on ChildDoesNotExistException{
+      return ChildDoesNotExistException().toString();
+    } catch (e){
+      print(e);
+      return e.toString();
     }
-    if (users[data.name] != data.password) {
-      return 'Password does not match';
-    }
-    ChildLoginID currentUser = ChildLoginID(data.name, data.password, "child");
-    await Future.delayed(const Duration(seconds: 2));
-    return null; // Successful login
+    return null;
   }
 
   Future<String?> _recoverPassword(String name) async {
@@ -49,9 +41,7 @@ class ChildLoginPage extends StatelessWidget {
         title: "Child Login",
         userType: LoginUserType.name,
         theme: LoginTheme(primaryColor: Color(0xFF56B1FB),),
-        messages: LoginMessages(
-          userHint: 'Username'
-        ),
+        messages: LoginMessages(userHint: 'Username'),
         footer: "ConnectAutism, Inc",
         onSubmitAnimationCompleted: () {
           Navigator.of(context).pushReplacement(MaterialPageRoute(

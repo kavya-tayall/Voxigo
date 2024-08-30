@@ -4,35 +4,23 @@ import '../main.dart';
 import 'package:test_app/auth_logic.dart';
 import 'package:test_app/child_pages/child_login_page.dart';
 
-Map<String, String> users = {"kavya": "password2", "nihanth": "password3"};
 
-class ParentLoginID {
-  String username;
-  String password;
-  String accountType;
-
-  String? email;
-
-  ParentLoginID(this.username, this.password, this.accountType, {this.email});
-}
 
 class ParentLoginPage extends StatelessWidget {
   ParentLoginPage({super.key});
 
   final AuthService _auth = AuthService();
 
-//done
   Future<String?> _authUser(LoginData data) async {
     try {
       _auth.signInParent(data.name, data.password);
     } on UserNotParentException {
       return 'User is not parent';
-    } on UserDoesNotExistException {
+    } on ParentDoesNotExistException {
       return 'Username or password is incorrect';
     } catch (e) {
       return 'error';
     }
-    ParentLoginID currentUser = ParentLoginID(data.name, data.password, "child");
     await Future.delayed(const Duration(seconds: 1));
     return null;
   }
@@ -76,7 +64,7 @@ class ParentLoginPage extends StatelessWidget {
         theme: LoginTheme(primaryColor: Color(0xFF56B1FB),),
         onSubmitAnimationCompleted: () {
           Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => BasePage(),
+            builder: (context) => ParentBasePage(),
           ));
         },
       ),

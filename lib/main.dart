@@ -14,6 +14,8 @@ import 'child_pages/home_page.dart';
 import 'child_pages/behavior_page.dart';
 import 'child_pages/settings_page.dart';
 import 'parent_pages/parent_login_page.dart';
+import 'child_pages/child_login_page.dart';
+import 'parent_pages/parent_settings.dart';
 
 typedef VoidCallBack = void Function();
 
@@ -41,8 +43,12 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
         ),
-        home: BasePage() ,
-        //initialRoute: '/login', routes: {'/login': (_) => ParentLoginPage()},
+        initialRoute: '/parent_login',
+        routes: {
+          '/parent_login': (_) => ParentLoginPage(),
+          '/child_login': (_) => ChildLoginPage(),
+          '/base': (_) => BasePage()
+        },
       ),
     );
   }
@@ -166,5 +172,14 @@ class BasePageState extends State<BasePage> {
         ],
       ),
     );
+  }
+}
+
+class ParentBasePage extends StatelessWidget {
+  const ParentBasePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ParentHomePage();
   }
 }

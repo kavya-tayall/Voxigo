@@ -1,13 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:flutter/material.dart';
 
 
 
-class AuthService{
+
+class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future <User?> registerParent(String username, String name, String email, String password) async{
+  Future <User?> registerParent(String username, String name, String email, String password) async {
     bool usernameExists = await _checkUsernameExists(username);
 
     print(usernameExists);
@@ -16,7 +20,8 @@ class AuthService{
     }
 
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
       User? parent = userCredential.user;
 
       if (parent != null) {
@@ -34,6 +39,7 @@ class AuthService{
       return null;
     }
   }
+
   Future<bool> _checkUsernameExists(String username) async {
     QuerySnapshot parentResult = await _db.collection('parents')
         .where('username', isEqualTo: username)
@@ -45,18 +51,20 @@ class AuthService{
 
   Future<User?> signInParent(String email, String password) async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
       User? parent = userCredential.user;
 
       if (parent != null) {
-        DocumentSnapshot userDoc = await _db.collection('parents').doc(parent.uid).get();
+        DocumentSnapshot userDoc = await _db.collection('parents').doc(
+            parent.uid).get();
         if (userDoc.exists && userDoc['role'] == 'parent') {
           return parent;
         } else {
           throw UserNotParentException();
         }
       } else {
-        throw UserDoesNotExistException();
+        throw ParentDoesNotExistException();
       }
     } catch (e) {
       print(e.toString());
@@ -73,16 +81,16 @@ class AuthService{
     if (childQuery.docs.isNotEmpty) {
       return childQuery.docs.first.data() as Map<String, dynamic>?;
     } else {
-      throw Exception('Invalid username or password');
+      throw ChildDoesNotExistException();
     }
   }
 }
 
 
-class UserService{
+class UserService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<DocumentReference?> registerChild(String parentId, String username, String password) async {
+  Future<DocumentReference?> registerChild(String parentId, String firstName, String lastName, String username, String password) async {
     bool usernameExists = await _checkUsernameExists(username);
 
     if (usernameExists) {
@@ -91,6 +99,8 @@ class UserService{
 
     DocumentReference childRef = await _db.collection('children').add({
       'username': username,
+      'first name': firstName,
+      'last name': lastName,
       'password': password, // Consider hashing this password for security
       'parents': [parentId],
       'data': {}
@@ -111,9 +121,6 @@ class UserService{
     return childResult.docs.isNotEmpty;
   }
 }
-
-
-
 
 
 class UsernameAlreadyExistsException implements Exception {
@@ -138,10 +145,23 @@ class UserNotParentException implements Exception {
   }
 }
 
-class UserDoesNotExistException implements Exception{
+class ParentDoesNotExistException implements Exception {
   final String message;
 
-  UserDoesNotExistException([this.message = 'Email or password is incorrect']);
+  ParentDoesNotExistException(
+      [this.message = 'Email or password is incorrect']);
+
+  @override
+  String toString() {
+    return "CustomException: $message";
+  }
+}
+
+class ChildDoesNotExistException implements Exception {
+  final String message;
+
+  ChildDoesNotExistException(
+      [this.message = 'Username or password is incorrect']);
 
   @override
   String toString() {
