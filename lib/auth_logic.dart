@@ -51,13 +51,12 @@ class AuthService {
 
   Future<User?> signInParent(String email, String password) async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
       User? parent = userCredential.user;
 
+
       if (parent != null) {
-        DocumentSnapshot userDoc = await _db.collection('parents').doc(
-            parent.uid).get();
+        DocumentSnapshot userDoc = await _db.collection('parents').doc(parent.uid).get();
         if (userDoc.exists && userDoc['role'] == 'parent') {
           return parent;
         } else {
@@ -68,7 +67,7 @@ class AuthService {
       }
     } catch (e) {
       print(e.toString());
-      throw Exception();
+      throw ParentDoesNotExistException();
     }
   }
 

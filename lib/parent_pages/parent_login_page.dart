@@ -12,13 +12,20 @@ class ParentLoginPage extends StatelessWidget {
   final AuthService _auth = AuthService();
 
   Future<String?> _authUser(LoginData data) async {
+
+
+
     try {
-      _auth.signInParent(data.name, data.password);
-    } on UserNotParentException {
+      await _auth.signInParent(data.name, data.password);
+    } on UserNotParentException{
+      print("asdf3");
       return 'User is not parent';
-    } on ParentDoesNotExistException {
+    } on ParentDoesNotExistException{
+      print("asdf2");
       return 'Username or password is incorrect';
+
     } catch (e) {
+      print("asdf4");
       return 'error';
     }
     await Future.delayed(const Duration(seconds: 1));

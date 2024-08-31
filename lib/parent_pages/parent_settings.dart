@@ -96,7 +96,8 @@ class RegisterChildForm extends StatelessWidget {
                     debugPrint(_formKey.currentState?.instantValue.toString());
                     User? user = FirebaseAuth.instance.currentUser;
                     print(user!.uid);
-                    _user.registerChild(user.uid, _formKey.currentState?.instantValue['Username'], _formKey.currentState?.instantValue['Password'], _formKey.currentState?.instantValue['First name'], _formKey.currentState?.instantValue['Last name']);
+                    _user.registerChild(user.uid, _formKey.currentState?.instantValue['First name'], _formKey.currentState?.instantValue['Last name'], _formKey.currentState?.instantValue['Username'], _formKey.currentState?.instantValue['Password']);
+                    Navigator.pop(context);
                   }
                 },
                 child: const Text('Register Child'),
