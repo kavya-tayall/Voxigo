@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import '../auth_logic.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/safe_area_values.dart';
+import 'package:top_snackbar_flutter/tap_bounce_container.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class ParentHomePage extends StatelessWidget {
   const ParentHomePage({super.key});
@@ -34,6 +36,7 @@ class ParentHomePage extends StatelessWidget {
 
 class RegisterChildForm extends StatelessWidget {
   RegisterChildForm({super.key});
+
   final UserService _user = UserService();
 
   final _formKey = GlobalKey<FormBuilderState>();
@@ -42,7 +45,8 @@ class RegisterChildForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return FormBuilder(
       key: _formKey,
-      child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,  children: [
+      child:
+          Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
         Padding(
           padding: EdgeInsets.only(bottom: 8),
           child: FormBuilderTextField(
@@ -88,16 +92,38 @@ class RegisterChildForm extends StatelessWidget {
         ),
         Padding(
           padding: EdgeInsets.only(top: 8),
-          child: Row(
-            children: [Expanded(
+          child: Row(children: [
+            Expanded(
               child: ElevatedButton(
                 onPressed: () async {
-                  if (_formKey.currentState!.validate()){
+                  if (_formKey.currentState!.validate()) {
                     debugPrint(_formKey.currentState?.instantValue.toString());
                     User? user = FirebaseAuth.instance.currentUser;
-                    print(user!.uid);
-                    _user.registerChild(user.uid, _formKey.currentState?.instantValue['First name'], _formKey.currentState?.instantValue['Last name'], _formKey.currentState?.instantValue['Username'], _formKey.currentState?.instantValue['Password']);
-                    Navigator.pop(context);
+                    try{
+                      await _user.registerChild(
+                          user!.uid,
+                          _formKey.currentState?.instantValue['First name'],
+                          _formKey.currentState?.instantValue['Last name'],
+                          _formKey.currentState?.instantValue['Username'],
+                          _formKey.currentState?.instantValue['Password']);
+                      Navigator.pop(context);
+                      showTopSnackBar(Overlay.of(context),
+                        CustomSnackBar.success(
+                          backgroundColor: Colors.green,
+                          message: "Child has been added",
+                        ),
+                        displayDuration: Duration(seconds: 3),
+                      );
+                    } on UsernameAlreadyExistsException{
+                      showTopSnackBar(Overlay.of(context),
+                        CustomSnackBar.error(
+                          backgroundColor: Colors.red.shade900,
+                          message: "Username already exists",
+                        ),
+                        displayDuration: Duration(seconds: 3),
+                      );
+                    }
+
                   }
                 },
                 child: const Text('Register Child'),
@@ -127,3 +153,13 @@ class RegisterChildDialog extends StatelessWidget {
     );
   }
 }
+
+final childSuccessSnackBar = SnackBar(
+    content: Text('Child has been added'),
+    behavior: SnackBarBehavior.floating,
+    margin: EdgeInsets.only(top: 10, left: 10.0, right: 10.0),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(0),
+    ),
+    backgroundColor: Colors.green,
+    duration: Duration(seconds: 3));

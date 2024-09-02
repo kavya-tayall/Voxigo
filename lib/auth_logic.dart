@@ -1,8 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:io';
-import 'dart:convert';
-import 'package:flutter/material.dart';
 
 
 
@@ -93,7 +90,7 @@ class UserService {
     bool usernameExists = await _checkUsernameExists(username);
 
     if (usernameExists) {
-      throw Exception('Username already exists');
+      throw UsernameAlreadyExistsException();
     }
 
     DocumentReference childRef = await _db.collection('children').add({
@@ -105,8 +102,7 @@ class UserService {
       'data': {}
     });
 
-    // Update the parent's document with the new child ID
-    await _db.collection('users').doc(parentId).update({
+    await _db.collection('parents').doc(parentId).update({
       'children': FieldValue.arrayUnion([childRef.id])
     });
     return childRef;

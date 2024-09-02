@@ -170,11 +170,11 @@ class GridState extends State<Grid> {
             } else {
               return DragTarget<Map<String, dynamic>>(
                 key: itemKey, // Ensure the FolderButton also has a unique key
-                onWillAccept: (receivedItem) {
+                onWillAcceptWithDetails: (receivedItem) {
                   // Allow dragging over folder to drop
                   return true;
                 },
-                onAccept: (receivedItem) {
+                onAcceptWithDetails: (receivedItem) {
                   final dataWidget = DataWidget.of(context);
                   final pathWidget = PathWidget.of(context);
 

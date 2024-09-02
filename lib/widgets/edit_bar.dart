@@ -6,7 +6,6 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:uuid/uuid.dart';
 
 import '../child_pages/home_page.dart';
-import '../main.dart';
 import 'buttons.dart';
 
 class EditBar extends StatelessWidget {
@@ -115,6 +114,7 @@ class AddButtonState extends State<AddButton> {
 
   List<dynamic> pictogramsData = [];
 
+  @override
   void initState() {
     super.initState();
     loadData();
@@ -133,7 +133,7 @@ class AddButtonState extends State<AddButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: buttonSize,
       height: buttonSize,
       child: SpeedDial(
@@ -288,7 +288,7 @@ class RemoveButtonState extends State<RemoveButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: buttonSize,
       height: buttonSize,
       child: ElevatedButton(
