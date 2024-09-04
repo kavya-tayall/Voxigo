@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/scheduler.dart';
+import 'child_pages/MusicStories.dart';
 import 'firebase_options.dart';
 
 import 'package:flutter/material.dart';
@@ -152,7 +153,7 @@ class BasePageState extends State<BasePage> {
       case 1:
         page = Placeholder();
       case 2:
-        page = Placeholder();
+        page = MusicStoriesPage();
       case 3:
         page = BehaviourPage();
       case 4:
