@@ -195,7 +195,7 @@ class _MusicTileState extends State<MusicTile> {
     double progress = _duration.inMilliseconds > 0
         ? _position.inMilliseconds / _duration.inMilliseconds
         : 0.0;
-
+//hi
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
       padding: EdgeInsets.all(15),
