@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
@@ -16,11 +15,6 @@ class _MusicPageState extends State<MusicPage> {
   List<Song> _filteredSongs = [];
   final TextEditingController _searchController = TextEditingController();
 
-  // Controllers for adding a new song
-  TextEditingController _newSongTitleController = TextEditingController();
-  String? _newSongImage;
-  String? _newSongAudio;
-
   @override
   void initState() {
     super.initState();
@@ -32,63 +26,9 @@ class _MusicPageState extends State<MusicPage> {
     final List<dynamic> data = json.decode(response);
     setState(() {
       _songs = data.map((json) => Song.fromJson(json)).toList();
-      _filteredSongs = _songs;
+      _filteredSongs = _songs; // Initially show all songs
     });
   }
-
-  // File picker for audio files
-  Future<void> _pickAudioFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.audio);
-    if (result != null) {
-      setState(() {
-        _newSongAudio = result.files.single.path;
-      });
-    }
-  }
-
-  // File picker for image files
-  Future<void> _pickImageFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
-    if (result != null) {
-      setState(() {
-        _newSongImage = result.files.single.path;
-      });
-    }
-  }
-
-  // Function to add a new song
-  void _addNewSong() {
-    if (_newSongTitleController.text.isNotEmpty && _newSongAudio != null && _newSongImage != null) {
-      final newSong = Song(
-        title: _newSongTitleController.text,
-        emotion: ['new'], // Set default or add custom emotions
-        keywords: ['added'], // Set default or add custom keywords
-        link: _newSongAudio!,
-        image: _newSongImage!,
-      );
-
-      setState(() {
-        _songs.add(newSong);
-        _filteredSongs = _songs;
-      });
-
-      // Clear input fields
-      _newSongTitleController.clear();
-      _newSongImage = null;
-      _newSongAudio = null;
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please complete all fields before adding a song.')),
-      );
-    }
-  }
-
-
-
-
-
-
-
 
   void _onPlayPause(int index, AudioPlayer audioPlayer) async {
     // If a different song is playing, stop it
@@ -129,12 +69,6 @@ class _MusicPageState extends State<MusicPage> {
         title: const Text('Music Library', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.blue[800],
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => _showAddSongDialog(context), // Show dialog to add song
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -157,7 +91,9 @@ class _MusicPageState extends State<MusicPage> {
                   borderRadius: BorderRadius.circular(25.0),
                 ),
               ),
-              onChanged: (query) => _searchSongs(query),
+              onChanged: (query) {
+                _searchSongs(query);
+              },
             ),
           ),
           Expanded(
@@ -184,53 +120,6 @@ class _MusicPageState extends State<MusicPage> {
       ),
     );
   }
-
-  Future<void> _showAddSongDialog(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Add New Song'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: _newSongTitleController,
-                  decoration: InputDecoration(labelText: 'Song Title'),
-                ),
-                SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: _pickImageFile,
-                  child: Text('Pick Image'),
-                ),
-                SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: _pickAudioFile,
-                  child: Text('Pick Audio'),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _addNewSong();
-                Navigator.of(context).pop();
-              },
-              child: Text('Add Song'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
 }
 
 class MusicTile extends StatefulWidget {
