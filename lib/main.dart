@@ -153,7 +153,7 @@ class BasePageState extends State<BasePage> {
       case 1:
         page = Placeholder();
       case 2:
-        page = MusicStoriesPage();
+        page = MusicPage();
       case 3:
         page = BehaviourPage();
       case 4:
