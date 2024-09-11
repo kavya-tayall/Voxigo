@@ -4,8 +4,6 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import '../auth_logic.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/safe_area_values.dart';
-import 'package:top_snackbar_flutter/tap_bounce_container.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class ParentHomePage extends StatelessWidget {

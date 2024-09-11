@@ -33,7 +33,6 @@ dependencies:
   top_snackbar_flutter: ^3.1.0
 
 
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -48,6 +47,14 @@ flutter:
     - assets/imgs/OneDrive_Folder_Icon.png
     - assets/imgs/sun.png
     - assets/board_info/pictograms.json
-    - assets/temp_logo.jpg
+    - assets/imgs/temp_logo.jpg
+    - assets/imgs/sad.png
+    - assets/imgs/happy.png
+    - assets/imgs/bored.png
+    - assets/imgs/angry.png
+    - assets/imgs/tired.png
+    - assets/imgs/nervous.png
+    - assets/imgs/final_spinner.png
+    - assets/sound_effects/spinning-fidget-spinner-23292.mp3
 
 
