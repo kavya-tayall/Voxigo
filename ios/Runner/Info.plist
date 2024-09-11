@@ -45,5 +45,18 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+    <string>We need access to your photo library to save music files.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>We need access to your photo library for media features.</string>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+      <key>NSAllowsArbitraryLoads</key>
+      <true/>
+    </dict>
+
+    <key>NSMicrophoneUsageDescription</key>
+    <string>We need access to your microphone for audio recording.</string>
+
 </dict>
 </plist>

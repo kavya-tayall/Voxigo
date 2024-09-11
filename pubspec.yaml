@@ -13,12 +13,13 @@ dependencies:
     sdk: flutter
   http: ^1.2.2
   path_provider: ^2.0.11
+  file_picker: ^5.1.0
   uuid: ^3.0.5
   reorderable_grid: ^1.0.10
   settings_ui: ^2.0.2
   table_calendar: ^3.1.2
   flutter_speed_dial: ^6.0.0
-
+  json_annotation: ^4.5.0
   english_words: ^4.0.0
   provider: ^6.1.2
   flutter_tts: ^3.3.0
@@ -31,7 +32,7 @@ dependencies:
   form_builder_validators: ^11.0.0
   fluttertoast: ^8.2.8
   top_snackbar_flutter: ^3.1.0
-
+  audioplayers: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -56,5 +57,14 @@ flutter:
     - assets/imgs/nervous.png
     - assets/imgs/final_spinner.png
     - assets/sound_effects/spinning-fidget-spinner-23292.mp3
+    - assets/temp_logo.jpg
+    - assets/songs/Twinnkle, Twinkle, Little Star.mp3
+    - assets/songs/HumptyDumpty.mp3
+    - assets/songs/alphabet song.mp3
+    - assets/songs/music.json
+    - assets/songs/Screenshot 2024-09-09 at 7.49.23 PM.png
+    - assets/songs/Screenshot 2024-09-09 at 7.49.55 PM.png
+    - assets/songs/Screenshot 2024-09-09 at 7.50.11 PM.png
+
 
 
