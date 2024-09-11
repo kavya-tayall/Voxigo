@@ -43,6 +43,7 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
     _controller.repeat(); // Continuously update the animation
   }
 
+
   @override
   void dispose() {
     _controller.dispose();
