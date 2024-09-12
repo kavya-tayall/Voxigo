@@ -16,6 +16,7 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
   double _friction = 0.003;
   double _threshold = 0.00001;
 
+
   @override
   void initState() {
     super.initState();
