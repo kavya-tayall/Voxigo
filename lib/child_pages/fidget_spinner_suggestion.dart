@@ -7,6 +7,7 @@ class FidgetSpinnerHome extends StatefulWidget {
   _FidgetSpinnerHomeState createState() => _FidgetSpinnerHomeState();
 }
 
+
 class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
