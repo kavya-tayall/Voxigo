@@ -1,19 +1,24 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
-
+import 'package:path_provider/path_provider.dart';
+// Main MusicPage class
 class MusicPage extends StatefulWidget {
   @override
   _MusicPageState createState() => _MusicPageState();
 }
 
 class _MusicPageState extends State<MusicPage> {
-  AudioPlayer? _currentlyPlayingPlayer; // Store the current audio player
+  AudioPlayer? _currentlyPlayingPlayer;
   int? _currentlyPlayingIndex;
   List<Song> _songs = [];
   List<Song> _filteredSongs = [];
   final TextEditingController _searchController = TextEditingController();
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -21,28 +26,65 @@ class _MusicPageState extends State<MusicPage> {
     _loadSongs();
   }
 
+  // Load songs from JSON
   Future<void> _loadSongs() async {
-    final String response = await rootBundle.loadString('assets/songs/music.json');
-    final List<dynamic> data = json.decode(response);
-    setState(() {
-      _songs = data.map((json) => Song.fromJson(json)).toList();
-      _filteredSongs = _songs; // Initially show all songs
-    });
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      String filePath = '${directory.path}/music.json';
+
+      // Check if the file exists locally
+      File file = File(filePath);
+      if (await file.exists()) {
+        String fileContents = await file.readAsString();
+        final List<dynamic> data = json.decode(fileContents);
+        setState(() {
+          _songs = data.map((json) => Song.fromJson(json)).toList();
+          _filteredSongs = _songs;
+          isLoading = false;  // Done loading
+        });
+      } else {
+        // Load from assets on the first run
+        final String response = await rootBundle.loadString('assets/songs/music.json');
+        final List<dynamic> data = json.decode(response);
+        setState(() {
+          _songs = data.map((json) => Song.fromJson(json)).toList();
+          _filteredSongs = _songs;
+          isLoading = false;  // Done loading
+        });
+        await _saveSongsToLocalStorage();  // Save to local storage after first load
+      }
+    } catch (e) {
+      print('Error loading songs: $e');
+    }
   }
 
+  // Save updated song list to local storage
+  Future<void> _saveSongsToLocalStorage() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      String filePath = '${directory.path}/music.json';
+      File file = File(filePath);
+      String jsonData = json.encode(_songs.map((song) => song.toJson()).toList());
+      await file.writeAsString(jsonData);
+      print('Songs saved to local storage.');
+    } catch (e) {
+      print('Error saving songs: $e');
+    }
+  }
+
+  // Play or pause song
   void _onPlayPause(int index, AudioPlayer audioPlayer) async {
-    // If a different song is playing, stop it
     if (_currentlyPlayingIndex != null && _currentlyPlayingIndex != index) {
       _currentlyPlayingPlayer?.stop();
     }
 
-    // Update the currently playing player and index
     setState(() {
       _currentlyPlayingIndex = index;
       _currentlyPlayingPlayer = audioPlayer;
     });
   }
 
+  // Search for songs
   void _searchSongs(String query) {
     setState(() {
       _filteredSongs = _songs.where((song) {
@@ -55,6 +97,7 @@ class _MusicPageState extends State<MusicPage> {
     });
   }
 
+  // Clear search
   void _clearSearch() {
     _searchController.clear();
     setState(() {
@@ -62,66 +105,213 @@ class _MusicPageState extends State<MusicPage> {
     });
   }
 
+  // Add new song with title, image, and audio
+  Future<void> _addMusic(BuildContext context) async {
+    String? songTitle;
+    File? imageFile;
+    File? audioFile;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add New Song'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Song title input
+              TextField(
+                decoration: InputDecoration(labelText: 'Song Title'),
+                onChanged: (value) {
+                  songTitle = value;
+                },
+              ),
+              SizedBox(height: 10),
+              // Pick image button using FilePicker
+              ElevatedButton(
+                onPressed: () async {
+                  FilePickerResult? result = await FilePicker.platform.pickFiles(
+                    type: FileType.image,
+                  );
+
+                  if (result != null) {
+                    imageFile = File(result.files.single.path!);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Image selected!')));
+                  }
+                },
+                child: Text('Pick Image'),
+              ),
+              SizedBox(height: 10),
+              // Pick audio file button
+              ElevatedButton(
+                onPressed: () async {
+                  FilePickerResult? result = await FilePicker.platform.pickFiles(
+                    type: FileType.custom,
+                    allowedExtensions: ['mp3', 'wav'],
+                  );
+
+                  if (result != null) {
+                    audioFile = File(result.files.single.path!);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Audio selected!')));
+                  }
+                },
+                child: Text('Pick Audio File'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Add Song'),
+              onPressed: () async {
+                if (songTitle != null && imageFile != null && audioFile != null) {
+                  try {
+                    final newSong = Song(
+                      title: songTitle!,
+                      emotion: ['unknown'],
+                      keywords: ['user', 'added'],
+                      link: audioFile!.path,
+                      image: imageFile!.path,
+                      isFromAssets: false,
+                    );
+
+                    setState(() {
+                      _songs.add(newSong);
+                      _filteredSongs = _songs;
+                    });
+
+                    await _saveSongsToLocalStorage(); // Save updated list
+
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Song added successfully!')));
+                    Navigator.of(context).pop();
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add song: $e')));
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please provide a title, image, and audio file.')));
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Music Library', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.blue[800],
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Search by title or keyword',
-                filled: true,
-                fillColor: Colors.blue[50],
-                prefixIcon: Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                  icon: Icon(Icons.clear),
-                  onPressed: _clearSearch,
-                )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
+    return isLoading
+        ? Center(child: CircularProgressIndicator())
+        : Column(
+      children: [
+        // Search field
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              labelText: 'Search by title or keyword',
+              filled: true,
+              fillColor: Colors.blue[50],
+              prefixIcon: Icon(Icons.search),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                icon: Icon(Icons.clear),
+                onPressed: _clearSearch,
+              )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
               ),
-              onChanged: (query) {
-                _searchSongs(query);
-              },
             ),
+            onChanged: (query) {
+              _searchSongs(query);
+            },
           ),
-          Expanded(
-            child: _filteredSongs.isEmpty
-                ? Center(
-              child: Text(
-                'No songs found',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+        ),
+        // Song list
+        Expanded(
+          child: _filteredSongs.isEmpty
+              ? Center(
+            child: Text(
+              'No songs found',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+          )
+              : ListView.builder(
+            itemCount: _filteredSongs.length,
+            itemBuilder: (context, index) {
+              return MusicTile(
+                index: index,
+                song: _filteredSongs[index],
+                onPlayPause: _onPlayPause,
+                isPlaying: _currentlyPlayingIndex == index,
+              );
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: () => _addMusic(context),
+                child: Text('Add Song from Files'),
               ),
-            )
-                : ListView.builder(
-              itemCount: _filteredSongs.length,
-              itemBuilder: (context, index) {
-                return MusicTile(
-                  index: index,
-                  song: _filteredSongs[index],
-                  onPlayPause: _onPlayPause,
-                  isPlaying: _currentlyPlayingIndex == index,
-                );
-              },
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
+// Song model class
+class Song {
+  final String title;
+  final List<String> emotion;
+  final List<String> keywords;
+  final String link;
+  final String image;
+  final bool isFromAssets;
+
+  Song({
+    required this.title,
+    required this.emotion,
+    required this.keywords,
+    required this.link,
+    required this.image,
+    this.isFromAssets = true,
+  });
+
+  factory Song.fromJson(Map<String, dynamic> json) {
+    return Song(
+      title: json['title'],
+      emotion: List<String>.from(json['emotion']),
+      keywords: List<String>.from(json['keywords']),
+      link: json['link'],
+      image: json['image'],
+      isFromAssets: json['isFromAssets'] ?? true,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'emotion': emotion,
+      'keywords': keywords,
+      'link': link,
+      'image': image,
+      'isFromAssets': isFromAssets,
+    };
+  }
+}
 class MusicTile extends StatefulWidget {
   final int index;
   final Song song;
@@ -140,18 +330,22 @@ class _MusicTileState extends State<MusicTile> {
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
 
+  // Toggle play or pause
   void _togglePlayPause() async {
     if (_isPlaying) {
-      await _audioPlayer.pause();  // Pause instead of stop to resume later
+      await _audioPlayer.pause();
       setState(() {
         _isPlaying = false;
       });
     } else {
       if (!widget.isPlaying) {
-        // Only play if this song is not already playing
-        await _audioPlayer.play(AssetSource(widget.song.link));
+        if (widget.song.isFromAssets) {
+          await _audioPlayer.play(AssetSource(widget.song.link));
+        } else {
+          await _audioPlayer.play(DeviceFileSource(widget.song.link));
+        }
       } else {
-        await _audioPlayer.resume(); // Resume from the paused position
+        await _audioPlayer.resume();
       }
       setState(() {
         _isPlaying = true;
@@ -160,12 +354,24 @@ class _MusicTileState extends State<MusicTile> {
     widget.onPlayPause(widget.index, _audioPlayer);
   }
 
-  void _onTapProgressBar(Offset localPosition, Size progressBarSize) {
-    final double tapPosition = localPosition.dx;
-    final double progress = tapPosition / progressBarSize.width;
+  // Rewind and fast forward
+  void _rewind() {
+    final newPosition = _position - Duration(seconds: 5);
+    _audioPlayer.seek(newPosition);
+  }
+
+  void _fastForward() {
+    final newPosition = _position + Duration(seconds: 5);
+    _audioPlayer.seek(newPosition);
+  }
+
+  // Seek progress bar accurately based on tap
+  void _onTapProgressBar(double tapPositionX, double totalWidth) {
+    final double progress = tapPositionX / totalWidth;
     final newPosition = Duration(milliseconds: (progress * _duration.inMilliseconds).toInt());
     _audioPlayer.seek(newPosition);
   }
+
 
   @override
   void initState() {
@@ -195,7 +401,7 @@ class _MusicTileState extends State<MusicTile> {
     double progress = _duration.inMilliseconds > 0
         ? _position.inMilliseconds / _duration.inMilliseconds
         : 0.0;
-//hi
+
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
       padding: EdgeInsets.all(15),
@@ -213,81 +419,88 @@ class _MusicTileState extends State<MusicTile> {
       ),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              widget.song.image, // Display song image
-              height: 60,
-              width: 60,
-              fit: BoxFit.cover,
+          // Song image
+          Container(
+            height: 60,
+            width: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              image: DecorationImage(
+                fit: BoxFit.cover,
+                image: widget.song.isFromAssets
+                    ? AssetImage(widget.song.image)
+                    : FileImage(File(widget.song.image)) as ImageProvider,
+              ),
             ),
           ),
-          SizedBox(width: 15),
+          SizedBox(width: 20),
+          // Song title and progress bar
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   widget.song.title,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue[900]),
-                ),
-                SizedBox(height: 5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.replay_10, color: Colors.blue[900]),
-                      onPressed: () {
-                        _audioPlayer.seek(_position - Duration(seconds: 10));
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.blue[900]),
-                      onPressed: _togglePlayPause,
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.forward_10, color: Colors.blue[900]),
-                      onPressed: () {
-                        _audioPlayer.seek(_position + Duration(seconds: 10));
-                      },
-                    ),
-                  ],
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return InkWell(
-                      onTapUp: (TapUpDetails details) {
-                        _onTapProgressBar(details.localPosition, constraints.biggest);
-                      },
-                      child: Container(
-                        height: 5.0,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(5),
+                // Use MouseRegion to show hand cursor on hover
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTapDown: (details) {
+                      // Get the exact tap position and total width of the progress bar
+                      final RenderBox box = context.findRenderObject() as RenderBox;
+                      final totalWidth = box.size.width;
+                      _onTapProgressBar(details.localPosition.dx, totalWidth);
+                    },
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(5),
+                          ),
                         ),
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Container(
-                                  width: progress * constraints.maxWidth,
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue[900],
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                ),
-                              ),
+                        FractionallySizedBox(
+                          widthFactor: progress,
+                          child: Container(
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(5),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
+          ),
+          SizedBox(width: 20),
+          // Rewind button
+          IconButton(
+            icon: Icon(Icons.replay_5),
+            iconSize: 30,
+            color: Colors.blue,
+            onPressed: _rewind,
+          ),
+          // Play/Pause button
+          IconButton(
+            icon: Icon(_isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled),
+            iconSize: 50,
+            color: Colors.blue,
+            onPressed: _togglePlayPause,
+          ),
+          // Fast forward button
+          IconButton(
+            icon: Icon(Icons.forward_5),
+            iconSize: 30,
+            color: Colors.blue,
+            onPressed: _fastForward,
           ),
         ],
       ),
@@ -295,28 +508,4 @@ class _MusicTileState extends State<MusicTile> {
   }
 }
 
-class Song {
-  final String title;
-  final List<String> emotion;
-  final List<String> keywords;
-  final String link;
-  final String image;
 
-  Song({
-    required this.title,
-    required this.emotion,
-    required this.keywords,
-    required this.link,
-    required this.image,
-  });
-
-  factory Song.fromJson(Map<String, dynamic> json) {
-    return Song(
-      title: json['title'],
-      emotion: List<String>.from(json['emotion']),
-      keywords: List<String>.from(json['keywords']),
-      link: json['link'],
-      image: json['image'], // Image field added
-    );
-  }
-}
