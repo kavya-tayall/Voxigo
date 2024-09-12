@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+
 // Main MusicPage class
 class MusicPage extends StatefulWidget {
   @override
@@ -203,6 +204,20 @@ class _MusicPageState extends State<MusicPage> {
     );
   }
 
+  // Delete song
+  void _deleteSong(int index) async {
+    try {
+      setState(() {
+        _songs.removeAt(index);
+        _filteredSongs = _songs;
+      });
+      await _saveSongsToLocalStorage(); // Save updated list
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Song deleted successfully!')));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete song: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return isLoading
@@ -251,6 +266,7 @@ class _MusicPageState extends State<MusicPage> {
                 song: _filteredSongs[index],
                 onPlayPause: _onPlayPause,
                 isPlaying: _currentlyPlayingIndex == index,
+                onDelete: _deleteSong, // Pass delete function
               );
             },
           ),
@@ -312,16 +328,24 @@ class Song {
     };
   }
 }
+
 class MusicTile extends StatefulWidget {
-  final int index;
-  final Song song;
-  final Function(int, AudioPlayer) onPlayPause;
-  final bool isPlaying;
+final int index;
+final Song song;
+final Function(int, AudioPlayer) onPlayPause;
+final bool isPlaying;
+final Function(int) onDelete; // Add onDelete callback
 
-  MusicTile({required this.index, required this.song, required this.onPlayPause, required this.isPlaying});
+MusicTile({
+  required this.index,
+  required this.song,
+  required this.onPlayPause,
+  required this.isPlaying,
+  required this.onDelete,
+});
 
-  @override
-  _MusicTileState createState() => _MusicTileState();
+@override
+_MusicTileState createState() => _MusicTileState();
 }
 
 class _MusicTileState extends State<MusicTile> {
@@ -332,11 +356,14 @@ class _MusicTileState extends State<MusicTile> {
 
   // Toggle play or pause
   void _togglePlayPause() async {
+    if (!mounted) return; // Ensure widget is still mounted
     if (_isPlaying) {
       await _audioPlayer.pause();
-      setState(() {
-        _isPlaying = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isPlaying = false;
+        });
+      }
     } else {
       if (!widget.isPlaying) {
         if (widget.song.isFromAssets) {
@@ -347,9 +374,11 @@ class _MusicTileState extends State<MusicTile> {
       } else {
         await _audioPlayer.resume();
       }
-      setState(() {
-        _isPlaying = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isPlaying = true;
+        });
+      }
     }
     widget.onPlayPause(widget.index, _audioPlayer);
   }
@@ -372,6 +401,34 @@ class _MusicTileState extends State<MusicTile> {
     _audioPlayer.seek(newPosition);
   }
 
+  // Show confirmation dialog before deleting
+  Future<void> _showDeleteConfirmationDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap button to dismiss dialog
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Deletion'),
+          content: Text('Are you sure you want to delete this song?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog
+              },
+            ),
+            TextButton(
+              child: Text('Delete'),
+              onPressed: () {
+                widget.onDelete(widget.index);
+                Navigator.of(context).pop(); // Dismiss the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   void initState() {
@@ -392,7 +449,7 @@ class _MusicTileState extends State<MusicTile> {
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
+    _audioPlayer.dispose(); // Cancel the audio player
     super.dispose();
   }
 
@@ -502,10 +559,14 @@ class _MusicTileState extends State<MusicTile> {
             color: Colors.blue,
             onPressed: _fastForward,
           ),
+          // Delete button
+          IconButton(
+            icon: Icon(Icons.delete, color: Colors.red),
+            iconSize: 30,
+            onPressed: _showDeleteConfirmationDialog, // Show confirmation dialog
+          ),
         ],
       ),
     );
   }
 }
-
-
