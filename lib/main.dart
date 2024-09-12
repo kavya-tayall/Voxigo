@@ -17,6 +17,8 @@ import 'child_pages/settings_page.dart';
 import 'parent_pages/parent_login_page.dart';
 import 'child_pages/child_login_page.dart';
 import 'parent_pages/parent_settings.dart';
+import 'child_pages/feelings_page.dart';
+import 'child_pages/fidget_spinner_suggestion.dart';
 
 typedef VoidCallBack = void Function();
 
@@ -151,7 +153,7 @@ class BasePageState extends State<BasePage> {
                 pathOfBoard: pathOfBoard,
                 child: HomePage()));
       case 1:
-        page = Placeholder();
+        page = FidgetSpinnerHome();
       case 2:
         page = MusicPage();
       case 3:
