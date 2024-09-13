@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:audioplayers/audioplayers.dart';
 
 
 class FidgetSpinnerHome extends StatefulWidget {
@@ -11,6 +12,7 @@ class FidgetSpinnerHome extends StatefulWidget {
 class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  AudioPlayer player = AudioPlayer();
   double _rotationSpeed = 0;
   double _currentAngle = 0; // Keep track of the current rotation angle
   double _friction = 0.003;
@@ -20,6 +22,7 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
   @override
   void initState() {
     super.initState();
+    // player.play(AssetSource('sound_effects/spinning-fidget-spinner-23292.mp3'));
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 16), // Faster updates
@@ -33,18 +36,23 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
           }
           if (_rotationSpeed < 0){
             _rotationSpeed += _friction;
-            if (_rotationSpeed > 0) _rotationSpeed = 0; // Stop at zero
+            if (_rotationSpeed > 0){
+              _rotationSpeed = 0;
+            }; // Stop at zero
           }
         }
-
-
-
+        print(_rotationSpeed);
+        player.setPlaybackRate(_rotationSpeed);
         _currentAngle -= _rotationSpeed;
       });
     });
     _controller.repeat(); // Continuously update the animation
   }
 
+
+  void playSound() {
+    player.setPlaybackRate(_rotationSpeed);
+  }
 
   @override
   void dispose() {
@@ -57,7 +65,7 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
     setState(() {
       // Increase the spin speed based on the mouse or touch delta
       _rotationSpeed += sqrt(event.delta.dx * event.delta.dx + event.delta.dy * event.delta.dy) * 0.005; // Use dx for horizontal drag
-      print(sqrt(event.delta.dx * event.delta.dx + event.delta.dy * event.delta.dy));
+      sqrt(event.delta.dx * event.delta.dx + event.delta.dy * event.delta.dy);
       if (_rotationSpeed > 1) _rotationSpeed = 1; // Cap the speed for control
     });
   }

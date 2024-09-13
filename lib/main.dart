@@ -50,7 +50,9 @@ class MyApp extends StatelessWidget {
         routes: {
           '/parent_login': (_) => ParentLoginPage(),
           '/child_login': (_) => ChildLoginPage(),
-          '/base': (_) => BasePage()
+          '/base': (_) => BasePage(),
+          '/feelings': (_) => FeelingsPage(),
+          '/music': (_) => MusicPage()
         },
       ),
     );
@@ -153,12 +155,10 @@ class BasePageState extends State<BasePage> {
                 pathOfBoard: pathOfBoard,
                 child: HomePage()));
       case 1:
-        page = FidgetSpinnerHome();
+        page = FeelingsPage();
       case 2:
         page = MusicPage();
       case 3:
-        page = BehaviourPage();
-      case 4:
         page = CustomSettings();
       default:
         throw UnimplementedError('no widget for $selectedIndex');
