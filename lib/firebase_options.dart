@@ -23,10 +23,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
@@ -56,7 +53,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCdbQv3GYIjQ1IXsyz2Hfgff0vrc21ZlOw',
-    appId: '1:662430635566:android:41e9dfda73ba0dae5771bf',
+    appId: '1:662430635566:android:98198abe528d468b5771bf',
     messagingSenderId: '662430635566',
     projectId: 'aac-app-24',
     databaseURL: 'https://aac-app-24-default-rtdb.firebaseio.com',
@@ -75,6 +72,16 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyBPY7ngSGol9gA65rqMRtHHt7fels1Yt7E',
+    appId: '1:662430635566:ios:91dde89dcf62d08e5771bf',
+    messagingSenderId: '662430635566',
+    projectId: 'aac-app-24',
+    databaseURL: 'https://aac-app-24-default-rtdb.firebaseio.com',
+    storageBucket: 'aac-app-24.appspot.com',
+    iosBundleId: 'com.example.testt',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBPY7ngSGol9gA65rqMRtHHt7fels1Yt7E',
     appId: '1:662430635566:ios:91dde89dcf62d08e5771bf',
     messagingSenderId: '662430635566',

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../child_pages/home_page.dart';
@@ -38,19 +40,7 @@ class _FirstButtonState extends State<FirstButton> {
       width: widget.size,
       height: widget.size,
       child: ElevatedButton(
-        onPressed: () {
-          double width = MediaQuery.sizeOf(context).width;
-          double currentWidth = (widget.size + 21) *
-              (context.findAncestorStateOfType<HomePageState>()!.selectedButtons.length);
-          print(width);
-          print(currentWidth);
-
-          if (currentWidth <= width) {
-            widget.onPressed();
-          } else {
-            print("Oops, overflowed");
-          }
-        },
+        onPressed: widget.onPressed,
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
@@ -74,27 +64,49 @@ class _FirstButtonState extends State<FirstButton> {
     );
   }
 
-  // Helper method to load images from assets or URL
+  // Helper method to load images from assets, URLs, or local file system
   Widget _loadImage(String imagePath) {
-    bool isUrl = Uri.tryParse(imagePath)?.hasAbsolutePath ?? false;
 
-    return isUrl
-        ? Image.network(
-      imagePath,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        print(error);
-        return Icon(Icons.broken_image); // Fallback for broken image URLs
-      },
-    )
-        : Image.asset(
-      imagePath,
-      fit: BoxFit.cover,
-    );
+    if (imagePath.startsWith('http') || imagePath.startsWith('https')) {
+      // Load from network
+      return Image.network(
+        imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          print("Failed to load image from URL: $imagePath");
+          return Icon(Icons.broken_image); // Fallback for broken image URLs
+        },
+      );
+    } else if (imagePath.startsWith('file://')) {
+      String cleanedPath = imagePath.replaceFirst('file://', '');
+      if (File(cleanedPath).existsSync()) {
+        // Load from local file system
+        return Image.file(
+          File(cleanedPath),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            print("Failed to load image from file: $cleanedPath");
+            return Icon(Icons.broken_image); // Fallback for broken image files
+          },
+        );
+      } else {
+        print("File does not exist: $cleanedPath");
+        return Icon(Icons.broken_image); // Fallback if file does not exist
+      }
+    } else {
+      // Load from assets
+      return Image.asset(
+        imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          print("Failed to load image from assets: $imagePath");
+          return Icon(Icons.broken_image); // Fallback for broken assets
+        },
+      );
+    }
   }
 }
-
-class FolderButton extends StatelessWidget {
+  class FolderButton extends StatelessWidget {
   final String imagePath;
   final String text;
   final int ind;

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 import '../child_pages/home_page.dart';
@@ -35,10 +36,26 @@ class AddButton extends StatefulWidget {
 }
 
 class AddButtonState extends State<AddButton> {
-  // Define consistent colors and sizes
   final Color buttonColor = Colors.lightBlue;
   final Color iconColor = Colors.white;
   final double buttonSize = 60.0;
+
+  List<dynamic> pictogramsData = [];
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    String jsonString = await rootBundle.loadString('assets/board_info/pictograms.json');
+    List<dynamic> data = jsonDecode(jsonString);
+    setState(() {
+      pictogramsData = data;
+    });
+  }
 
   void addVisibleButtons(FirstButton button) {
     final dataWidget = DataWidget.of(context);
@@ -52,20 +69,13 @@ class AddButtonState extends State<AddButton> {
           nestedData = nestedData[folder];
         }
 
-        // Generate a unique ID for the new button
         final buttonId = Uuid().v4(); // Generate a UUID
         final newButton = button.toJson()..['id'] = buttonId;
 
-        // Add the button to the top-level buttons list
         nestedData.add(newButton); // Add button to the list
 
-        // Notify the widget that the data has changed
         dataWidget.onDataChange(dataWidget.data);
-
-        // Save the updated data to file
         context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
-
-        // Update the UI
         context.findAncestorStateOfType<HomePageState>()?.updateGrid();
       });
     } else {
@@ -112,23 +122,21 @@ class AddButtonState extends State<AddButton> {
     }
   }
 
-  List<dynamic> pictogramsData = [];
+  Future<void> addCustomImageButton(String enteredText) async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
-  @override
-  void initState() {
-    super.initState();
-    loadData();
-  }
-
-  Future<void> loadData() async {
-    // Load the JSON string from the asset
-    String jsonString = await rootBundle.loadString('assets/board_info/pictograms.json');
-    // Parse the JSON string into a Dart object
-    List<dynamic> data = jsonDecode(jsonString);
-
-    setState(() {
-      pictogramsData = data; // Store the parsed data
-    });
+    if (image != null) {
+      FirstButton button = FirstButton(
+        id: Uuid().v4(),
+        imagePath: image.path, // Use local file path
+        text: enteredText,
+        size: 60.0,
+        onPressed: () {
+          // Handle button press
+        },
+      );
+      addVisibleButtons(button);
+    }
   }
 
   @override
@@ -139,22 +147,34 @@ class AddButtonState extends State<AddButton> {
       child: SpeedDial(
         icon: Icons.add,
         activeIcon: Icons.close,
-        backgroundColor: buttonColor, iconTheme:
-      IconThemeData(color: iconColor),
+        backgroundColor: buttonColor,
+        iconTheme: IconThemeData(color: iconColor),
         children: [
           SpeedDialChild(
             child: Icon(Icons.add, color: iconColor),
             backgroundColor: buttonColor,
             label: 'Add Button',
             onTap: () async {
-              String? enteredText = await _showTextInputDialog(context, "Enter button label:");
-              if (enteredText != null) {
-                dynamic buttonData = searchButtonData(pictogramsData, enteredText);
-                if (buttonData != null) {
-                  FirstButton button = _createFirstButtonFromData(buttonData, enteredText);
-                  addVisibleButtons(button);
-                } else {
-                  print("Button not found");
+              bool? choosePictogram = await _showChoiceDialog(context);
+              if (choosePictogram == true) {
+                String? enteredText = await _showTextInputDialog(context, "Enter pictogram keyword:");
+                if (enteredText != null) {
+                  print("hi");
+                  dynamic buttonData = searchButtonData(pictogramsData, enteredText);
+                  if (buttonData != null) {
+                    FirstButton button = _createFirstButtonFromData(buttonData, enteredText);
+                    addVisibleButtons(button);
+                  } else {
+                    bool? useCustomImage = await _showConfirmationDialog(context, "Pictogram not found. Would you like to upload a custom image?");
+                    if (useCustomImage == true) {
+                      await addCustomImageButton(enteredText);
+                    }
+                  }
+                }
+              } else {
+                String? enteredText = await _showTextInputDialog(context, "Enter button label:");
+                if (enteredText != null) {
+                  await addCustomImageButton(enteredText);
                 }
               }
             },
@@ -171,18 +191,45 @@ class AddButtonState extends State<AddButton> {
             },
           ),
         ],
-        // Remove shadow
         elevation: 0,
       ),
     );
   }
 
+  Future<bool?> _showChoiceDialog(BuildContext context) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Choose Image Type'),
+          content: Text('Would you like to search for a pictogram or upload a custom image?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Pictogram'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+            TextButton(
+              child: Text('Custom Image'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   dynamic searchButtonData(List<dynamic> data, String keyword) {
+    print(keyword);
     keyword = keyword.trim().toLowerCase(); // Trim and convert to lowercase
     for (var item in data) {
       if (item is Map<String, dynamic> && item.containsKey("keywords")) {
         for (var keywordData in item["keywords"]) {
           if (keywordData["keyword"].toString().toLowerCase() == keyword) {
+            print(item);
             return item;
           }
         }
@@ -191,24 +238,22 @@ class AddButtonState extends State<AddButton> {
     return null;
   }
 
-  FirstButton _createFirstButtonFromData(Map<String, dynamic> data, String enteredText) {
-    // Construct the image URL using the _id and required resolution
-    String imageUrl = "https://static.arasaac.org/pictograms/${data['_id']}/${data['_id']}_2500.png";
 
-    // Get the keyword to use as the label
+
+  FirstButton _createFirstButtonFromData(Map<String, dynamic> data, String enteredText) {
+    String imageUrl = "https://static.arasaac.org/pictograms/${data['_id']}/${data['_id']}_2500.png";
     String label = enteredText;
 
     return FirstButton(
-      id: data["_id"].toString(), // Convert _id to string
+      id: data["_id"].toString(),
       imagePath: imageUrl,
       text: label,
       size: 60.0,
       onPressed: () {
-        // Implement what happens when the button is pressed
+        // Handle button press
       },
     );
   }
-
 
   Future<String?> _showTextInputDialog(BuildContext context, String hintText) async {
     TextEditingController controller = TextEditingController();
@@ -240,7 +285,34 @@ class AddButtonState extends State<AddButton> {
       },
     );
   }
+
+  Future<bool?> _showConfirmationDialog(BuildContext context, String message) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmation'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
+
 
 class RemoveButton extends StatefulWidget {
   @override
@@ -286,6 +358,44 @@ class RemoveButtonState extends State<RemoveButton> {
     print("Button with ID ${button.id} is removed");
   }
 
+  void addFolder(String folderName) {
+    final dataWidget = DataWidget.of(context);
+    final pathWidget = PathWidget.of(context);
+
+    if (dataWidget != null) {
+      setState(() {
+        dynamic nestedData = dataWidget.data;
+
+        for (var folder in pathWidget!.pathOfBoard) {
+          nestedData = nestedData[folder];
+        }
+
+        // Generate a unique ID for the new folder
+        final folderId = Uuid().v4(); // Generate a UUID
+        final newFolder = {
+          "id": folderId,
+          "image_url": "assets/imgs/OneDrive_Folder_Icon.png",
+          "label": folderName,
+          "folder": true,
+          "buttons": [], // Empty list to hold buttons inside this folder
+        };
+
+        // Add the folder to the top-level buttons list
+        nestedData.add(newFolder); // Add folder to the list
+
+        // Notify the widget that the data has changed
+        dataWidget.onDataChange(dataWidget.data);
+
+        // Save the updated data to file
+        context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
+
+        // Update the UI
+        context.findAncestorStateOfType<HomePageState>()?.updateGrid();
+      });
+    } else {
+      print('DataWidget is null');
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return SizedBox(
