@@ -6,6 +6,7 @@ Map<String, String> temp = {"Fidget Spinner": "/fidget", "PlaceHolder": "/feelin
 class SuggestionsPage extends StatelessWidget {
   const SuggestionsPage({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
