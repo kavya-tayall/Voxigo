@@ -85,9 +85,15 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Fidget Spinner Simulator'),
-        centerTitle: true,
-      ),
+          title: Center(
+            child: Container(
+              alignment: Alignment.center,
+              width: double.infinity,
+              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black, width: 5, style: BorderStyle.solid))),
+              child: Padding(
+                  padding: EdgeInsets.only(bottom: 10, top: 10), child: Text("Fidget Spinner Simulator", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold), textAlign: TextAlign.center,)),
+            ),
+          )),
       body: Center(
         child: GestureDetector(
           onPanUpdate: _spinFidgetSpinnerTouch, // Handle touch drag

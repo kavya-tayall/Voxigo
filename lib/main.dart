@@ -12,13 +12,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'child_pages/home_page.dart';
-import 'child_pages/behavior_page.dart';
 import 'child_pages/settings_page.dart';
 import 'parent_pages/parent_login_page.dart';
 import 'child_pages/child_login_page.dart';
 import 'parent_pages/parent_settings.dart';
 import 'child_pages/feelings_page.dart';
 import 'child_pages/fidget_spinner_suggestion.dart';
+import 'child_pages/suggestions_page.dart';
+import 'child_pages/coloring_suggestion.dart';
 
 typedef VoidCallBack = void Function();
 
@@ -52,7 +53,10 @@ class MyApp extends StatelessWidget {
           '/child_login': (_) => ChildLoginPage(),
           '/base': (_) => BasePage(),
           '/feelings': (_) => FeelingsPage(),
-          '/music': (_) => MusicPage()
+          '/music': (_) => MusicPage(),
+          '/suggestions': (_) => SuggestionsPage(),
+          '/fidget': (_) => FidgetSpinnerHome(),
+          '/coloring': (_) => ColoringHome()
         },
       ),
     );

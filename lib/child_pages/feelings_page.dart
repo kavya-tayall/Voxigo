@@ -3,14 +3,14 @@ import 'package:test_app/widgets/feelings_buttons.dart';
 
 
 
-Map<String, List> suggestions =
+Map<String, Map<String, Widget>> suggestions =
 {
-  "Angry": [],
-  "Happy": [],
-  "Sad": [],
-  "Tired": [],
-  "Bored": [],
-  "Nervous": [],
+  "Angry": {},
+  "Happy": {},
+  "Sad": {},
+  "Tired": {},
+  "Bored": {},
+  "Nervous": {},
 };
 
 class FeelingsPage extends StatelessWidget {
@@ -70,3 +70,5 @@ class FeelingsPage extends StatelessWidget {
         ]));
   }
 }
+
+

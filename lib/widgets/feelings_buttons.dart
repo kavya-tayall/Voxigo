@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:test_app/child_pages/suggestions_page.dart';
 
 class FeelingsButton extends StatelessWidget {
   final String feeling;
@@ -19,7 +20,7 @@ class FeelingsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       style: TextButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2))),
-      onPressed: ()=>{},
+      onPressed: () {Navigator.pushNamed(context, '/suggestions');},
       child: Column(
         children: [
           Image.asset(imagePath, width: MediaQuery.sizeOf(context).width/7,),
