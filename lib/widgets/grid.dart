@@ -67,21 +67,27 @@ class GridState extends State<Grid> {
         nestedData = nestedData[folder];
       }
 
-      // Handle reorder logic
-      Map<String, dynamic> btnVar = nestedData[oldIndex];
-      nestedData.removeAt(oldIndex);
+      // Ensure the new index is valid
+      if (newIndex > oldIndex) {
+        newIndex -= 1; // Adjust for index change when moving forward
+      }
+
+      // Move the item in the nestedData
+      Map<String, dynamic> btnVar = nestedData.removeAt(oldIndex);
       nestedData.insert(newIndex, btnVar);
 
-      // Notify the widget that the data has changed
+      // Also update visibleButtons to reflect the new order
+      visibleButtons = List.from(nestedData);
+
+      // Notify data change
       dataWidget.onDataChange(dataWidget.data);
 
-      // Save the updated data to file
+      // Save the updated data to file and refresh the UI
       context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
-
-      // Update the UI
       context.findAncestorStateOfType<HomePageState>()?.updateGrid();
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +123,11 @@ class GridState extends State<Grid> {
           physics: NeverScrollableScrollPhysics(), // Disable scrolling
           shrinkWrap: true,
           itemCount: visibleItemCount,
-          onReorder: reorderGrid,
+          onReorder: (oldIndex, newIndex) {
+            setState(() {
+              reorderGrid(oldIndex, newIndex);
+            });
+          },
           itemBuilder: (BuildContext context, int index) {
             final item = visibleButtons[index];
             final imagePath = item["image_url"] ?? '';
