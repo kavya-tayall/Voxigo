@@ -52,7 +52,7 @@ class _FirstButtonState extends State<FirstButton> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Expanded(
-              child: _loadImage(widget.imagePath),
+              child: _loadImageWithLoadingIndicator(widget.imagePath),
             ),
             Text(
               widget.text,
@@ -64,14 +64,22 @@ class _FirstButtonState extends State<FirstButton> {
     );
   }
 
+  // Helper method to load images from assets, URLs, or local file system with a loading indicator
+  Widget _loadImageWithLoadingIndicator(String imagePath) {
+    return _loadImage(imagePath); // Directly load image with proper loading state handling
+  }
+
   // Helper method to load images from assets, URLs, or local file system
   Widget _loadImage(String imagePath) {
-
     if (imagePath.startsWith('http') || imagePath.startsWith('https')) {
       // Load from network
       return Image.network(
         imagePath,
         fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(child: CircularProgressIndicator()); // Show progress while loading
+        },
         errorBuilder: (context, error, stackTrace) {
           print("Failed to load image from URL: $imagePath");
           return Icon(Icons.broken_image); // Fallback for broken image URLs
@@ -106,19 +114,25 @@ class _FirstButtonState extends State<FirstButton> {
     }
   }
 }
-  class FolderButton extends StatelessWidget {
+
+class FolderButton extends StatelessWidget {
   final String imagePath;
   final String text;
   final int ind;
   final double size;
-
   final VoidCallback onPressed;
 
-  FolderButton({Key? key, required this.imagePath, required this.text, required this.ind, required this.size, required this.onPressed}) : super(key: key);
+  FolderButton({
+    Key? key,
+    required this.imagePath,
+    required this.text,
+    required this.ind,
+    required this.size,
+    required this.onPressed,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-
     return SizedBox(
       width: size,
       height: size,
@@ -135,10 +149,7 @@ class _FirstButtonState extends State<FirstButton> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Expanded(
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-              ),
+              child: _loadImageFromAsset(imagePath), // Image always from asset
             ),
             Text(
               text,
@@ -147,6 +158,18 @@ class _FirstButtonState extends State<FirstButton> {
           ],
         ),
       ),
+    );
+  }
+
+  // Helper method to load images from assets
+  Widget _loadImageFromAsset(String imagePath) {
+    return Image.asset(
+      imagePath,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        print("Failed to load image from assets: $imagePath");
+        return Icon(Icons.broken_image); // Fallback for broken assets
+      },
     );
   }
 }

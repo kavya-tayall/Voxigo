@@ -28,36 +28,40 @@ class _MusicPageState extends State<MusicPage> {
   }
 
   // Load songs from JSON
+  // Load songs from JSON
   Future<void> _loadSongs() async {
     try {
       final directory = await getApplicationDocumentsDirectory();
       String filePath = '${directory.path}/music.json';
-
-      // Check if the file exists locally
       File file = File(filePath);
+
       if (await file.exists()) {
-        String fileContents = await file.readAsString();
-        final List<dynamic> data = json.decode(fileContents);
+        // If the file exists, load from local storage
+        String jsonData = await file.readAsString();
+        final List<dynamic> data = json.decode(jsonData);
         setState(() {
           _songs = data.map((json) => Song.fromJson(json)).toList();
           _filteredSongs = _songs;
-          isLoading = false;  // Done loading
+          isLoading = false; // Done loading
         });
       } else {
-        // Load from assets on the first run
+        // If the file does not exist, load from assets JSON
         final String response = await rootBundle.loadString('assets/songs/music.json');
         final List<dynamic> data = json.decode(response);
         setState(() {
           _songs = data.map((json) => Song.fromJson(json)).toList();
           _filteredSongs = _songs;
-          isLoading = false;  // Done loading
+          isLoading = false; // Done loading
         });
-        await _saveSongsToLocalStorage();  // Save to local storage after first load
+
+        // Save the songs to local storage
+        await _saveSongsToLocalStorage();
       }
     } catch (e) {
       print('Error loading songs: $e');
     }
   }
+
 
   // Save updated song list to local storage
   Future<void> _saveSongsToLocalStorage() async {
@@ -106,7 +110,6 @@ class _MusicPageState extends State<MusicPage> {
     });
   }
 
-  // Add new song with title, image, and audio
   Future<void> _addMusic(BuildContext context) async {
     String? songTitle;
     File? imageFile;
@@ -171,28 +174,24 @@ class _MusicPageState extends State<MusicPage> {
               child: Text('Add Song'),
               onPressed: () async {
                 if (songTitle != null && imageFile != null && audioFile != null) {
-                  try {
-                    final newSong = Song(
-                      title: songTitle!,
-                      emotion: ['unknown'],
-                      keywords: ['user', 'added'],
-                      link: audioFile!.path,
-                      image: imageFile!.path,
-                      isFromAssets: false,
-                    );
+                  final newSong = Song(
+                    title: songTitle!,
+                    emotion: ['unknown'],
+                    keywords: ['user', 'added'],
+                    link: audioFile!.path,
+                    image: imageFile!.path,
+                    isFromAssets: false,
+                  );
 
-                    setState(() {
-                      _songs.add(newSong);
-                      _filteredSongs = _songs;
-                    });
+                  setState(() {
+                    _songs.add(newSong); // Update the songs list
+                    _filteredSongs = List.from(_songs); // Update the filtered list
+                  });
 
-                    await _saveSongsToLocalStorage(); // Save updated list
+                  await _saveSongsToLocalStorage(); // Save updated list
 
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Song added successfully!')));
-                    Navigator.of(context).pop();
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add song: $e')));
-                  }
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Song added successfully!')));
+                  Navigator.of(context).pop(); // Close dialog
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please provide a title, image, and audio file.')));
                 }
@@ -203,6 +202,9 @@ class _MusicPageState extends State<MusicPage> {
       },
     );
   }
+
+
+
 
   // Delete song
   void _deleteSong(int index) async {
@@ -249,26 +251,35 @@ class _MusicPageState extends State<MusicPage> {
             },
           ),
         ),
-        // Song list
+        // Expanded widget wrapping the ListView to ensure it scrolls
         Expanded(
           child: _filteredSongs.isEmpty
               ? Center(
             child: Text(
               'No songs found',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
             ),
           )
-              : ListView.builder(
-            itemCount: _filteredSongs.length,
-            itemBuilder: (context, index) {
-              return MusicTile(
-                index: index,
-                song: _filteredSongs[index],
-                onPlayPause: _onPlayPause,
-                isPlaying: _currentlyPlayingIndex == index,
-                onDelete: _deleteSong, // Pass delete function
-              );
-            },
+              : Scrollbar(
+            thickness: 8.0, // Customize the thickness of the scrollbar
+            radius: Radius.circular(20),
+            thumbVisibility: true,
+            child: ListView.builder(
+              itemCount: _filteredSongs.length,
+              itemBuilder: (context, index) {
+                return MusicTile(
+                  index: index,
+                  song: _filteredSongs[index],
+                  onPlayPause: _onPlayPause,
+                  isPlaying: _currentlyPlayingIndex == index,
+                  onDelete: _deleteSong,
+                );
+              },
+            ),
           ),
         ),
         Padding(
@@ -286,48 +297,12 @@ class _MusicPageState extends State<MusicPage> {
       ],
     );
   }
+
+
 }
+
 
 // Song model class
-class Song {
-  final String title;
-  final List<String> emotion;
-  final List<String> keywords;
-  final String link;
-  final String image;
-  final bool isFromAssets;
-
-  Song({
-    required this.title,
-    required this.emotion,
-    required this.keywords,
-    required this.link,
-    required this.image,
-    this.isFromAssets = true,
-  });
-
-  factory Song.fromJson(Map<String, dynamic> json) {
-    return Song(
-      title: json['title'],
-      emotion: List<String>.from(json['emotion']),
-      keywords: List<String>.from(json['keywords']),
-      link: json['link'],
-      image: json['image'],
-      isFromAssets: json['isFromAssets'] ?? true,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'emotion': emotion,
-      'keywords': keywords,
-      'link': link,
-      'image': image,
-      'isFromAssets': isFromAssets,
-    };
-  }
-}
 
 class MusicTile extends StatefulWidget {
 final int index;
@@ -454,32 +429,33 @@ class _MusicTileState extends State<MusicTile> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     double progress = _duration.inMilliseconds > 0
         ? _position.inMilliseconds / _duration.inMilliseconds
         : 0.0;
 
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-      padding: EdgeInsets.all(15),
+      margin: EdgeInsets.symmetric(vertical: 15, horizontal: 25), // Increased margin
+      padding: EdgeInsets.all(20), // Increased padding
       decoration: BoxDecoration(
         color: Colors.blue[50],
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(20), // Increased border radius
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.5),
-            blurRadius: 5,
-            spreadRadius: 2,
-            offset: Offset(0, 3),
+            blurRadius: 8, // Increased blur radius
+            spreadRadius: 3,
+            offset: Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
-          // Song image
+          // Larger Song Image
           Container(
-            height: 60,
-            width: 60,
+            height: 80, // Increased height
+            width: 80, // Increased width
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               image: DecorationImage(
@@ -490,7 +466,7 @@ class _MusicTileState extends State<MusicTile> {
               ),
             ),
           ),
-          SizedBox(width: 20),
+          SizedBox(width: 25), // Increased space between image and text
           // Song title and progress bar
           Expanded(
             child: Column(
@@ -498,15 +474,15 @@ class _MusicTileState extends State<MusicTile> {
               children: [
                 Text(
                   widget.song.title,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), // Increased font size
                 ),
-                SizedBox(height: 10),
-                // Use MouseRegion to show hand cursor on hover
+                SizedBox(height: 12), // Increased space between title and progress bar
+                // Progress bar with gesture detection
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTapDown: (details) {
-                      // Get the exact tap position and total width of the progress bar
+                      // Calculate tap position and seek accordingly
                       final RenderBox box = context.findRenderObject() as RenderBox;
                       final totalWidth = box.size.width;
                       _onTapProgressBar(details.localPosition.dx, totalWidth);
@@ -514,19 +490,19 @@ class _MusicTileState extends State<MusicTile> {
                     child: Stack(
                       children: [
                         Container(
-                          height: 5,
+                          height: 8, // Increased height of progress bar
                           decoration: BoxDecoration(
                             color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(5),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
                         FractionallySizedBox(
                           widthFactor: progress,
                           child: Container(
-                            height: 5,
+                            height: 8,
                             decoration: BoxDecoration(
                               color: Colors.blue,
-                              borderRadius: BorderRadius.circular(5),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                         ),
@@ -537,36 +513,74 @@ class _MusicTileState extends State<MusicTile> {
               ],
             ),
           ),
-          SizedBox(width: 20),
-          // Rewind button
+          SizedBox(width: 25),
+          // Rewind, Play, Fast-forward, Delete buttons (same size)
           IconButton(
             icon: Icon(Icons.replay_5),
-            iconSize: 30,
+            iconSize: 35,
             color: Colors.blue,
             onPressed: _rewind,
           ),
-          // Play/Pause button
           IconButton(
             icon: Icon(_isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled),
-            iconSize: 50,
+            iconSize: 55,
             color: Colors.blue,
             onPressed: _togglePlayPause,
           ),
-          // Fast forward button
           IconButton(
             icon: Icon(Icons.forward_5),
-            iconSize: 30,
+            iconSize: 35,
             color: Colors.blue,
             onPressed: _fastForward,
           ),
-          // Delete button
           IconButton(
             icon: Icon(Icons.delete, color: Colors.red),
-            iconSize: 30,
-            onPressed: _showDeleteConfirmationDialog, // Show confirmation dialog
+            iconSize: 35,
+            onPressed: _showDeleteConfirmationDialog,
           ),
         ],
       ),
     );
+  }
+
+}
+
+class Song {
+  final String title;
+  final List<String> emotion;
+  final List<String> keywords;
+  final String link;
+  final String image;
+  final bool isFromAssets;
+
+  Song({
+    required this.title,
+    required this.emotion,
+    required this.keywords,
+    required this.link,
+    required this.image,
+    this.isFromAssets = true,
+  });
+
+  factory Song.fromJson(Map<String, dynamic> json) {
+    return Song(
+      title: json['title'],
+      emotion: List<String>.from(json['emotion']),
+      keywords: List<String>.from(json['keywords']),
+      link: json['link'],
+      image: json['image'],
+      isFromAssets: json['isFromAssets'] ?? true,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'emotion': emotion,
+      'keywords': keywords,
+      'link': link,
+      'image': image,
+      'isFromAssets': isFromAssets,
+    };
   }
 }

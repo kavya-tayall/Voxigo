@@ -98,28 +98,26 @@ class BasePageState extends State<BasePage> {
 
     File file = File(filePath);
 
-    // Check if the file exists in the documents directory
+    // If the file exists, delete the file
     if (await file.exists()) {
-      // Load the data from the file if it exists
-      String fileContents = await file.readAsString();
-      final jsonData = jsonDecode(fileContents);
-      setState(() {
-        data = Map.from(jsonData);
-        isLoading = false; // Data loading complete
-      });
-    } else {
-      // If the file doesn't exist, copy it from the assets
-      final assetJsonString = await rootBundle.loadString("assets/board_info/board.json");
-      await file.writeAsString(assetJsonString); // Copy asset to file
-
-      // Parse JSON data
-      final jsonData = jsonDecode(assetJsonString);
-      setState(() {
-        data = Map.from(jsonData);
-        isLoading = false; // Data loading complete
-      });
+      await file.delete();
     }
+
+    // Load the data from the assets (board.json)
+    final assetJsonString = await rootBundle.loadString("assets/board_info/board.json");
+
+    // Write the asset data to the local file
+    await file.writeAsString(assetJsonString);
+
+    // Parse the JSON data
+    final jsonData = jsonDecode(assetJsonString);
+
+    setState(() {
+      data = Map.from(jsonData);
+      isLoading = false; // Data loading complete
+    });
   }
+
   // Update the path of the board
   void updatePathOfBoard(List<dynamic> newPath) {
     setState(() {
