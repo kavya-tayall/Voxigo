@@ -34,18 +34,21 @@ class _BreathingHomeState extends State<BreathingHome>
     _startBreathingCycle();
   }
 
-  void _startBreathingCycle() {
-    _controller.repeat(reverse: true); // Loops the animation
+  Future<void> _startBreathingCycle() async {
+    await Future.delayed(const Duration(seconds: 1));
+    _controller.repeat(reverse: true);
     _timer = Timer.periodic(Duration(seconds: 5), (Timer timer) {
-      setState(() {;
+      setState(() {
         if (_breathingText == 'Inhale') {
           _breathingText = 'Exhale';
         } else {
+          this._count += 1;
           _breathingText = 'Inhale';
         }
       });
     });
   }
+
 
   @override
   void dispose() {
@@ -57,6 +60,7 @@ class _BreathingHomeState extends State<BreathingHome>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Stack(children: [
         AnimateGradient(
             duration: Duration(seconds: 10),
@@ -70,19 +74,25 @@ class _BreathingHomeState extends State<BreathingHome>
               Color(0xFF6EB5FF),
               Color.fromRGBO(173, 216, 230, 1),
             ],
-            child: Visibility(
-              visible: _visibleCircle,
-              child: Center(
-                child: Container(
-                  width: 200 * _breathingAnimation.value,
-                  height: 200 * _breathingAnimation.value,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                  ),
-                ),
+        ),
+        Visibility(
+          visible: (this._count < 4),
+          replacement: AnimatedOpacity(
+            opacity: (this._count > 4) ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 600),
+            child: Center(child: Text("All Done!", style: TextStyle(fontSize: 100, fontWeight: FontWeight.bold), textAlign: TextAlign.center,))),
+          child: Center(
+            child: Container(
+              width: 200 * _breathingAnimation.value,
+              height: 200 * _breathingAnimation.value,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
               ),
-            )),
+              child: Center(child: Text((this._count+1).toString(), style: TextStyle(fontSize: 45, fontWeight: FontWeight.bold), textAlign: TextAlign.center,)),
+            ),
+          ),
+        ),
         Positioned(
           top: 0,
           left: 0,
@@ -96,19 +106,22 @@ class _BreathingHomeState extends State<BreathingHome>
             ),
           )
         ),
-        Positioned(
-            bottom: MediaQuery.of(context).size.height*0.15,
-            left: 0,
-            right: 0,
-            child:  Center(
-              child: Container(
-                alignment: Alignment.center,
-                width: double.infinity,
-                child: Padding(
-                    padding: EdgeInsets.only(bottom: 10, top: 10),
-                    child: Text(_breathingText, style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold), textAlign: TextAlign.center,)),
-              ),
-            )
+        Visibility(
+          visible: (this._count < 4),
+          child: Positioned(
+              bottom: MediaQuery.of(context).size.height*0.15,
+              left: 0,
+              right: 0,
+              child:  Center(
+                child: Container(
+                  alignment: Alignment.center,
+                  width: double.infinity,
+                  child: Padding(
+                      padding: EdgeInsets.only(bottom: 10, top: 10),
+                      child: Text(_breathingText, style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold), textAlign: TextAlign.center,)),
+                ),
+              )
+          ),
         )
       ]),
     );
