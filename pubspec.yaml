@@ -37,6 +37,8 @@ dependencies:
   shared_preferences: ^2.3.2
   scribble: ^0.10.0+1
   flutter_libphonenumber: ^2.3.3
+  animate_gradient: ^0.0.3
+  font_awesome_flutter: ^10.7.0
 
 dev_dependencies:
   flutter_test:

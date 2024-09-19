@@ -20,6 +20,8 @@ import 'child_pages/feelings_page.dart';
 import 'child_pages/fidget_spinner_suggestion.dart';
 import 'child_pages/suggestions_page.dart';
 import 'child_pages/coloring_suggestion.dart';
+import 'child_pages/breathing_suggestion.dart';
+import 'child_pages/54321_suggestion.dart';
 
 typedef VoidCallBack = void Function();
 
@@ -56,7 +58,9 @@ class MyApp extends StatelessWidget {
           '/music': (_) => MusicPage(),
           '/suggestions': (_) => SuggestionsPage(),
           '/fidget': (_) => FidgetSpinnerHome(),
-          '/coloring': (_) => ColoringHome()
+          '/coloring': (_) => ColoringHome(),
+          '/breathing': (_) => BreathingHome(),
+          '/54321': (_) => FiveCalmDownHome()
         },
       ),
     );
