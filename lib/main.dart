@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
         ),
-        initialRoute: '/base',
+        initialRoute: '/parent_login',
         routes: {
           '/parent_login': (_) => ParentLoginPage(),
           '/child_login': (_) => ChildLoginPage(),
