@@ -12,7 +12,7 @@ class CustomSettings extends StatelessWidget {
         SettingsSection(
           title: Text('Common'),
           tiles: <SettingsTile>[
-            SettingsTile.navigation(
+            SettingsTile.navigation( //hi
               leading: Icon(Icons.language),
               title: Text('Language'),
               value: Text('English'),
