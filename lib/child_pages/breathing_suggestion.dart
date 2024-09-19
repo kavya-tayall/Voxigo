@@ -15,7 +15,7 @@ class _BreathingHomeState extends State<BreathingHome>
   Timer? _timer;
   String _breathingText = 'Inhale';
   int _count = 0;
-  bool _visibleCircle = true;
+  int _countdown = 3;
 
   @override
   void initState() {
