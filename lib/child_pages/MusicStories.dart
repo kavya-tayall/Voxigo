@@ -20,11 +20,21 @@ class _MusicPageState extends State<MusicPage> {
   final TextEditingController _searchController = TextEditingController();
   bool isLoading = true;
 
+  // Add ScrollController
+  ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     _loadSongs();
   }
+
+  @override
+  void dispose() {
+    _scrollController.dispose(); // Dispose the ScrollController when not needed
+    super.dispose();
+  }
+
 
 
   Future<void> _loadSongs() async {
@@ -109,6 +119,7 @@ class _MusicPageState extends State<MusicPage> {
     });
   }
 
+
   Future<void> _addMusic(BuildContext context) async {
     String? songTitle;
     File? imageFile;
@@ -117,89 +128,141 @@ class _MusicPageState extends State<MusicPage> {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Add New Song'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Song title input
-              TextField(
-                decoration: InputDecoration(labelText: 'Song Title'),
-                onChanged: (value) {
-                  songTitle = value;
-                },
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Add New Song'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Song title input
+                  TextField(
+                    decoration: InputDecoration(labelText: 'Song Title'),
+                    onChanged: (value) {
+                      songTitle = value;
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  // Display selected image
+                  if (imageFile != null)
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black),
+                      ),
+                      child: Image.file(imageFile!, fit: BoxFit.cover),
+                    ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      FilePickerResult? result = await FilePicker.platform.pickFiles(
+                        type: FileType.image,
+                      );
+
+                      if (result != null) {
+                        setState(() {
+                          imageFile = File(result.files.single.path!);
+                        });
+                      }
+                    },
+                    child: Text('Pick Image'),
+                  ),
+                  SizedBox(height: 10),
+                  // Display audio file confirmation
+                  if (audioFile != null)
+                    Text(
+                      'Audio Selected: ${audioFile!.path.split('/').last}',
+                      style: TextStyle(color: Colors.green),
+                    ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      FilePickerResult? result = await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['mp3', 'wav'],
+                      );
+
+                      if (result != null) {
+                        setState(() {
+                          audioFile = File(result.files.single.path!);
+                        });
+                      }
+                    },
+                    child: Text('Pick Audio File'),
+                  ),
+                ],
               ),
-              SizedBox(height: 10),
-
-              ElevatedButton(
-                onPressed: () async {
-                  FilePickerResult? result = await FilePicker.platform.pickFiles(
-                    type: FileType.image,
-                  );
-
-                  if (result != null) {
-                    imageFile = File(result.files.single.path!);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Image selected!')));
-                  }
-                },
-                child: Text('Pick Image'),
-              ),
-              SizedBox(height: 10),
-              // Pick audio file button
-              ElevatedButton(
-                onPressed: () async {
-                  FilePickerResult? result = await FilePicker.platform.pickFiles(
-                    type: FileType.custom,
-                    allowedExtensions: ['mp3', 'wav'],
-                  );
-
-                  if (result != null) {
-                    audioFile = File(result.files.single.path!);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Audio selected!')));
-                  }
-                },
-                child: Text('Pick Audio File'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Add Song'),
-              onPressed: () async {
-                if (songTitle != null && imageFile != null && audioFile != null) {
-                  final newSong = Song(
-                    title: songTitle!,
-                    emotion: ['unknown'],
-                    keywords: ['user', 'added'],
-                    link: audioFile!.path,
-                    image: imageFile!.path,
-                    isFromAssets: false,
-                  );
-
-                  setState(() {
-                    _songs.add(newSong);
-                    _filteredSongs = List.from(_songs);
-                  });
-
-                  await _saveSongsToLocalStorage();
-
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Song added successfully!')));
-                  Navigator.of(context).pop(); // Close dialog
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please provide a title, image, and audio file.')));
-                }
-              },
-            ),
-          ],
+              actions: [
+                TextButton(
+                  child: Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text('Add Song'),
+                  onPressed: () {
+                    if (songTitle != null && imageFile != null && audioFile != null) {
+                      // Close the dialog and return the song details to the main page
+                      Navigator.of(context).pop({
+                        'title': songTitle,
+                        'imageFile': imageFile,
+                        'audioFile': audioFile,
+                      });
+                    }
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
-    );
+    ).then((result) {
+      if (result != null) {
+        // Add the song in the main widget after the dialog is closed
+        final newSong = Song(
+          title: result['title'],
+          emotion: ['unknown'],
+          keywords: ['user', 'added'],
+          link: result['audioFile'].path,
+          image: result['imageFile'].path,
+          isFromAssets: false,
+        );
+
+        setState(() {
+          _songs.add(newSong);
+          _filteredSongs = List.from(_songs);
+        });
+
+        // Scroll to the bottom to show the newly added song
+        Future.delayed(Duration(milliseconds: 300), () {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Song added successfully!',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            margin: EdgeInsets.all(20),
+            padding: EdgeInsets.symmetric(vertical: 16),
+          ),
+        );
+
+        _saveSongsToLocalStorage();
+      }
+    });
   }
 
 
@@ -267,6 +330,7 @@ class _MusicPageState extends State<MusicPage> {
             radius: Radius.circular(20),
             thumbVisibility: true,
             child: ListView.builder(
+              controller: _scrollController,
               itemCount: _filteredSongs.length,
               itemBuilder: (context, index) {
                 return MusicTile(
@@ -280,6 +344,7 @@ class _MusicPageState extends State<MusicPage> {
             ),
           ),
         ),
+
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
@@ -300,7 +365,6 @@ class _MusicPageState extends State<MusicPage> {
 }
 
 
-// Song model class
 
 class MusicTile extends StatefulWidget {
 final int index;
@@ -327,7 +391,7 @@ class _MusicTileState extends State<MusicTile> {
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
 
-  // Toggle play or pause
+
   void _togglePlayPause() async {
     if (!mounted) return;
     if (_isPlaying) {
@@ -367,7 +431,7 @@ class _MusicTileState extends State<MusicTile> {
     _audioPlayer.seek(newPosition);
   }
 
-  // Seek progress bar accurately based on tap
+
   void _onTapProgressBar(double tapPositionX, double totalWidth) {
     final double progress = tapPositionX / totalWidth;
     final newPosition = Duration(milliseconds: (progress * _duration.inMilliseconds).toInt());
@@ -435,7 +499,7 @@ class _MusicTileState extends State<MusicTile> {
 
     return Container(
       margin: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
-      padding: EdgeInsets.all(20), // Increased padding
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.blue[50],
         borderRadius: BorderRadius.circular(20),
