@@ -14,17 +14,18 @@ class ChildLoginPage extends StatelessWidget {
     return null;
   }
 
-  Future<String?> _authUser(LoginData data) async {
-    try{
-      await _auth.signInChild(data.name, data.password);
-    } on ChildDoesNotExistException{
+  Future<String?> _authUser(BuildContext context, LoginData data) async {
+    try {
+      await _auth.signInChild(data.name, data.password, context);
+    } on ChildDoesNotExistException {
       return ChildDoesNotExistException().toString();
-    } catch (e){
+    } catch (e) {
       print(e);
       return e.toString();
     }
     return null;
   }
+
 
   Future<String?> _recoverPassword(String name) async {
     return null;
@@ -34,13 +35,13 @@ class ChildLoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(children: [
       FlutterLogin(
-        onLogin: _authUser,
+        onLogin: (loginData) => _authUser(context, loginData),
         hideForgotPasswordButton: true,
         onRecoverPassword: _recoverPassword,
         userValidator: checkUsername,
         title: "Child Login",
         userType: LoginUserType.name,
-        theme: LoginTheme(primaryColor: Color(0xFF56B1FB),),
+        theme: LoginTheme(primaryColor: Color(0xFF56B1FB)),
         messages: LoginMessages(userHint: 'Username'),
         footer: "ConnectAutism, Inc",
         onSubmitAnimationCompleted: () {
@@ -48,8 +49,9 @@ class ChildLoginPage extends StatelessWidget {
             builder: (context) => BasePage(),
           ));
         },
-      ),
-      Positioned(
+      )
+
+      ,Positioned(
         top: 20,
         right: 20,
         child: ElevatedButton(

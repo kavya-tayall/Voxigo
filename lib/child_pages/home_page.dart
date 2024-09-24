@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../widgets/grid.dart';
 import '../widgets/homepage_top_bar.dart';
 import '../widgets/edit_bar.dart';
@@ -8,6 +10,8 @@ import 'dart:convert';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+
+import '../widgets/child_provider.dart';
 
 class DataWidget extends InheritedWidget {
   const DataWidget({
@@ -77,12 +81,20 @@ class HomePageState extends State<HomePage> {
     });
   }
 
-  void addButton(FirstButton button) {
+  void addButton(FirstButton button) async {
+    final childProvider = Provider.of<ChildProvider>(context, listen: false);
+
     setState(() {
       selectedButtons.add(button);
     });
-  }
 
+    try {
+      await childProvider.addSelectedButton(button.text, Timestamp.now());
+      print('Button added successfully to Firebase');
+    } catch (e) {
+      print('Error adding button to Firebase: $e');
+    }
+  }
   void clearSelectedButtons() {
     setState(() {
       selectedButtons.clear();

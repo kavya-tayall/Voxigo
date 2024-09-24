@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import '../child_pages/home_page.dart';
+
 
 class FirstButton extends StatefulWidget {
   final String id;
@@ -64,51 +64,50 @@ class _FirstButtonState extends State<FirstButton> {
     );
   }
 
-  // Helper method to load images from assets, URLs, or local file system with a loading indicator
+
   Widget _loadImageWithLoadingIndicator(String imagePath) {
-    return _loadImage(imagePath); // Directly load image with proper loading state handling
+    return _loadImage(imagePath);
   }
 
-  // Helper method to load images from assets, URLs, or local file system
+
   Widget _loadImage(String imagePath) {
     if (imagePath.startsWith('http') || imagePath.startsWith('https')) {
-      // Load from network
       return Image.network(
         imagePath,
         fit: BoxFit.cover,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
-          return Center(child: CircularProgressIndicator()); // Show progress while loading
+          return Center(child: CircularProgressIndicator());
         },
         errorBuilder: (context, error, stackTrace) {
           print("Failed to load image from URL: $imagePath");
-          return Icon(Icons.broken_image); // Fallback for broken image URLs
+          return Icon(Icons.broken_image);
         },
       );
     } else if (imagePath.startsWith('file://')) {
       String cleanedPath = imagePath.replaceFirst('file://', '');
       if (File(cleanedPath).existsSync()) {
-        // Load from local file system
+
         return Image.file(
           File(cleanedPath),
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
             print("Failed to load image from file: $cleanedPath");
-            return Icon(Icons.broken_image); // Fallback for broken image files
+            return Icon(Icons.broken_image);
           },
         );
       } else {
         print("File does not exist: $cleanedPath");
-        return Icon(Icons.broken_image); // Fallback if file does not exist
+        return Icon(Icons.broken_image);
       }
     } else {
-      // Load from assets
+
       return Image.asset(
         imagePath,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
           print("Failed to load image from assets: $imagePath");
-          return Icon(Icons.broken_image); // Fallback for broken assets
+          return Icon(Icons.broken_image);
         },
       );
     }
@@ -149,7 +148,7 @@ class FolderButton extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Expanded(
-              child: _loadImageFromAsset(imagePath), // Image always from asset
+              child: _loadImageFromAsset(imagePath),
             ),
             Text(
               text,
@@ -161,14 +160,13 @@ class FolderButton extends StatelessWidget {
     );
   }
 
-  // Helper method to load images from assets
   Widget _loadImageFromAsset(String imagePath) {
     return Image.asset(
       imagePath,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
         print("Failed to load image from assets: $imagePath");
-        return Icon(Icons.broken_image); // Fallback for broken assets
+        return Icon(Icons.broken_image);
       },
     );
   }

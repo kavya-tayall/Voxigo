@@ -69,10 +69,10 @@ class AddButtonState extends State<AddButton> {
           nestedData = nestedData[folder];
         }
 
-        final buttonId = Uuid().v4(); // Generate a UUID
+        final buttonId = Uuid().v4();
         final newButton = button.toJson()..['id'] = buttonId;
 
-        nestedData.add(newButton); // Add button to the list
+        nestedData.add(newButton);
 
         dataWidget.onDataChange(dataWidget.data);
         context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
@@ -95,26 +95,26 @@ class AddButtonState extends State<AddButton> {
           nestedData = nestedData[folder];
         }
 
-        // Generate a unique ID for the new folder
-        final folderId = Uuid().v4(); // Generate a UUID
+
+        final folderId = Uuid().v4();
         final newFolder = {
           "id": folderId,
           "image_url": "assets/imgs/OneDrive_Folder_Icon.png",
           "label": folderName,
           "folder": true,
-          "buttons": [], // Empty list to hold buttons inside this folder
+          "buttons": [],
         };
 
-        // Add the folder to the top-level buttons list
-        nestedData.add(newFolder); // Add folder to the list
 
-        // Notify the widget that the data has changed
+        nestedData.add(newFolder);
+
+
         dataWidget.onDataChange(dataWidget.data);
 
-        // Save the updated data to file
+
         context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
 
-        // Update the UI
+
         context.findAncestorStateOfType<HomePageState>()?.updateGrid();
       });
     } else {
@@ -128,11 +128,11 @@ class AddButtonState extends State<AddButton> {
     if (image != null) {
       FirstButton button = FirstButton(
         id: Uuid().v4(),
-        imagePath: image.path, // Use local file path
+        imagePath: image.path,
         text: enteredText,
         size: 60.0,
         onPressed: () {
-          // Handle button press
+
         },
       );
       addVisibleButtons(button);
@@ -224,7 +224,7 @@ class AddButtonState extends State<AddButton> {
 
   dynamic searchButtonData(List<dynamic> data, String keyword) {
     print(keyword);
-    keyword = keyword.trim().toLowerCase(); // Trim and convert to lowercase
+    keyword = keyword.trim().toLowerCase();
     for (var item in data) {
       if (item is Map<String, dynamic> && item.containsKey("keywords")) {
         for (var keywordData in item["keywords"]) {
@@ -250,7 +250,7 @@ class AddButtonState extends State<AddButton> {
       text: label,
       size: 60.0,
       onPressed: () {
-        // Handle button press
+
       },
     );
   }
@@ -322,7 +322,7 @@ class RemoveButton extends StatefulWidget {
 class RemoveButtonState extends State<RemoveButton> {
   bool isRemovalMode = false;
 
-  // Define consistent colors and sizes
+
   final Color buttonColor = Colors.lightBlue;
   final Color iconColor = Colors.white;
   final double buttonSize = 60.0;
@@ -339,16 +339,16 @@ class RemoveButtonState extends State<RemoveButton> {
           nestedData = nestedData[folder];
         }
 
-        // Find and remove the button with the specified ID
+
         nestedData.removeWhere((b) => b['id'] == button.id);
 
-        // Notify the widget that the data has changed
+
         dataWidget.onDataChange(dataWidget.data);
 
-        // Save the updated data to file
+
         context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
 
-        // Update the UI
+
         context.findAncestorStateOfType<HomePageState>()?.updateGrid();
       });
     } else {
@@ -370,26 +370,25 @@ class RemoveButtonState extends State<RemoveButton> {
           nestedData = nestedData[folder];
         }
 
-        // Generate a unique ID for the new folder
-        final folderId = Uuid().v4(); // Generate a UUID
+
+        final folderId = Uuid().v4();
         final newFolder = {
           "id": folderId,
           "image_url": "assets/imgs/OneDrive_Folder_Icon.png",
           "label": folderName,
           "folder": true,
-          "buttons": [], // Empty list to hold buttons inside this folder
+          "buttons": [],
         };
 
-        // Add the folder to the top-level buttons list
-        nestedData.add(newFolder); // Add folder to the list
+        nestedData.add(newFolder);
 
-        // Notify the widget that the data has changed
+
         dataWidget.onDataChange(dataWidget.data);
 
-        // Save the updated data to file
+
         context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
 
-        // Update the UI
+
         context.findAncestorStateOfType<HomePageState>()?.updateGrid();
       });
     } else {
@@ -404,9 +403,9 @@ class RemoveButtonState extends State<RemoveButton> {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           shape: CircleBorder(),
-          padding: EdgeInsets.all(16), // Adjust padding to fit the size
-          backgroundColor: buttonColor, // Match the AddButton color
-          minimumSize: Size(buttonSize, buttonSize), // Ensure button size is consistent
+          padding: EdgeInsets.all(16),
+          backgroundColor: buttonColor,
+          minimumSize: Size(buttonSize, buttonSize),
         ),
         onPressed: () {
           context.findAncestorStateOfType<HomePageState>()?.changeRemovalState();
@@ -414,7 +413,7 @@ class RemoveButtonState extends State<RemoveButton> {
             isRemovalMode = !isRemovalMode;
           });
         },
-        child: Icon(isRemovalMode ? Icons.check : Icons.delete, color: iconColor), // Match the AddButton icon color
+        child: Icon(isRemovalMode ? Icons.check : Icons.delete, color: iconColor),
       ),
     );
   }

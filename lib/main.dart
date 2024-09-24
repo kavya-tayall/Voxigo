@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/scheduler.dart';
-import 'child_pages/MusicStories.dart';
-import 'firebase_options.dart';
+import 'package:test_app/parent_pages/child_management_page.dart';
+import 'package:test_app/parent_pages/stats_page.dart';
+import 'child_pages/music_page.dart';
+import 'widgets/child_provider.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,14 +28,17 @@ import 'child_pages/54321_suggestion.dart';
 typedef VoidCallBack = void Function();
 
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(MyApp());
-}
+  await Firebase.initializeApp();
 
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ChildProvider(),
+      child: MyApp(),
+    ),
+  );
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -60,7 +65,8 @@ class MyApp extends StatelessWidget {
           '/fidget': (_) => FidgetSpinnerHome(),
           '/coloring': (_) => ColoringHome(),
           '/breathing': (_) => BreathingHome(),
-          '/54321': (_) => FiveCalmDownHome()
+          '/54321': (_) => FiveCalmDownHome(),
+          '/parent_base': (_) => ParentBasePage(),
         },
       ),
     );
@@ -102,27 +108,19 @@ class BasePageState extends State<BasePage> {
 
     File file = File(filePath);
 
-    // If the file exists, delete the file
-    if (await file.exists()) {
-      await file.delete();
-    }
-
-    // Load the data from the assets (board.json)
     final assetJsonString = await rootBundle.loadString("assets/board_info/board.json");
 
-    // Write the asset data to the local file
     await file.writeAsString(assetJsonString);
 
-    // Parse the JSON data
     final jsonData = jsonDecode(assetJsonString);
 
     setState(() {
       data = Map.from(jsonData);
-      isLoading = false; // Data loading complete
+      isLoading = false;
     });
   }
 
-  // Update the path of the board
+
   void updatePathOfBoard(List<dynamic> newPath) {
     setState(() {
       pathOfBoard = List.from(newPath);
@@ -135,12 +133,12 @@ class BasePageState extends State<BasePage> {
         pathOfBoard.removeLast();
         pathOfBoard.removeLast();
 
-        updatePathOfBoard(pathOfBoard); // Notify that path has changed
+        updatePathOfBoard(pathOfBoard);
       }
     });
   }
 
-  // Modify the data (you can customize this based on your app's logic)
+
   void modifyData(Map<String, List> newData) {
     setState(() {
       data = Map.from(newData);
@@ -184,11 +182,57 @@ class BasePageState extends State<BasePage> {
   }
 }
 
-class ParentBasePage extends StatelessWidget {
+class ParentBasePage extends StatefulWidget {
   const ParentBasePage({super.key});
 
   @override
+  _ParentBasePageState createState() => _ParentBasePageState();
+}
+
+class _ParentBasePageState extends State<ParentBasePage> {
+  int _selectedIndex = 0;
+
+  static List<Widget> _widgetOptions = <Widget>[
+    ChildManagementPage(),
+    StatsPage(),
+    ParentSettingsPage(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ParentHomePage();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Parent Dashboard'),
+      ),
+      body: Center(
+
+        child: _widgetOptions.elementAt(_selectedIndex),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'Child Management',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart),
+            label: 'Stats',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blueAccent,
+        onTap: _onItemTapped,
+      ),
+    );
   }
 }

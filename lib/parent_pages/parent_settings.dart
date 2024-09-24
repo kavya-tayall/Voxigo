@@ -6,8 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
-class ParentHomePage extends StatelessWidget {
-  const ParentHomePage({super.key});
+class ParentSettingsPage extends StatelessWidget {
+  const ParentSettingsPage ({super.key});
 
   @override
   Widget build(BuildContext context) {

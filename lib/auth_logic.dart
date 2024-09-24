@@ -1,5 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
+
+import 'widgets/child_provider.dart';
 
 
 
@@ -8,7 +12,8 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future <User?> registerParent(String username, String name, String email, String password) async {
+  Future <User?> registerParent(String username, String name, String email,
+      String password) async {
     bool usernameExists = await _checkUsernameExists(username);
 
     print(usernameExists);
@@ -48,12 +53,14 @@ class AuthService {
 
   Future<User?> signInParent(String email, String password) async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
       User? parent = userCredential.user;
 
 
       if (parent != null) {
-        DocumentSnapshot userDoc = await _db.collection('parents').doc(parent.uid).get();
+        DocumentSnapshot userDoc = await _db.collection('parents').doc(
+            parent.uid).get();
         if (userDoc.exists && userDoc['role'] == 'parent') {
           return parent;
         } else {
@@ -68,22 +75,28 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>?> signInChild(String username, String password) async {
+  Future<Map<String, dynamic>?> signInChild(String username, String password,
+      BuildContext context) async {
     QuerySnapshot childQuery = await _db.collection('children')
         .where('username', isEqualTo: username)
         .where('password', isEqualTo: password)
         .get();
 
     if (childQuery.docs.isNotEmpty) {
-      return childQuery.docs.first.data() as Map<String, dynamic>?;
+      var childData = childQuery.docs.first.data() as Map<String, dynamic>;
+      var childId = childQuery.docs.first.id;
+
+      final childProvider = Provider.of<ChildProvider>(context, listen: false);
+      childProvider.setChildData(childId, childData);
+
+      return childData;
     } else {
       throw ChildDoesNotExistException();
     }
   }
 }
 
-
-class UserService {
+  class UserService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Future<DocumentReference?> registerChild(String parentId, String firstName, String lastName, String username, String password) async {
@@ -99,7 +112,7 @@ class UserService {
       'last name': lastName,
       'password': password, // Consider hashing this password for security
       'parents': [parentId],
-      'data': {}
+      'data': {'selectedButtons': [], 'selectedFeelings': []}
     });
 
     await _db.collection('parents').doc(parentId).update({
