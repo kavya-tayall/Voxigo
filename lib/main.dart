@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
         ),
-        initialRoute: '/parent_login',
+        initialRoute: '/child_login',
         routes: {
           '/parent_login': (_) => ParentLoginPage(),
           '/child_login': (_) => ChildLoginPage(),
@@ -181,15 +181,14 @@ class BasePageState extends State<BasePage> {
     );
   }
 }
-
 class ParentBasePage extends StatefulWidget {
   const ParentBasePage({super.key});
 
   @override
-  _ParentBasePageState createState() => _ParentBasePageState();
+  ParentBasePageState createState() => ParentBasePageState();
 }
 
-class _ParentBasePageState extends State<ParentBasePage> {
+class ParentBasePageState extends State<ParentBasePage> {
   int _selectedIndex = 0;
 
   static List<Widget> _widgetOptions = <Widget>[
@@ -211,27 +210,41 @@ class _ParentBasePageState extends State<ParentBasePage> {
         title: Text('Parent Dashboard'),
       ),
       body: Center(
-
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.people),
-            label: 'Child Management',
+            label: '',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            label: 'Stats',
+            label: '',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'Settings',
+            label: '',
           ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blueAccent,
+        unselectedItemColor: Colors.grey,
+        selectedIconTheme: IconThemeData(
+          size: 30,
+        ),
+        unselectedIconTheme: IconThemeData(
+          size: 25,
+        ),
         onTap: _onItemTapped,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        type: BottomNavigationBarType.fixed,
+        iconSize: 20,
+        selectedFontSize: 0,
+        unselectedFontSize: 0,
       ),
     );
   }

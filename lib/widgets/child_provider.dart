@@ -36,4 +36,11 @@ class ChildProvider with ChangeNotifier {
       throw Exception("No child logged in");
     }
   }
+
+  void logout() {
+    childId = null;
+    childData = null;
+    notifyListeners();
+  }
+
 }
