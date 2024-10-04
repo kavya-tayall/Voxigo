@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
         ),
-        initialRoute: '/child_login',
+        initialRoute: '/parent_login',
         routes: {
           '/parent_login': (_) => ParentLoginPage(),
           '/child_login': (_) => ChildLoginPage(),
@@ -67,6 +67,7 @@ class MyApp extends StatelessWidget {
           '/breathing': (_) => BreathingHome(),
           '/54321': (_) => FiveCalmDownHome(),
           '/parent_base': (_) => ParentBasePage(),
+          '/parent_stats': (_) => StatsPage(),
         },
       ),
     );
