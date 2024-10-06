@@ -9,13 +9,13 @@ class ButtonDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Group button instances by day (using original timestamp for sorting)
+
     Map<DateTime, List<dynamic>> groupedByDay = {};
     for (var instance in buttonInstances) {
       DateTime timestamp = instance['timestamp'].toDate();
       String date = DateFormat('MMMM d, y').format(timestamp);
 
-      // Create a map with the original DateTime object for sorting
+
       DateTime dateOnly = DateTime(timestamp.year, timestamp.month, timestamp.day);
 
       if (groupedByDay.containsKey(dateOnly)) {
@@ -25,7 +25,7 @@ class ButtonDetailsScreen extends StatelessWidget {
       }
     }
 
-    // Sort the keys (DateTime) in chronological order
+
     List<DateTime> sortedDays = groupedByDay.keys.toList()..sort((a, b) => b.compareTo(a));
 
     return Scaffold(
@@ -49,7 +49,7 @@ class ButtonDetailsScreen extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Date separator
+
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Text(
@@ -61,10 +61,10 @@ class ButtonDetailsScreen extends StatelessWidget {
                   ),
                 ),
 
-                // Events for that day
+
                 ListView.builder(
-                  shrinkWrap: true, // Important for nested ListView
-                  physics: NeverScrollableScrollPhysics(), // Prevent nested scrolling
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
                   itemCount: instancesForDay.length,
                   itemBuilder: (context, instanceIndex) {
                     var instance = instancesForDay[instanceIndex];
@@ -73,7 +73,7 @@ class ButtonDetailsScreen extends StatelessWidget {
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Timeline line and bullet
+
                         Column(
                           children: [
                             if (instanceIndex != 0)
@@ -99,9 +99,9 @@ class ButtonDetailsScreen extends StatelessWidget {
                               ),
                           ],
                         ),
-                        SizedBox(width: 16.0), // Space between the bullet and the text
+                        SizedBox(width: 16.0),
 
-                        // Event details (timestamp)
+
                         Expanded(
                           child: Container(
                             padding: EdgeInsets.all(16.0),

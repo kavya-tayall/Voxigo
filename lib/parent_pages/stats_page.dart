@@ -25,7 +25,7 @@ class _StatsPageState extends State<StatsPage> {
         ),
         body: TabBarView(
           children: [
-            // Search View with search functionality
+
             Column(
               children: [
                 Padding(
@@ -38,7 +38,7 @@ class _StatsPageState extends State<StatsPage> {
                     ),
                     onChanged: (value) {
                       setState(() {
-                        searchText = value.toLowerCase(); // Update search text
+                        searchText = value.toLowerCase();
                       });
                     },
                   ),
@@ -48,7 +48,7 @@ class _StatsPageState extends State<StatsPage> {
                 ),
               ],
             ),
-            // AI View (empty for now)
+
             Center(child: Text('AI View coming soon')),
           ],
         ),

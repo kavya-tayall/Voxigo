@@ -173,7 +173,7 @@ class ButtonsTableState extends State<ButtonsTable> {
                       alignment: Alignment.bottomLeft,
                       child: TextButton(
                         onPressed: () {
-                          // Filter the instances of this button
+
                           List<dynamic> buttonInstances = selectedButtons
                               .where((button) => button['text'] == text)
                               .toList();
