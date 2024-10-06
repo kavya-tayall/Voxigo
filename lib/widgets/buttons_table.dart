@@ -1,10 +1,15 @@
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
-import 'dart:collection';
+
+import 'buttons_screen.dart';
 
 class ButtonsTable extends StatefulWidget {
+  final String searchText;
+
+  ButtonsTable({required this.searchText});
+
   @override
   ButtonsTableState createState() => ButtonsTableState();
 }
@@ -102,22 +107,13 @@ class ButtonsTableState extends State<ButtonsTable> {
     }
   }
 
-  String _formatTimestamp(Timestamp timestamp) {
-    DateTime now = DateTime.now();
-    DateTime date = timestamp.toDate();
-    Duration difference = now.difference(date);
-
-    if (difference.inDays == 0) {
-      return 'Today';
-    } else if (difference.inDays == 1) {
-      return 'Yesterday';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
-    } else if (difference.inDays < 30) {
-      return DateFormat('EEE, MMM d').format(date);
-    } else {
-      return DateFormat('MMM d, yyyy').format(date);
-    }
+  void _navigateToButtonDetails(String buttonText, List<dynamic> buttonInstances) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ButtonDetailsScreen(buttonText: buttonText, buttonInstances: buttonInstances),
+      ),
+    );
   }
 
   @override
@@ -130,66 +126,98 @@ class ButtonsTableState extends State<ButtonsTable> {
       return Center(child: Text('No buttons selected yet'));
     }
 
-    Map<String, Timestamp> latestTimestamps = {};
-
-
-    for (var button in selectedButtons) {
-      String text = button['text'];
-      Timestamp timestamp = button['timestamp'];
-
-      if (!latestTimestamps.containsKey(text) || timestamp.compareTo(latestTimestamps[text]!) > 0) {
-        latestTimestamps[text] = timestamp;
-      }
-    }
-
-
-    List<MapEntry<String, Timestamp>> sortedButtons = latestTimestamps.entries.toList()
+    List<MapEntry<String, int>> sortedButtons = buttonCounts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          border: TableBorder.all(
-            color: Colors.grey,
-            width: 1,
-          ),
-          columns: const <DataColumn>[
-            DataColumn(
-              label: Text(
-                'Button Text',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Timestamp',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Quantity',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-          rows: sortedButtons.map((entry) {
-            String text = entry.key;
-            Timestamp timestamp = entry.value;
-            String formattedTimestamp = _formatTimestamp(timestamp);
-            int quantity = buttonCounts[text] ?? 1;
+    sortedButtons = sortedButtons
+        .where((entry) =>
+        entry.key.toLowerCase().contains(widget.searchText.toLowerCase()))
+        .toList();
 
-            return DataRow(cells: <DataCell>[
-              DataCell(Text(text)),
-              DataCell(Text(formattedTimestamp)),
-              DataCell(Text(quantity.toString())),
-            ]);
-          }).toList(),
-        ),
-      ),
+    return ListView.builder(
+      itemCount: sortedButtons.length,
+      itemBuilder: (context, index) {
+        String text = sortedButtons[index].key;
+        int quantity = sortedButtons[index].value;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      text,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8.0),
+                    Align(
+                      alignment: Alignment.bottomLeft,
+                      child: TextButton(
+                        onPressed: () {
+                          // Filter the instances of this button
+                          List<dynamic> buttonInstances = selectedButtons
+                              .where((button) => button['text'] == text)
+                              .toList();
+                          _navigateToButtonDetails(text, buttonInstances);
+                        },
+                        child: Text(
+                          'See More',
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            color: Colors.blueAccent,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Column(
+                    children: [
+                      Text(
+                        'Quantity',
+                        style: TextStyle(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        quantity.toString(),
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
-
 }

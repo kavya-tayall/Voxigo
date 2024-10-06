@@ -88,12 +88,6 @@ class HomePageState extends State<HomePage> {
       selectedButtons.add(button);
     });
 
-    try {
-      await childProvider.addSelectedButton(button.text, Timestamp.now());
-      print('Button added successfully to Firebase');
-    } catch (e) {
-      print('Error adding button to Firebase: $e');
-    }
   }
   void clearSelectedButtons() {
     setState(() {
@@ -208,6 +202,18 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> addPhraseToPlay(String phrase) async {
+    final childProvider = Provider.of<ChildProvider>(context, listen: false);
+
+    try {
+      // Add the entire phrase as one entry with the current timestamp
+      await childProvider.addSelectedButton(phrase, Timestamp.now());
+      print('Phrase added successfully to Firebase');
+    } catch (e) {
+      print('Error adding phrase to Firebase: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (context.findAncestorStateOfType<BasePageState>()!.isLoading) {
@@ -291,12 +297,17 @@ class HomePageState extends State<HomePage> {
                     child: TextButton.icon(
                       icon: Icon(Icons.play_arrow),
                       onPressed: () async {
-                        for (FirstButton button in _selectedButtons) {
-                          print(button.text);
-                          await flutterTts.speak(button.text);
-                        }
-                        // Implement play logic
+                        // Concatenate all selected buttons' text into one phrase
+                        String fullPhrase = _selectedButtons.map((button) => button.text).join(' ');
+
+                        // Print and speak the full phrase
+                        print(fullPhrase);
+                        await flutterTts.speak(fullPhrase);
+
+                        // Implement play logic: Add the whole phrase as a single entry to Firebase
+                        await addPhraseToPlay(fullPhrase);
                       },
+
                       label: const Text('Play'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
