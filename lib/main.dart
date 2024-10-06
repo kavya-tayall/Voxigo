@@ -62,6 +62,7 @@ class MyApp extends StatelessWidget {
           '/breathing': (_) => BreathingHome(),
           '/54321': (_) => FiveCalmDownHome(),
           '/parent_base': (_) => ParentBasePage(),
+          '/parent_stats': (_) => StatsPage(),
         },
       ),
     );
