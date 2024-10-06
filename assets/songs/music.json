@@ -3,56 +3,56 @@
     "title": "Twinkle, Twinkle, Little Star",
     "emotion": ["nervous", "sad", "angry"],
     "keywords": ["children", "bedtime", "soothing", "nursery rhyme"],
-    "link": "songs/Twinkle, Twinkle, Little Star.mp3",
-    "image": "assets/songs/Screenshot 2024-09-09 at 7.49.23 PM.png"
+    "link": "Twinkle, Twinkle, Little Star.mp3",
+    "image": "Screenshot 2024-09-09 at 7.49.23 PM.png"
   },
   {
     "title": "Humpty Dumpty",
     "emotion": ["bored", "angry", "tired"],
     "keywords": ["children", "falling", "classic", "nursery rhyme"],
-    "link": "songs/HumptyDumpty.mp3",
-    "image": "assets/songs/Screenshot 2024-09-09 at 7.49.55 PM.png"
+    "link": "HumptyDumpty.mp3",
+    "image": "Screenshot 2024-09-09 at 7.49.55 PM.png"
   },
   {
     "title": "ABCs",
     "emotion": ["bored", "nervous", "angry"],
     "keywords": ["learning", "education", "children", "alphabet"],
-    "link": "songs/alphabet song.mp3",
-    "image": "assets/songs/Screenshot 2024-09-09 at 7.50.11 PM.png"
+    "link": "alphabet song.mp3",
+    "image": "Screenshot 2024-09-09 at 7.50.11 PM.png"
   },
   {
     "title": "Row, Row, Row Your Boat",
     "emotion": ["nervous", "sad", "tired"],
     "keywords": ["children", "boating", "fun", "nursery rhyme"],
-    "link": "songs/Rowgo.mp3",
-    "image": "assets/songs/dreamstime_xs_24653504.jpg"
+    "link": "Rowgo.mp3",
+    "image": "dreamstime_xs_24653504.jpg"
   },
   {
     "title": "Rain, Rain, Go Away",
     "emotion": ["angry", "sad", "nervous"],
     "keywords": ["children", "rain", "weather", "nursery rhyme"],
-    "link": "songs/rain-rain.mp3",
-    "image": "assets/songs/images.jpeg"
+    "link": "rain-rain.mp3",
+    "image": "images.jpeg"
   },
   {
     "title": "Take Me Out to the Ball Game",
     "emotion": ["angry", "bored", "nervous"],
     "keywords": ["children", "sports", "baseball", "nursery rhyme"],
-    "link": "songs/take-me-out-to-the-ballgame.mp3",
-    "image": "assets/songs/png-clipart-three-child-plays-baseball-baseball-field-cartoon-child-baseball-kids-sport-photography.png"
+    "link": "take-me-out-to-the-ballgame.mp3",
+    "image": "png-clipart-three-child-plays-baseball-baseball-field-cartoon-child-baseball-kids-sport-photography.png"
   },
   {
     "title": "Pop Goes the Weasel",
     "emotion": ["nervous", "sad", "tired"],
     "keywords": ["children", "surprise", "classic", "nursery rhyme"],
-    "link": "songs/pop-goes-the-weasel.mp3",
-    "image": "assets/songs/Pop-Goes-the-Weasel-Nursery-Rhyme-for-Kids.jpg"
+    "link": "pop-goes-the-weasel.mp3",
+    "image": "Pop-Goes-the-Weasel-Nursery-Rhyme-for-Kids.jpg"
   },
   {
     "title": "I'm a Little Teapot",
     "emotion": ["nervous", "angry", "tired"],
     "keywords": ["children", "teapot", "fun", "nursery rhyme"],
-    "link": "songs/im-a-little-teapot.mp3",
-    "image": "assets/songs/im-a-little-teapot.jpg"
+    "link": "im-a-little-teapot.mp3",
+    "image": "im-a-little-teapot.jpg"
   }
 ]

@@ -25,9 +25,9 @@ dependencies:
   flutter_tts: ^3.3.0
   firebase_core: ^2.24.2
   cloud_firestore: ^4.14.0
-  firebase_auth: ^4.16.0
+  firebase_auth: ^4.17.0
   flutter_login: ^5.0.0
-  firebase_storage: ^11.6.0
+  firebase_storage: ^11.6.1
   flutter_form_builder: ^9.4.1
   form_builder_validators: ^11.0.0
   fluttertoast: ^8.2.8
@@ -39,6 +39,8 @@ dependencies:
   flutter_libphonenumber: ^2.3.3
   animate_gradient: ^0.0.3
   font_awesome_flutter: ^10.7.0
+  cached_network_image: ^3.2.3
+
 
 dev_dependencies:
   flutter_test:
@@ -63,7 +65,7 @@ flutter:
     - assets/imgs/nervous.png
     - assets/imgs/final_spinner.png
     - assets/sound_effects/spinning-fidget-spinner-23292.mp3
-    - assets/songs/Twinnkle, Twinkle, Little Star.mp3
+    - assets/songs/Twinkle, Twinkle, Little Star.mp3
     - assets/songs/HumptyDumpty.mp3
     - assets/songs/alphabet song.mp3
     - assets/songs/music.json

@@ -205,6 +205,7 @@ class GridState extends State<Grid> {
                       // Remove the item from its original location
                       nestedData.remove(receivedItem);
 
+
                       // Notify the widget that the data has changed
                       dataWidget.onDataChange(dataWidget.data);
 

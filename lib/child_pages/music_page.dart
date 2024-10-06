@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:test_app/widgets/child_provider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:test_app/auth_logic.dart';
 
 import '../widgets/music_tile.dart';
 
@@ -27,7 +32,7 @@ class _MusicPageState extends State<MusicPage> {
   @override
   void initState() {
     super.initState();
-    _loadSongs();
+    _loadSongsOld();
   }
 
   @override
@@ -36,54 +41,62 @@ class _MusicPageState extends State<MusicPage> {
     super.dispose();
   }
 
-
-
-  Future<void> _loadSongs() async {
+  Future<void> _loadSongsOld() async {
     try {
-      final directory = await getApplicationDocumentsDirectory();
-      String filePath = '${directory.path}/music.json';
-      File file = File(filePath);
-
-      if (await file.exists()) {
-
-        String jsonData = await file.readAsString();
-        final List<dynamic> data = json.decode(jsonData);
-        setState(() {
-          _songs = data.map((json) => Song.fromJson(json)).toList();
-          _filteredSongs = _songs;
-          isLoading = false;
-        });
-      } else {
-
-
-        final String response = await rootBundle.loadString('assets/songs/music.json');
-        final List<dynamic> data = json.decode(response);
-        setState(() {
-          _songs = data.map((json) => Song.fromJson(json)).toList();
-          _filteredSongs = _songs;
-          isLoading = false;
-        });
-
-
-        await _saveSongsToLocalStorage();
-      }
+      String? jsonData = await Provider.of<ChildProvider>(context, listen: false).fetchMusicJson();
+      final List<dynamic> data = json.decode(jsonData!);
+      setState(() {
+        _songs = data.map((json) => Song.fromJson(json)).toList();
+        _filteredSongs = _songs;
+        isLoading = false;
+      });
     } catch (e) {
       print('Error loading songs: $e');
     }
   }
 
-
-
-  Future<void> _saveSongsToLocalStorage() async {
+  Future<void> _saveSongs(result) async {
     try {
+      print("checkpoint1");
+      // saving to local storage:
       final directory = await getApplicationDocumentsDirectory();
-      String filePath = '${directory.path}/music.json';
-      File file = File(filePath);
-      String jsonData = json.encode(_songs.map((song) => song.toJson()).toList());
-      await file.writeAsString(jsonData);
-      print('Songs saved to local storage.');
+      print(directory.path);
+      final musicDirectory = Directory('${directory.path}\\music_files\\');
+      print(musicDirectory.path);
+
+      final imageFileName = result['imageFile']!.path.split('\\').last;
+      final newImageFilePath = '${musicDirectory.path}$imageFileName';
+      final newImageFile = await result['imageFile']!.copy(newImageFilePath);
+      print(imageFileName);
+      print(newImageFilePath);
+      print(newImageFile);
+
+
+      final audioFileName = result['audioFile']!.path.split('\\').last;
+      final newAudioFilePath = '${musicDirectory.path}$audioFileName';
+      final newAudioFile = await result['audioFile']!.copy(newAudioFilePath);
+
+      print(audioFileName);
+      print(newAudioFilePath);
+      print(newAudioFile);
+
+
+      // saving to firebase:
+      FirebaseStorage storage = FirebaseStorage.instance;
+      Reference musicRef = storage.ref('music_info/mp3 files/$audioFileName');
+      SettableMetadata audioMetadata = SettableMetadata(
+        contentType: 'audio/mpeg',
+      );
+      await musicRef.putFile(newAudioFile, audioMetadata);
+
+      Reference coverImageRef = storage.ref('music_info/cover_images/$imageFileName');
+      SettableMetadata imageMetadata = SettableMetadata(
+        contentType: 'image/png',
+      );
+      await coverImageRef.putFile(newImageFile, imageMetadata);
+
     } catch (e) {
-      print('Error saving songs: $e');
+      print('Error saving songs to local storage: $e');
     }
   }
 
@@ -136,7 +149,6 @@ class _MusicPageState extends State<MusicPage> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-
                   TextField(
                     decoration: InputDecoration(labelText: 'Song Title'),
                     onChanged: (value) {
@@ -170,7 +182,7 @@ class _MusicPageState extends State<MusicPage> {
                   SizedBox(height: 10),
                   if (audioFile != null)
                     Text(
-                      'Audio Selected: ${audioFile!.path.split('/').last}',
+                      'Audio Selected: ${audioFile!.path.split('\\').last}',
                       style: TextStyle(color: Colors.green),
                     ),
                   ElevatedButton(
@@ -214,19 +226,23 @@ class _MusicPageState extends State<MusicPage> {
           },
         );
       },
-    ).then((result) {
+    ).then((result) async {
       if (result != null) {
+        await _saveSongs(result);
+
         final newSong = Song(
           title: result['title'],
           emotion: ['unknown'],
           keywords: ['user', 'added'],
-          link: result['audioFile'].path,
-          image: result['imageFile'].path,
+          link: result['audioFile']!.path.split('\\').last,
+          image: result['imageFile']!.path.split('\\').last,
           isFromAssets: false,
         );
+        _songs.add(newSong);
+        await Provider.of<ChildProvider>(context, listen: false).changeMusicJson(_songs);
 
+        // Now call setState to update the UI
         setState(() {
-          _songs.add(newSong);
           _filteredSongs = List.from(_songs);
         });
 
@@ -255,22 +271,17 @@ class _MusicPageState extends State<MusicPage> {
             padding: EdgeInsets.symmetric(vertical: 16),
           ),
         );
-
-        _saveSongsToLocalStorage();
       }
     });
   }
 
-
-
-
   void _deleteSong(int index) async {
     try {
+      _songs.removeAt(index);
       setState(() {
-        _songs.removeAt(index);
         _filteredSongs = _songs;
       });
-      await _saveSongsToLocalStorage();
+      await Provider.of<ChildProvider>(context, listen: false).changeMusicJson(_songs);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Song deleted successfully!')));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete song: $e')));
@@ -357,12 +368,7 @@ class _MusicPageState extends State<MusicPage> {
       ],
     );
   }
-
-
 }
-
-
-
 
 
 class Song {
@@ -379,7 +385,7 @@ class Song {
     required this.keywords,
     required this.link,
     required this.image,
-    this.isFromAssets = true,
+    this.isFromAssets = false,
   });
 
   factory Song.fromJson(Map<String, dynamic> json) {
@@ -389,7 +395,7 @@ class Song {
       keywords: List<String>.from(json['keywords']),
       link: json['link'],
       image: json['image'],
-      isFromAssets: json['isFromAssets'] ?? true,
+      isFromAssets: json['isFromAssets'] ?? false,
     );
   }
 

@@ -1,12 +1,19 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'authExceptions.dart';
+
 
 import 'widgets/child_provider.dart';
-
-
-
+import 'cache_utility.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -52,10 +59,14 @@ class AuthService {
   }
 
   Future<User?> signInParent(String email, String password) async {
+    print("called func");
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
+      print("done");
       User? parent = userCredential.user;
+      print(parent);
+
 
 
       if (parent != null) {
@@ -71,12 +82,11 @@ class AuthService {
       }
     } catch (e) {
       print(e.toString());
-      throw ParentDoesNotExistException();
+      throw OtherError();
     }
   }
 
-  Future<Map<String, dynamic>?> signInChild(String username, String password,
-      BuildContext context) async {
+  Future<Map<String, dynamic>?> signInChild(String username, String password, BuildContext context) async {
     QuerySnapshot childQuery = await _db.collection('children')
         .where('username', isEqualTo: username)
         .where('password', isEqualTo: password)
@@ -96,8 +106,9 @@ class AuthService {
   }
 }
 
-  class UserService {
+class UserService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final storage = FirebaseStorage.instance;
 
   Future<DocumentReference?> registerChild(String parentId, String firstName, String lastName, String username, String password) async {
     bool usernameExists = await _checkUsernameExists(username);
@@ -106,19 +117,36 @@ class AuthService {
       throw UsernameAlreadyExistsException();
     }
 
+
     DocumentReference childRef = await _db.collection('children').add({
       'username': username,
       'first name': firstName,
       'last name': lastName,
       'password': password, // Consider hashing this password for security
       'parents': [parentId],
-      'data': {'selectedButtons': [], 'selectedFeelings': []}
+      'data': {'selectedButtons': [], 'selectedFeelings': []},
     });
+
 
     await _db.collection('parents').doc(parentId).update({
       'children': FieldValue.arrayUnion([childRef.id])
     });
-    return childRef;
+
+    await uploadJsonFromAssets('assets/board_info/board.json', '/user_folders/$username/board.json');
+    await uploadJsonFromAssets('assets/songs/music.json', '/user_folders/$username/music.json');
+
+    try{
+      String jsonString = await rootBundle.loadString('assets/songs/music.json');
+      final List<dynamic> data = json.decode(jsonString);
+
+      for (int i=0;i<data.length; i++){
+        downloadMp3(data[i]['link']);
+        downloadCoverImage(data[i]['image']);
+      }
+
+    } catch(e){
+      print(e);
+    }
   }
 
   Future<bool> _checkUsernameExists(String username) async {
@@ -128,51 +156,32 @@ class AuthService {
 
     return childResult.docs.isNotEmpty;
   }
-}
 
 
-class UsernameAlreadyExistsException implements Exception {
-  final String message;
+  Future<void> uploadJsonFromAssets(String assetPath, String destinationPath) async {
+    try {
+      String jsonString = await rootBundle.loadString(assetPath);
 
-  UsernameAlreadyExistsException([this.message = 'Username already exists']);
+      final directory = Directory.systemTemp;
+      File tempFile = File('${directory.path}/temp.json');
+      await tempFile.writeAsString(jsonString);
 
-  @override
-  String toString() {
-    return "CustomException: $message";
+      FirebaseStorage storage = FirebaseStorage.instance;
+      Reference storageRef = storage.ref(destinationPath);
+
+      final SettableMetadata metadata = SettableMetadata(contentType: 'application/json',);
+
+      UploadTask uploadTask = storageRef.putFile(tempFile, metadata);
+      TaskSnapshot snapshot = await uploadTask;
+
+      FullMetadata fileMetadata = await storageRef.getMetadata();
+      print('Uploaded file content type: ${fileMetadata.contentType}');
+
+    } catch (e) {
+      print('Error uploading JSON file: $e');
+    }
   }
+
 }
 
-class UserNotParentException implements Exception {
-  final String message;
 
-  UserNotParentException([this.message = 'User is not a parent']);
-
-  @override
-  String toString() {
-    return "CustomException: $message";
-  }
-}
-
-class ParentDoesNotExistException implements Exception {
-  final String message;
-
-  ParentDoesNotExistException(
-      [this.message = 'Email or password is incorrect']);
-
-  @override
-  String toString() {
-    return "CustomException: $message";
-  }
-}
-
-class ChildDoesNotExistException implements Exception {
-  final String message;
-
-  ChildDoesNotExistException(
-      [this.message = 'Username or password is incorrect']);
-
-  @override
-  String toString() {
-    return "CustomException: $message";
-  }
-}
