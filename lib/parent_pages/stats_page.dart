@@ -1,56 +1,33 @@
 import 'package:flutter/material.dart';
-import '../widgets/buttons_table.dart';
+import 'buttons_stats_page.dart';
 
-class StatsPage extends StatefulWidget {
-  @override
-  _StatsPageState createState() => _StatsPageState();
-}
-
-class _StatsPageState extends State<StatsPage> {
-  String searchText = '';
-
+class StatsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
-          child: TabBar(
-            tabs: [
-              Tab(text: 'Search View'),
-              Tab(text: 'AI View'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-
-            Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Search',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        searchText = value.toLowerCase();
-                      });
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: ButtonsTable(searchText: searchText),
-                ),
-              ],
+    return Scaffold(
+      body: Center(
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ButtonsStatsPage()),
+            );
+          },
+          child: Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              color: Colors.blue[100],
+              borderRadius: BorderRadius.circular(16),
             ),
-
-            Center(child: Text('AI View coming soon')),
-          ],
+            child: Center(
+              child: Icon(
+                Icons.bar_chart,
+                size: 100,
+                color: Colors.blue,
+              ),
+            ),
+          ),
         ),
       ),
     );

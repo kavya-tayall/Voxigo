@@ -1,120 +1,17 @@
-
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'buttons_screen.dart';
 
-class ButtonsTable extends StatefulWidget {
+class ButtonsTable extends StatelessWidget {
   final String searchText;
+  final List<dynamic> selectedButtons;
+  final bool isLoading;
 
-  ButtonsTable({required this.searchText});
-
-  @override
-  ButtonsTableState createState() => ButtonsTableState();
-}
-
-class ButtonsTableState extends State<ButtonsTable> {
-  List<dynamic> selectedButtons = [];
-  bool isLoading = true;
-  Map<String, int> buttonCounts = {};
-
-  @override
-  void initState() {
-    super.initState();
-    fetchChildSelectedButtons();
-  }
-
-  Future<void> fetchChildSelectedButtons() async {
-    try {
-      User? currentUser = FirebaseAuth.instance.currentUser;
-
-      if (currentUser != null) {
-        String parentId = currentUser.uid;
-
-        DocumentSnapshot parentSnapshot = await FirebaseFirestore.instance
-            .collection('parents')
-            .doc(parentId)
-            .get();
-
-        if (parentSnapshot.exists) {
-          Map<String, dynamic>? parentData = parentSnapshot.data() as Map<String, dynamic>?;
-
-          if (parentData != null && parentData['children'] != null) {
-            List<String> childrenIds = List<String>.from(parentData['children']);
-
-            if (childrenIds.isNotEmpty) {
-              String childId = childrenIds[0]; // Select a specific child
-
-              DocumentSnapshot childSnapshot = await FirebaseFirestore.instance
-                  .collection('children')
-                  .doc(childId)
-                  .get();
-
-              if (childSnapshot.exists) {
-                Map<String, dynamic>? childData = childSnapshot.data() as Map<String, dynamic>?;
-                if (childData != null &&
-                    childData['data'] != null &&
-                    childData['data']['selectedButtons'] != null) {
-                  setState(() {
-                    selectedButtons = childData['data']['selectedButtons'];
-                    _calculateButtonCounts();
-                    isLoading = false;
-                  });
-                }
-              } else {
-                setState(() {
-                  isLoading = false;
-                });
-                print('Child document does not exist');
-              }
-            }
-          } else {
-            setState(() {
-              isLoading = false;
-            });
-            print('Parent does not have any children listed');
-          }
-        } else {
-          setState(() {
-            isLoading = false;
-          });
-          print('Parent document does not exist');
-        }
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-        print('No authenticated user');
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      print('Error fetching selected buttons: $e');
-    }
-  }
-
-  void _calculateButtonCounts() {
-    buttonCounts.clear();
-    for (var button in selectedButtons) {
-      String text = button['text'];
-      if (buttonCounts.containsKey(text)) {
-        buttonCounts[text] = buttonCounts[text]! + 1;
-      } else {
-        buttonCounts[text] = 1;
-      }
-    }
-  }
-
-  void _navigateToButtonDetails(String buttonText, List<dynamic> buttonInstances) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ButtonDetailsScreen(buttonText: buttonText, buttonInstances: buttonInstances),
-      ),
-    );
-  }
+  ButtonsTable({
+    required this.searchText,
+    required this.selectedButtons,
+    required this.isLoading,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -126,12 +23,22 @@ class ButtonsTableState extends State<ButtonsTable> {
       return Center(child: Text('No buttons selected yet'));
     }
 
+    Map<String, int> buttonCounts = {};
+    for (var button in selectedButtons) {
+      String text = button['text'];
+      if (buttonCounts.containsKey(text)) {
+        buttonCounts[text] = buttonCounts[text]! + 1;
+      } else {
+        buttonCounts[text] = 1;
+      }
+    }
+
     List<MapEntry<String, int>> sortedButtons = buttonCounts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
     sortedButtons = sortedButtons
         .where((entry) =>
-        entry.key.toLowerCase().contains(widget.searchText.toLowerCase()))
+        entry.key.toLowerCase().contains(searchText.toLowerCase()))
         .toList();
 
     return ListView.builder(
@@ -156,64 +63,70 @@ class ButtonsTableState extends State<ButtonsTable> {
                 ),
               ],
             ),
-            child: Stack(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
+            child: SizedBox(
+              height: 100,
+              child: Stack(
+                children: [
+
+                  Positioned(
+                    bottom: 8,
+                    left: 8,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ButtonDetailsScreen(
+                              buttonText: text,
+                              buttonInstances: selectedButtons
+                                  .where((button) => button['text'] == text)
+                                  .toList(),
+                            ),
+                          ),
+                        );
+                      },
+                      child: Text('See More'),
+                    ),
+                  ),
+
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Text(
                       text,
                       style: TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 8.0),
-                    Align(
-                      alignment: Alignment.bottomLeft,
-                      child: TextButton(
-                        onPressed: () {
+                  ),
 
-                          List<dynamic> buttonInstances = selectedButtons
-                              .where((button) => button['text'] == text)
-                              .toList();
-                          _navigateToButtonDetails(text, buttonInstances);
-                        },
-                        child: Text(
-                          'See More',
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Quantity',
                           style: TextStyle(
-                            fontSize: 12.0,
-                            color: Colors.blueAccent,
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
+                        SizedBox(height: 4.0),
+                        Text(
+                          '$quantity',
+                          style: TextStyle(
+                            fontSize: 24.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: Column(
-                    children: [
-                      Text(
-                        'Quantity',
-                        style: TextStyle(
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        quantity.toString(),
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
