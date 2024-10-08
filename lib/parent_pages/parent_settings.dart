@@ -99,13 +99,18 @@ class RegisterChildForm extends StatelessWidget {
                   if (_formKey.currentState!.validate()) {
                     debugPrint(_formKey.currentState?.instantValue.toString());
                     User? user = FirebaseAuth.instance.currentUser;
-                    try{
+                    // Show the loading dialog
+                    _showLoadingDialog(context);
+                    try {
                       await _user.registerChild(
                           user!.uid,
                           _formKey.currentState?.instantValue['First name'],
                           _formKey.currentState?.instantValue['Last name'],
                           _formKey.currentState?.instantValue['Username'],
                           _formKey.currentState?.instantValue['Password']);
+
+                      // Close the loading dialog
+                      Navigator.pop(context); // Close loading dialog
                       Navigator.pop(context);
                       showTopSnackBar(Overlay.of(context),
                         CustomSnackBar.success(
@@ -115,6 +120,7 @@ class RegisterChildForm extends StatelessWidget {
                         displayDuration: Duration(seconds: 3),
                       );
                     } on UsernameAlreadyExistsException{
+                      Navigator.pop(context); // Close loading dialog
                       showTopSnackBar(Overlay.of(context),
                         CustomSnackBar.error(
                           backgroundColor: Colors.red.shade900,
@@ -134,6 +140,19 @@ class RegisterChildForm extends StatelessWidget {
       ]),
     );
   }
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent closing the dialog by tapping outside
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+  }
+
 }
 
 class RegisterChildDialog extends StatelessWidget {

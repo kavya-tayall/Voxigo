@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:test_app/parent_pages/feelings_stats_page.dart';
 import 'firebase_options.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:test_app/parent_pages/child_management_page.dart';
@@ -88,10 +91,9 @@ class BasePageState extends State<BasePage> {
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      return;
-      // ChildProvider().initiateGrid();
-    });
+    //SchedulerBinding.instance.addPostFrameCallback((_) {
+    _loadJsonData();
+    //});
   }
 
   void onItemTapped(int index) {
@@ -101,16 +103,9 @@ class BasePageState extends State<BasePage> {
   }
 
   Future<void> _loadJsonData() async {
-    final directory = await getApplicationDocumentsDirectory();
-    String filePath = '${directory.path}/board.json';
+    String? jsonString = await Provider.of<ChildProvider>(context, listen: false).fetchJson('board.json');
 
-    File file = File(filePath);
-
-    final assetJsonString = await rootBundle.loadString("assets/board_info/board.json");
-
-    await file.writeAsString(assetJsonString);
-
-    final jsonData = jsonDecode(assetJsonString);
+    final jsonData = jsonDecode(jsonString!);
 
     setState(() {
       data = Map.from(jsonData);
@@ -137,10 +132,11 @@ class BasePageState extends State<BasePage> {
   }
 
 
-  void modifyData(Map<String, List> newData) {
+  Future<void> modifyData(Map<String, List> newData) async {
     setState(() {
       data = Map.from(newData);
     });
+    await Provider.of<ChildProvider>(context, listen: false).changeGridJson(newData);
   }
 
 
@@ -151,7 +147,9 @@ class BasePageState extends State<BasePage> {
       case 0:
         page = DataWidget(
             data: data,
-            onDataChange: modifyData,
+            onDataChange: (Map<String, List> newData) async {
+              await modifyData;
+            },
             child: PathWidget(
                 onPathChange: updatePathOfBoard,
                 pathOfBoard: pathOfBoard,
@@ -192,6 +190,7 @@ class ParentBasePageState extends State<ParentBasePage> {
   static List<Widget> _widgetOptions = <Widget>[
     ChildManagementPage(),
     StatsPage(),
+    FeelingsStatsPage(),
     ParentSettingsPage(),
   ];
 
@@ -218,6 +217,10 @@ class ParentBasePageState extends State<ParentBasePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.tag_faces_sharp),
             label: '',
           ),
           BottomNavigationBarItem(

@@ -135,19 +135,33 @@ class UserService {
     await uploadJsonFromAssets('assets/board_info/board.json', '/user_folders/$username/board.json');
     await uploadJsonFromAssets('assets/songs/music.json', '/user_folders/$username/music.json');
 
+    // putting music files in cache/local storage
     try{
       String jsonString = await rootBundle.loadString('assets/songs/music.json');
       final List<dynamic> data = json.decode(jsonString);
 
       for (int i=0;i<data.length; i++){
-        downloadMp3(data[i]['link']);
-        downloadCoverImage(data[i]['image']);
+        await downloadMp3(data[i]['link']);
+        await downloadCoverImage(data[i]['image']);
       }
-
     } catch(e){
       print(e);
     }
+
+    // putting board images in cache/local storage
+    try{
+      String jsonString = await rootBundle.loadString('assets/board_info/board.json');
+      final Map<String, dynamic> data2 = json.decode(jsonString);
+
+      await downloadFromList(data2["buttons"]!);
+    } catch(e){
+      print(e);
+    }
+
+
   }
+
+
 
   Future<bool> _checkUsernameExists(String username) async {
     QuerySnapshot childResult = await _db.collection('children')

@@ -84,32 +84,16 @@ class _FirstButtonState extends State<FirstButton> {
           return Icon(Icons.broken_image);
         },
       );
-    } else if (imagePath.startsWith('file://')) {
-      String cleanedPath = imagePath.replaceFirst('file://', '');
-      if (File(cleanedPath).existsSync()) {
-
-        return Image.file(
-          File(cleanedPath),
+    } else {
+      return Image.file(
+        File(imagePath),
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            print("Failed to load image from file: $cleanedPath");
+            print("Failed to load image from file: $imagePath");
             return Icon(Icons.broken_image);
           },
         );
-      } else {
-        print("File does not exist: $cleanedPath");
-        return Icon(Icons.broken_image);
-      }
-    } else {
 
-      return Image.asset(
-        imagePath,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          print("Failed to load image from assets: $imagePath");
-          return Icon(Icons.broken_image);
-        },
-      );
     }
   }
 }
@@ -161,11 +145,11 @@ class FolderButton extends StatelessWidget {
   }
 
   Widget _loadImageFromAsset(String imagePath) {
-    return Image.asset(
-      imagePath,
+    return Image.file(
+      File(imagePath),
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
-        print("Failed to load image from assets: $imagePath");
+        print("Failed to load image from file: $imagePath");
         return Icon(Icons.broken_image);
       },
     );

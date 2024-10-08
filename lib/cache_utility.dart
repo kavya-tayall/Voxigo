@@ -56,7 +56,7 @@ Future<File> downloadCoverImage(String fileName) async {
   }
   print(musicDirectory.path);
 
-  final filePath = '${musicDirectory.path}/$fileName';
+  final filePath = '${musicDirectory.path}$fileName';
   final file = File(filePath);
 
   if (!await file.exists()) {
@@ -67,3 +67,39 @@ Future<File> downloadCoverImage(String fileName) async {
 
   return file;
 }
+
+Future<File> downloadBoardImage(String fileName) async {
+  print(fileName);
+  final storageRef = FirebaseStorage.instance.ref('initial_board_images/$fileName');
+  final directory = await getApplicationDocumentsDirectory();
+  final boardDirectory = Directory('${directory.path}\\board_images\\');
+
+  if (!await boardDirectory.exists()) {
+    await boardDirectory.create(recursive: true);
+  }
+
+  final filePath = '${boardDirectory.path}$fileName';
+  final file = File(filePath);
+
+  if (!await file.exists()) {
+    final downloadUrl = await storageRef.getDownloadURL();
+    print(downloadUrl);
+    final response = await http.get(Uri.parse(downloadUrl));
+    await file.writeAsBytes(response.bodyBytes);
+    print(filePath);
+  }
+
+  return file;
+}
+
+Future<void> downloadFromList(List listData) async{
+  for (var i=0; i<listData.length; i++){
+    await downloadBoardImage(listData[i]["image_url"]);
+    if (listData[i]["folder"] == true) {
+      await downloadFromList(listData[i]["buttons"]);
+    }
+  }
+}
+
+
+

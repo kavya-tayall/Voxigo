@@ -21,7 +21,7 @@ class DataWidget extends InheritedWidget {
   });
 
   final Map<String, List> data;
-  final void Function(Map<String, List> newData) onDataChange;
+  final Future<void> Function(Map<String, List> newData) onDataChange;
 
   static DataWidget? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<DataWidget>();
@@ -82,8 +82,6 @@ class HomePageState extends State<HomePage> {
   }
 
   void addButton(FirstButton button) async {
-    final childProvider = Provider.of<ChildProvider>(context, listen: false);
-
     setState(() {
       selectedButtons.add(button);
     });

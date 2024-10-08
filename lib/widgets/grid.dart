@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import '../child_pages/home_page.dart';
 import 'buttons.dart';
 import 'package:reorderable_grid/reorderable_grid.dart';
@@ -14,11 +17,18 @@ class Grid extends StatefulWidget {
 
 class GridState extends State<Grid> {
   dynamic visibleButtons = [];
+  Directory? appDirectory; // Store the directory here
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     updateVisibleButtons();
+    loadAppDirectory();
+  }
+
+  Future<void> loadAppDirectory() async {
+    appDirectory = await getApplicationDocumentsDirectory(); // Await the directory and store it
+    setState(() {}); // Refresh UI after loading the directory
   }
 
   void updateVisibleButtons() {
@@ -56,41 +66,42 @@ class GridState extends State<Grid> {
     });
   }
 
-  void reorderGrid(int oldIndex, int newIndex) {
+  Future<void> reorderGrid(int oldIndex, int newIndex) async {
     final dataWidget = DataWidget.of(context);
     final pathWidget = PathWidget.of(context);
 
     setState(() {
-      dynamic nestedData = dataWidget!.data;
+      // Directly reorder visibleButtons without recomputing nestedData
+      final item = visibleButtons.removeAt(oldIndex);
+      visibleButtons.insert(newIndex, item);
 
+      // Update the nestedData based on visibleButtons only after reordering
+      dynamic nestedData = dataWidget!.data;
       for (var folder in pathWidget!.pathOfBoard) {
         nestedData = nestedData[folder];
       }
 
-      // Ensure the new index is valid
-      if (newIndex > oldIndex) {
-        newIndex -= 1; // Adjust for index change when moving forward
-      }
-
-      // Move the item in the nestedData
-      Map<String, dynamic> btnVar = nestedData.removeAt(oldIndex);
-      nestedData.insert(newIndex, btnVar);
-
-      // Also update visibleButtons to reflect the new order
-      visibleButtons = List.from(nestedData);
-
-      // Notify data change
-      dataWidget.onDataChange(dataWidget.data);
-
-      // Save the updated data to file and refresh the UI
-      context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
-      context.findAncestorStateOfType<HomePageState>()?.updateGrid();
+      // Apply the reordered visibleButtons back to nestedData
+      nestedData.clear();
+      nestedData.addAll(visibleButtons);
     });
+
+    // Avoid async operations in setState; do these after
+    await dataWidget?.onDataChange(dataWidget.data);
+    context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget!.data.cast<String, dynamic>());
+    context.findAncestorStateOfType<HomePageState>()?.updateGrid();
   }
 
 
   @override
   Widget build(BuildContext context) {
+    // Check if the data has loaded, otherwise show a loading indicator
+    if (visibleButtons.isEmpty || appDirectory == null) {
+      return Center(
+        child: CircularProgressIndicator(), // Show loading until data and directory are ready
+      );
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         int crossAxisCount = 10; // Fixed number of columns
@@ -115,6 +126,7 @@ class GridState extends State<Grid> {
         }
 
         return ReorderableGridView.builder(
+          key: UniqueKey(),  // Ensure the ReorderableGridView has a unique key
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 10,
@@ -123,14 +135,20 @@ class GridState extends State<Grid> {
           physics: NeverScrollableScrollPhysics(), // Disable scrolling
           shrinkWrap: true,
           itemCount: visibleItemCount,
-          onReorder: (oldIndex, newIndex) {
+          onReorder: (oldIndex, newIndex) async {
+
+            await reorderGrid(oldIndex, newIndex);
             setState(() {
-              reorderGrid(oldIndex, newIndex);
             });
           },
           itemBuilder: (BuildContext context, int index) {
             final item = visibleButtons[index];
-            final imagePath = item["image_url"] ?? '';
+            // Make sure appDirectory is loaded before using it
+            if (appDirectory == null) {
+              return CircularProgressIndicator(); // Show a loading indicator until the directory is loaded
+            }
+
+            final imagePath = '${appDirectory?.path}\\board_images\\${item["image_url"]}';
             final label = item["label"] ?? 'No Label';
 
             // Combine 'id' with 'index' to ensure uniqueness, in case 'id' alone isn't unique

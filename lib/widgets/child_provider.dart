@@ -19,20 +19,6 @@ class ChildProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> initiateGrid() async{
-    final assetJsonString = await rootBundle.loadString("assets/board_info/board.json");
-    final jsonData = jsonDecode(assetJsonString);
-
-    if (childId != null) {
-      await FirebaseFirestore.instance.collection('children').doc(childId).update({
-    'data.boardData': jsonData
-    });
-    } else {
-      throw Exception("No child logged in");
-    }
-
-  }
-
   Future<String> _uploadFile(_selectedImage) async {
     try {
       // Create a unique file name
@@ -90,9 +76,9 @@ class ChildProvider with ChangeNotifier {
     }
   }
 
-  Future<String?> fetchMusicJson() async{
+  Future<String?> fetchJson(String jsonName) async{
     FirebaseStorage storage = FirebaseStorage.instance;
-    Reference ref = storage.ref('user_folders/${childData!['username']}/music.json');
+    Reference ref = storage.ref('user_folders/${childData!['username']}/$jsonName');
 
     final data = await ref.getData();
     if (data!= null){
@@ -133,11 +119,30 @@ class ChildProvider with ChangeNotifier {
 
   }
 
+  Future<void> changeGridJson(Map<String, List> info) async{
+    try {
+      // Convert List<Song> to List<Map<String, dynamic>>
+      String jsonData = json.encode(info);
+
+      final directory = Directory.systemTemp;
+      File tempFile = File('${directory.path}/tempGrid.json');
+      await tempFile.writeAsString(jsonData);
+
+      Reference ref = FirebaseStorage.instance.ref('user_folders/${childData!['username']}/board.json');
+      final SettableMetadata metadata = SettableMetadata(contentType: 'application/json',);
+
+      UploadTask uploadTask = ref.putFile(tempFile, metadata);
+      TaskSnapshot snapshot = await uploadTask;
+
+      print("Board uploaded to Firebase successfully.");
+    } catch (e) {
+      print("Error uploading songs: $e");
+    }
+  }
 
   void logout() {
     childId = null;
     childData = null;
     notifyListeners();
   }
-
 }

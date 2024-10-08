@@ -44,7 +44,7 @@ class _MusicPageState extends State<MusicPage> {
 
   Future<void> _loadSongsOld() async {
     try {
-      String? jsonData = await Provider.of<ChildProvider>(context, listen: false).fetchMusicJson();
+      String? jsonData = await Provider.of<ChildProvider>(context, listen: false).fetchJson('music.json');
       final List<dynamic> data = json.decode(jsonData!);
       setState(() {
         _songs = data.map((json) => Song.fromJson(json)).toList();
