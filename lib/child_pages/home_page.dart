@@ -194,7 +194,7 @@ class HomePageState extends State<HomePage> {
     await file.writeAsString(jsonString);
   }
 
-  Function(FirstButton button) selectOnPressedfunction() {
+  Function(FirstButton button) selectOnPressedFunction() {
     if (!inRemovalState) {
       return addButton;
     } else {
@@ -351,7 +351,7 @@ class HomePageState extends State<HomePage> {
                     onDataChange: context.findAncestorStateOfType<BasePageState>()!.modifyData,
                     data:
                         context.findAncestorStateOfType<BasePageState>()!.data,
-                    child: Grid(onButtonPressed: selectOnPressedfunction()),
+                    child: Grid(onButtonPressed: selectOnPressedFunction()),
                   ),
                 ),
               ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:test_app/parent_pages/child_management_page.dart';
 import 'package:test_app/parent_pages/stats_page.dart';
@@ -30,14 +31,8 @@ typedef VoidCallBack = void Function();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => ChildProvider(),
-      child: MyApp(),
-    ),
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.windows);
+  runApp(ChangeNotifierProvider(create: (context) => ChildProvider(), child: const MyApp(),),);
 }
 
 class MyApp extends StatelessWidget {
@@ -94,7 +89,8 @@ class BasePageState extends State<BasePage> {
   void initState() {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      _loadJsonData();
+      return;
+      // ChildProvider().initiateGrid();
     });
   }
 
@@ -103,6 +99,7 @@ class BasePageState extends State<BasePage> {
       selectedIndex = index;
     });
   }
+
   Future<void> _loadJsonData() async {
     final directory = await getApplicationDocumentsDirectory();
     String filePath = '${directory.path}/board.json';

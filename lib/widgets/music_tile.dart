@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../child_pages/music_page.dart';
 
@@ -30,9 +33,12 @@ class _MusicTileState extends State<MusicTile> {
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
+  Future<String>? _imagePathFuture;
 
 
   void _togglePlayPause() async {
+    final directory = await getApplicationDocumentsDirectory();
+
     if (!mounted) return;
     if (_isPlaying) {
       await _audioPlayer.pause();
@@ -43,11 +49,7 @@ class _MusicTileState extends State<MusicTile> {
       }
     } else {
       if (!widget.isPlaying) {
-        if (widget.song.isFromAssets) {
-          await _audioPlayer.play(AssetSource(widget.song.link));
-        } else {
-          await _audioPlayer.play(DeviceFileSource(widget.song.link));
-        }
+        await _audioPlayer.play(DeviceFileSource('${directory.path}/music_files/${widget.song.link}'));
       } else {
         await _audioPlayer.resume();
       }
@@ -110,6 +112,8 @@ class _MusicTileState extends State<MusicTile> {
   @override
   void initState() {
     super.initState();
+    _imagePathFuture = _setImagePath();
+
 
     _audioPlayer.onDurationChanged.listen((Duration d) {
       setState(() {
@@ -124,13 +128,22 @@ class _MusicTileState extends State<MusicTile> {
     });
   }
 
+  Future<String> _setImagePath() async {
+    final directory = await getApplicationDocumentsDirectory();
+    // Assuming widget.song.image contains the unique image name
+    String imageName = widget.song.image; // Unique image name
+    String imagePath = '${directory.path}/music_files/$imageName';
+    print('Image path: $imagePath'); // Debugging line
+    return imagePath; // Return the full path
+  }
+
+
   @override
   void dispose() {
     _audioPlayer.dispose();
     super.dispose();
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     double progress = _duration.inMilliseconds > 0
@@ -154,18 +167,58 @@ class _MusicTileState extends State<MusicTile> {
       ),
       child: Row(
         children: [
-          Container(
-            height: 80,
-            width: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              image: DecorationImage(
-                fit: BoxFit.cover,
-                image: widget.song.isFromAssets
-                    ? AssetImage(widget.song.image)
-                    : FileImage(File(widget.song.image)) as ImageProvider,
-              ),
-            ),
+          // Use FutureBuilder to wait until _imagePath is set
+          FutureBuilder<String>(
+            future: _imagePathFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                // Show a loading indicator while waiting for the image path
+                return Container(
+                  height: 80,
+                  width: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey[300],
+                  ),
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasError) {
+                // Show an error icon if something went wrong
+                return Container(
+                  height: 80,
+                  width: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey[300],
+                  ),
+                  child: Icon(Icons.error, size: 40, color: Colors.red),
+                );
+              } else if (snapshot.hasData && File(snapshot.data!).existsSync()) {
+                // Render the image once the path is ready
+                return Container(
+                  height: 80,
+                  width: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: FileImage(File(snapshot.data!)),
+                    ),
+                  ),
+                );
+              } else {
+                // Show a placeholder if the file doesn't exist
+                return Container(
+                  height: 80,
+                  width: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey[300],
+                  ),
+                  child: Icon(Icons.image, size: 40, color: Colors.grey[600]),
+                );
+              }
+            },
           ),
           SizedBox(width: 25),
           Expanded(

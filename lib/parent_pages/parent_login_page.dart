@@ -5,6 +5,7 @@ import 'package:flutter_login/flutter_login.dart';
 import '../auth_logic.dart';
 import '../child_pages/child_login_page.dart';
 import '../main.dart';
+import 'package:test_app/authExceptions.dart';
 
 class ParentLoginPage extends StatelessWidget {
   ParentLoginPage({super.key});

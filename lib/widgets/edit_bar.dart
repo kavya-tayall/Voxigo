@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'child_provider.dart';
 
 import '../child_pages/home_page.dart';
 import 'buttons.dart';
@@ -29,6 +32,7 @@ class EditBar extends StatelessWidget {
 class AddButton extends StatefulWidget {
   final Map<String, dynamic> data;
 
+
   AddButton({required this.data});
 
   @override
@@ -42,6 +46,7 @@ class AddButtonState extends State<AddButton> {
 
   List<dynamic> pictogramsData = [];
   final ImagePicker _picker = ImagePicker();
+  var _isUploading = false;
 
   @override
   void initState() {
@@ -82,6 +87,7 @@ class AddButtonState extends State<AddButton> {
       print('DataWidget is null');
     }
   }
+
 
   void addFolder(String folderName) {
     final dataWidget = DataWidget.of(context);
