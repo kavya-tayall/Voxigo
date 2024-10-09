@@ -206,7 +206,7 @@ class ParentBasePageState extends State<ParentBasePage> {
       appBar: AppBar(
         title: Text('Parent Dashboard'),
       ),
-      body: Center(
+      body: Container(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
