@@ -183,6 +183,7 @@ class HomePageState extends State<HomePage> {
   Future<void> saveUpdatedData(Map<String, dynamic> updatedData) async {
     String jsonString = jsonEncode(updatedData);
     await writeJsonToFile(jsonString);
+
     print('Data saved to board.json in documents directory');
   }
 
