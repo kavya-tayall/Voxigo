@@ -34,7 +34,9 @@ typedef VoidCallBack = void Function();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.windows);
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.macos);
+
   runApp(ChangeNotifierProvider(create: (context) => ChildProvider(), child: const MyApp(),),);
 }
 
