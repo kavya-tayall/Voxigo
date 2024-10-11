@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../widgets/parent_music_page.dart';
 import 'edit_child_grid.dart';
 
 class ChildManagementPage extends StatefulWidget {
@@ -108,6 +109,13 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                   title: Text('Edit Music'),
                   onTap: () {
                     // Placeholder for edit music functionality
+
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                        builder: (context) => ParentMusicPage(username: entry.value),
+                    ),
+                    );
                   },
                 ),
                 ListTile(

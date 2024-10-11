@@ -425,36 +425,6 @@ class RemoveButtonState extends State<RemoveButton> {
   final Color iconColor = Colors.white;
   final double buttonSize = 60.0;
 
-  void removeVisibleButton(FirstButton button) {
-    final dataWidget = DataWidget.of(context);
-    final pathWidget = PathWidget.of(context);
-
-    if (dataWidget != null) {
-      setState(() {
-        dynamic nestedData = dataWidget.data;
-
-        for (var folder in pathWidget!.pathOfBoard) {
-          nestedData = nestedData[folder];
-        }
-
-
-        nestedData.removeWhere((b) => b['id'] == button.id);
-
-
-        dataWidget.onDataChange(dataWidget.data);
-
-
-        context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
-
-
-        context.findAncestorStateOfType<HomePageState>()?.updateGrid();
-      });
-    } else {
-      print('DataWidget is null');
-    }
-
-    print("Button with ID ${button.id} is removed");
-  }
 
   void addFolder(String folderName) {
     final dataWidget = DataWidget.of(context);

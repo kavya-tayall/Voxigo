@@ -1,8 +1,7 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-
-
+import 'package:firebase_storage/firebase_storage.dart'; // Firebase storage import
+import 'package:path/path.dart' as path; // Import to help with file paths
 
 class FirstButton extends StatefulWidget {
   final String id;
@@ -64,36 +63,75 @@ class _FirstButtonState extends State<FirstButton> {
     );
   }
 
-
   Widget _loadImageWithLoadingIndicator(String imagePath) {
-    return _loadImage(imagePath);
+    return FutureBuilder<Widget>(
+      future: _loadImage(imagePath), // Load image from file or Firebase
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError || !snapshot.hasData) {
+          return Icon(Icons.broken_image);
+        }
+        return snapshot.data!;
+      },
+    );
   }
 
+  Future<Widget> _loadImage(String imagePath) async {
+    // Strip out 'Documents/board_images/' part from the path
+    String cleanedImagePath = _cleanImagePath(imagePath);
 
-  Widget _loadImage(String imagePath) {
-    if (imagePath.startsWith('http') || imagePath.startsWith('https')) {
+    // Try loading the image from the local file system
+    if (File(cleanedImagePath).existsSync()) {
+      return Image.file(
+        File(cleanedImagePath),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          print("Failed to load image from file: $cleanedImagePath");
+          return Icon(Icons.broken_image);
+        },
+      );
+    } else {
+      // If not found locally, fallback to Firebase Storage with only the file name
+      String fileName = path.basename(cleanedImagePath); // Extract file name only
+      return await _loadImageFromFirebase(fileName);
+    }
+  }
+
+  String _cleanImagePath(String imagePath) {
+    // Remove 'Documents/board_images/' or any similar unwanted parts from the imagePath
+    if (imagePath.contains('Documents/board_images/')) {
+      return imagePath.replaceAll('Documents/board_images/', '');
+    } else if (imagePath.contains('Documents\\board_images\\')) {
+      return imagePath.replaceAll('Documents\\board_images\\', '');
+    }
+    return imagePath; // Return the cleaned-up path
+  }
+
+  Future<Widget> _loadImageFromFirebase(String fileName) async {
+    try {
+      // Construct the reference to the image in Firebase Storage
+      final ref = FirebaseStorage.instance.ref().child('initial_board_images/$fileName');
+
+      // Get the download URL
+      final downloadUrl = await ref.getDownloadURL();
+
+      // Return the image from the Firebase URL
       return Image.network(
-        imagePath,
+        downloadUrl,
         fit: BoxFit.cover,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return Center(child: CircularProgressIndicator());
         },
         errorBuilder: (context, error, stackTrace) {
-          print("Failed to load image from URL: $imagePath");
+          print("Failed to load image from Firebase: $fileName");
           return Icon(Icons.broken_image);
         },
       );
-    } else {
-      return Image.file(
-        File(imagePath),
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            print("Failed to load image from file: $imagePath");
-            return Icon(Icons.broken_image);
-          },
-        );
-
+    } catch (e) {
+      print("Failed to fetch image from Firebase: $fileName, error: $e");
+      return Icon(Icons.broken_image);
     }
   }
 }
@@ -132,7 +170,7 @@ class FolderButton extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Expanded(
-              child: _loadImageFromAsset(imagePath),
+              child: _loadImageWithLoadingIndicator(imagePath),
             ),
             Text(
               text,
@@ -144,14 +182,75 @@ class FolderButton extends StatelessWidget {
     );
   }
 
-  Widget _loadImageFromAsset(String imagePath) {
-    return Image.file(
-      File(imagePath),
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        print("Failed to load image from file: $imagePath");
-        return Icon(Icons.broken_image);
+  Widget _loadImageWithLoadingIndicator(String imagePath) {
+    return FutureBuilder<Widget>(
+      future: _loadImage(imagePath), // Load image from file or Firebase
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError || !snapshot.hasData) {
+          return Icon(Icons.broken_image);
+        }
+        return snapshot.data!;
       },
     );
+  }
+
+  Future<Widget> _loadImage(String imagePath) async {
+    // Strip out 'Documents/board_images/' part from the path
+    String cleanedImagePath = _cleanImagePath(imagePath);
+
+    // Try loading the image from the local file system
+    if (File(cleanedImagePath).existsSync()) {
+      return Image.file(
+        File(cleanedImagePath),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          print("Failed to load image from file: $cleanedImagePath");
+          return Icon(Icons.broken_image);
+        },
+      );
+    } else {
+      // If not found locally, fallback to Firebase Storage with only the file name
+      String fileName = path.basename(cleanedImagePath); // Extract file name only
+      return await _loadImageFromFirebase(fileName);
+    }
+  }
+
+  String _cleanImagePath(String imagePath) {
+    // Remove 'Documents/board_images/' or any similar unwanted parts from the imagePath
+    if (imagePath.contains('Documents/board_images/')) {
+      return imagePath.replaceAll('Documents/board_images/', '');
+    } else if (imagePath.contains('Documents\\board_images\\')) {
+      return imagePath.replaceAll('Documents\\board_images\\', '');
+    }
+    return imagePath; // Return the cleaned-up path
+  }
+
+  Future<Widget> _loadImageFromFirebase(String fileName) async {
+    try {
+      // Construct the reference to the image in Firebase Storage
+      final ref = FirebaseStorage.instance.ref().child('initial_board_images/$fileName');
+
+      // Get the download URL
+      final downloadUrl = await ref.getDownloadURL();
+
+      // Return the image from the Firebase URL
+      return Image.network(
+        downloadUrl,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(child: CircularProgressIndicator());
+        },
+        errorBuilder: (context, error, stackTrace) {
+          print("Failed to load image from Firebase: $fileName");
+          return Icon(Icons.broken_image);
+        },
+      );
+    } catch (e) {
+      print("Failed to fetch image from Firebase: $fileName, error: $e");
+      return Icon(Icons.broken_image);
+    }
   }
 }
