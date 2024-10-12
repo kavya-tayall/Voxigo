@@ -207,6 +207,7 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+
   Future<void> addPhraseToPlay(String phrase) async {
     final childProvider = Provider.of<ChildProvider>(context, listen: false);
 
