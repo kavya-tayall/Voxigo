@@ -259,15 +259,15 @@ class HomePageState extends State<HomePage> {
   }
 
 
-  @override
   Widget build(BuildContext context) {
     if (context.findAncestorStateOfType<BasePageState>()!.isLoading) {
       return Center(child: CircularProgressIndicator());
     } else {
       return Column(
         children: <Widget>[
+          // Increase the height of the top bar
           Container(
-            height: 130,
+            height: 190, // Adjust height to fit buttons
             color: Colors.blueAccent,
             padding: EdgeInsets.all(8),
             child: HomeTopBar(clickedButtons: selectedButtons),
@@ -280,6 +280,7 @@ class HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Path and navigation widgets
                   PathWidget(
                     onPathChange: context.findAncestorStateOfType<BasePageState>()!.updatePathOfBoard,
                     pathOfBoard: context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
@@ -287,23 +288,17 @@ class HomePageState extends State<HomePage> {
                       visible: true,
                       child: TextButton.icon(
                         icon: Icon(Icons.arrow_back_rounded),
-                        onPressed: () => context
-                            .findAncestorStateOfType<BasePageState>()
-                            ?.goBack(),
+                        onPressed: () => context.findAncestorStateOfType<BasePageState>()?.goBack(),
                         label: const Text('Back'),
                         style: TextButton.styleFrom(
                           shape: BeveledRectangleBorder(
-                            borderRadius:
-                                BorderRadius.zero, // Make the corners sharp
+                            borderRadius: BorderRadius.zero,
                           ),
                         ),
                       ),
                     ),
                   ),
-                  Container(
-                    width: 2,
-                    color: Colors.grey,
-                  ),
+                  Container(width: 2, color: Colors.grey),
                   Expanded(
                     child: TextButton.icon(
                       icon: Icon(Icons.backspace),
@@ -311,16 +306,13 @@ class HomePageState extends State<HomePage> {
                       label: const Text('Backspace'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
-                          borderRadius:
-                              BorderRadius.zero, // Make the corners sharp
+                          borderRadius: BorderRadius.zero,
                         ),
                       ),
                     ),
                   ),
-                  Container(
-                    width: 2,
-                    color: Colors.grey,
-                  ),
+                  // Other controls like Play, Clear, Stop, etc.
+                  Container(width: 2, color: Colors.grey),
                   Expanded(
                     child: TextButton.icon(
                       icon: Icon(Icons.clear),
@@ -328,73 +320,51 @@ class HomePageState extends State<HomePage> {
                       label: const Text('Clear'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
-                          borderRadius:
-                              BorderRadius.zero, // Make the corners sharp
+                          borderRadius: BorderRadius.zero,
                         ),
                       ),
                     ),
                   ),
-                  Container(
-                    width: 2,
-                    color: Colors.grey,
-                  ),
+                  Container(width: 2, color: Colors.grey),
                   Expanded(
                     child: TextButton.icon(
                       icon: Icon(Icons.play_arrow),
                       onPressed: () async {
-                        // Concatenate all selected buttons' text into one phrase
                         String fullPhrase = _selectedButtons.map((button) => button.text).join(' ');
-
-                        // Print and speak the full phrase
                         print(fullPhrase);
                         await flutterTts.speak(fullPhrase);
-
-                        // Implement play logic: Add the whole phrase as a single entry to Firebase
                         await addPhraseToPlay(fullPhrase);
                       },
-
                       label: const Text('Play'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
-                          borderRadius:
-                              BorderRadius.zero, // Make the corners sharp
+                          borderRadius: BorderRadius.zero,
                         ),
                       ),
                     ),
                   ),
-                  Container(
-                    width: 2,
-                    color: Colors.grey,
-                  ),
+                  Container(width: 2, color: Colors.grey),
                   Expanded(
                     child: TextButton.icon(
                       icon: Icon(Icons.stop),
-                      onPressed: () {
-                        flutterTts.stop();
-                      },
+                      onPressed: () => flutterTts.stop(),
                       label: const Text('Stop'),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
-                          borderRadius:
-                              BorderRadius.zero, // Make the corners sharp
+                          borderRadius: BorderRadius.zero,
                         ),
                       ),
                     ),
                   ),
-                  Container(
-                    width: 2,
-                    color: Colors.grey,
-                  ),
+                  Container(width: 2, color: Colors.grey),
                   Expanded(
                     child: TextButton.icon(
                       icon: Icon(Icons.assistant, color: Colors.purple),
-                      onPressed: () {
-                        _showAISuggestionDialog(context);
-                      },
+                      onPressed: () => _showAISuggestionDialog(context),
                       label: const Text('Helper', style: TextStyle(color: Colors.purple)),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero, // Make the corners sharp
+                          borderRadius: BorderRadius.zero,
                         ),
                       ),
                     ),
@@ -412,8 +382,7 @@ class HomePageState extends State<HomePage> {
                   pathOfBoard: context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
                   child: DataWidget(
                     onDataChange: context.findAncestorStateOfType<BasePageState>()!.modifyData,
-                    data:
-                        context.findAncestorStateOfType<BasePageState>()!.data,
+                    data: context.findAncestorStateOfType<BasePageState>()!.data,
                     child: Grid(onButtonPressed: selectOnPressedFunction()),
                   ),
                 ),
@@ -421,15 +390,11 @@ class HomePageState extends State<HomePage> {
             ),
           ),
           PathWidget(
-            onPathChange: context
-                .findAncestorStateOfType<BasePageState>()!
-                .updatePathOfBoard,
-            pathOfBoard:
-                context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
+            onPathChange: context.findAncestorStateOfType<BasePageState>()!.updatePathOfBoard,
+            pathOfBoard: context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
             child: DataWidget(
               data: context.findAncestorStateOfType<BasePageState>()!.data,
-              onDataChange:
-                  context.findAncestorStateOfType<BasePageState>()!.modifyData,
+              onDataChange: context.findAncestorStateOfType<BasePageState>()!.modifyData,
               child: EditBar(
                 data: context.findAncestorStateOfType<BasePageState>()?.data,
               ),
@@ -440,4 +405,5 @@ class HomePageState extends State<HomePage> {
       );
     }
   }
+
 }
