@@ -64,6 +64,7 @@ class _FirstButtonState extends State<FirstButton> {
   }
 
   Widget _loadImageWithLoadingIndicator(String imagePath) {
+    print(imagePath);
     return FutureBuilder<Widget>(
       future: _loadImage(imagePath), // Load image from file or Firebase
       builder: (context, snapshot) {
@@ -76,6 +77,7 @@ class _FirstButtonState extends State<FirstButton> {
       },
     );
   }
+
 
   Future<Widget> _loadImage(String imagePath) async {
     // Strip out 'Documents/board_images/' part from the path

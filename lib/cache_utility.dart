@@ -1,5 +1,9 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/cupertino.dart';
+import 'package:path/path.dart';
+import 'package:provider/provider.dart';
+import 'package:test_app/widgets/child_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
@@ -101,5 +105,14 @@ Future<void> downloadFromList(List listData) async{
   }
 }
 
+/*
+Future<void>? checkIfChanges(BuildContext context, String childUsername) async {
+  final childProvider = Provider.of<ChildProvider>(context, listen: false);
 
+  String? musicJsonString = await childProvider.fetchJson('music.json');
+  String? boardJsonString = await childProvider.fetchJson('board.json');
+
+  final List<dynamic> data = json.decode(musicJsonString!);
+}
+*/
 

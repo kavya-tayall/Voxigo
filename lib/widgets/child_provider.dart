@@ -78,9 +78,14 @@ class ChildProvider with ChangeNotifier {
 
   Future<String?> fetchJson(String jsonName) async{
     FirebaseStorage storage = FirebaseStorage.instance;
-    Reference ref = storage.ref('user_folders/${childData!['username']}/$jsonName');
+    print(childData);
+    Reference ref = storage.ref().child('user_folders/${childData!['username']}/$jsonName');
 
+    print("ch1");
+
+    print(ref.fullPath);
     final data = await ref.getData();
+    print("ch2");
     if (data!= null){
       String jsonString = String.fromCharCodes(data);
       print(jsonString);
