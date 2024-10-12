@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:test_app/widgets/child_provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test_app/auth_logic.dart';
@@ -56,45 +57,39 @@ class _MusicPageState extends State<MusicPage> {
     }
   }
 
+
   Future<void> _saveSongs(result) async {
     try {
       print("checkpoint1");
-      // saving to local storage:
-      final directory = await getApplicationDocumentsDirectory();
-      print(directory.path);
-      final musicDirectory = Directory('${directory.path}\\music_files\\');
-      print(musicDirectory.path);
 
-      final imageFileName = result['imageFile']!.path.split('\\').last;
-      final newImageFilePath = '${musicDirectory.path}$imageFileName';
-      final newImageFile = await result['imageFile']!.copy(newImageFilePath);
+      // Get the application documents directory (platform-agnostic).
+      final directory = await getApplicationDocumentsDirectory();
+      final musicDirectory = Directory(path.join(directory.path, 'music_files'));
+
+
+      if (!(await musicDirectory.exists())) {
+        await musicDirectory.create(recursive: true);
+      }
+
+
+      final imageFile = result['imageFile']!;
+      final imageFileName = path.basename(imageFile.path);
+      final newImageFilePath = path.join(musicDirectory.path, imageFileName);
+      final newImageFile = await imageFile.copy(newImageFilePath);
+
       print(imageFileName);
       print(newImageFilePath);
       print(newImageFile);
 
-
-      final audioFileName = result['audioFile']!.path.split('\\').last;
-      final newAudioFilePath = '${musicDirectory.path}$audioFileName';
-      final newAudioFile = await result['audioFile']!.copy(newAudioFilePath);
+      // Handle audio file.
+      final audioFile = result['audioFile']!;
+      final audioFileName = path.basename(audioFile.path);
+      final newAudioFilePath = path.join(musicDirectory.path, audioFileName);
+      final newAudioFile = await audioFile.copy(newAudioFilePath);
 
       print(audioFileName);
       print(newAudioFilePath);
       print(newAudioFile);
-
-
-      // saving to firebase:
-      FirebaseStorage storage = FirebaseStorage.instance;
-      Reference musicRef = storage.ref('music_info/mp3 files/$audioFileName');
-      SettableMetadata audioMetadata = SettableMetadata(
-        contentType: 'audio/mpeg',
-      );
-      await musicRef.putFile(newAudioFile, audioMetadata);
-
-      Reference coverImageRef = storage.ref('music_info/cover_images/$imageFileName');
-      SettableMetadata imageMetadata = SettableMetadata(
-        contentType: 'image/png',
-      );
-      await coverImageRef.putFile(newImageFile, imageMetadata);
 
     } catch (e) {
       print('Error saving songs to local storage: $e');

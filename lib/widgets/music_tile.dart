@@ -49,6 +49,8 @@ class _MusicTileState extends State<MusicTile> {
       }
     } else {
       if (!widget.isPlaying) {
+        print("playing right now");
+        print('${directory.path}/music_files/${widget.song.link}');
         await _audioPlayer.play(DeviceFileSource('${directory.path}/music_files/${widget.song.link}'));
       } else {
         await _audioPlayer.resume();
