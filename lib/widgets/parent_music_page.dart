@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:file_picker/file_picker.dart'; // For file selection
+import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 
@@ -22,7 +22,7 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
   String? currentAudioUrl;
   Duration currentPosition = Duration.zero;
   Duration totalDuration = Duration.zero;
-  bool isPlaying = false; // Track if a song is playing
+  bool isPlaying = false;
 
   Map<String, String> imageUrlCache = {};
   Map<String, String> audioUrlCache = {};
@@ -82,8 +82,8 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
     final imageUrl = await fetchImageFromStorage(imageName);
     final audioUrl = await fetchAudioFromStorage(audioName);
 
-    print("Image URL: $imageUrl"); // Debug log
-    print("Audio URL: $audioUrl"); // Debug log
+    print("Image URL: $imageUrl");
+    print("Audio URL: $audioUrl");
 
     setState(() {
       imageUrlCache[imageName] = imageUrl;
@@ -181,14 +181,14 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Music title input
+
                   TextField(
                     controller: titleController,
                     decoration: InputDecoration(hintText: 'Enter Music Title'),
                   ),
                   SizedBox(height: 10),
 
-                  // Image file picker
+
                   ElevatedButton(
                     onPressed: () async {
                       FilePickerResult? imageResult = await FilePicker.platform.pickFiles(type: FileType.image);
@@ -205,7 +205,7 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
 
                   SizedBox(height: 10),
 
-                  // Audio file picker
+
                   ElevatedButton(
                     onPressed: () async {
                       FilePickerResult? audioResult = await FilePicker.platform.pickFiles(
@@ -235,42 +235,42 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
                 TextButton(
                   onPressed: () async {
                     if (titleController.text.isNotEmpty && selectedImage != null && selectedAudio != null) {
-                      // Proceed to upload files
+
                       String imagePath = 'music_info/cover_images/${selectedImage!.name}';
                       String audioPath = 'music_info/mp3 files/${selectedAudio!.name}';
 
-                      // Upload the files
+
                       await uploadFile(selectedImage!, imagePath);
                       await uploadFile(selectedAudio!, audioPath);
 
-                      // Fetch the image and audio URLs immediately after upload
+
                       final imageUrl = await fetchImageFromStorage(selectedImage!.name);
                       final audioUrl = await fetchAudioFromStorage(selectedAudio!.name);
 
-                      // Cache the URLs right away so that the UI can use them
+
                       setState(() {
                         imageUrlCache[selectedImage!.name] = imageUrl;
                         audioUrlCache[selectedAudio!.name] = audioUrl;
                       });
 
-                      // Create the new music item
+
                       Map<String, dynamic> newMusicItem = {
                         'title': titleController.text.trim(),
-                        'emotion': [], // Add default values or collect from user
-                        'keywords': [], // Add default values or collect from user
-                        'link': selectedAudio!.name, // Store only the audio file name
-                        'image': selectedImage!.name, // Store only the image name
+                        'emotion': [],
+                        'keywords': [],
+                        'link': selectedAudio!.name,
+                        'image': selectedImage!.name,
                       };
 
-                      // Add the new song to the music data list
+
                       setState(() {
                         musicData.add(newMusicItem);
                       });
 
-                      // Update Firebase JSON file with the new data
+
                       await updateMusicJson();
 
-                      Navigator.of(context).pop(); // Close dialog
+                      Navigator.of(context).pop();
                     } else {
                       print("Error: Missing title, image, or audio file");
                     }
@@ -293,28 +293,28 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
     try {
       print("Debug: Attempting to upload to path: $path");
 
-      // Reference to Firebase storage path
+
       Reference ref = FirebaseStorage.instance.ref().child(path);
 
-      // Check if the file has bytes (in-memory files)
+
       if (file.bytes != null) {
         print("Debug: Uploading file from memory: ${file.name}");
 
-        // Upload file from memory
+
         await ref.putData(file.bytes!).then((taskSnapshot) {
           print("Debug: Upload completed: ${taskSnapshot.state}");
         });
 
       } else if (file.path != null) {
-        // If bytes are not available, upload from local storage path
+
         final fileToUpload = File(file.path!);
 
-        // Check if the file exists
+
         bool fileExists = await fileToUpload.exists();
         if (fileExists) {
           print("Debug: Uploading file from path: ${file.path}");
 
-          // Upload file from the file system
+
           await ref.putFile(fileToUpload).then((taskSnapshot) {
             print("Debug: Upload completed: ${taskSnapshot.state}");
           });
@@ -331,12 +331,13 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
       print("Success: File uploaded successfully to path: $path");
 
     } on FirebaseException catch (e) {
-      // Firebase-specific exceptions
+
+
       print("Firebase Error: ${e.message}");
       print("Error Code: ${e.code}");
 
     } catch (e, stackTrace) {
-      // General exception handling
+
       print("General Error: $e");
       print("Stack Trace: $stackTrace");
     }
@@ -355,11 +356,10 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
     String imageName = musicItem['image'];
     String audioName = musicItem['link'];
 
-    // Remove from Firebase Storage
     await deleteFile('music_info/cover_images/$imageName');
     await deleteFile('music_info/mp3 files/$audioName');
 
-    // Remove from local list and update Firebase
+
     musicData.removeAt(index);
     await updateMusicJson();
     setState(() {});
