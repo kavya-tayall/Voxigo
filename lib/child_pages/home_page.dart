@@ -10,8 +10,9 @@ import 'dart:convert';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-
 import '../widgets/child_provider.dart';
+
+
 
 class DataWidget extends InheritedWidget {
   const DataWidget({
@@ -102,22 +103,27 @@ class HomePageState extends State<HomePage> {
   void removeVisibleButton(FirstButton button) {
     final dataWidget = DataWidget.of(context);
     final pathWidget = PathWidget.of(context);
+    print("checkopint 1");
+    if (dataWidget != null) {
+      print("checkpoint 2");
+      setState(() {
 
+        dynamic nestedData = dataWidget.data;
 
-    setState(() {
-      dynamic nestedData = dataWidget?.data;
-      for (var folder in pathWidget!.pathOfBoard) {
-        nestedData = nestedData[folder];
-      }
+        for (var folder in pathWidget!.pathOfBoard) {
+          nestedData = nestedData[folder];
+        }
+        nestedData.removeWhere((b) => b['id'] == button.id);
+        print("checkpoint 3");
+        print(nestedData);
 
-
-      nestedData.removeWhere((b) => b['id'] == button.id);
-      dataWidget?.onDataChange(dataWidget.data);
-
-      saveUpdatedData(dataWidget!.data);
-
-      updateGrid();
-    });
+        dataWidget.onDataChange(dataWidget.data);
+        context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
+        context.findAncestorStateOfType<HomePageState>()?.updateGrid();
+      });
+    } else {
+      print('DataWidget is null');
+    }
 
     print("Button with ID ${button.id} is removed");
   }
@@ -212,6 +218,45 @@ class HomePageState extends State<HomePage> {
       print('Error adding phrase to Firebase: $e');
     }
   }
+
+  Future<bool?> _showAISuggestionDialog(BuildContext context) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Icon(Icons.assistant, color: Colors.purple),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Text("Sentence Assistant", style: TextStyle(color: Colors.purple)),
+                  )
+                ]
+            ),
+          ),
+          content: Column(children: [Text('Would you like to search for a pictogram or upload a custom image?')]),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Pictogram'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+            TextButton(
+              child: Text('Custom Image'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -331,6 +376,24 @@ class HomePageState extends State<HomePage> {
                         shape: BeveledRectangleBorder(
                           borderRadius:
                               BorderRadius.zero, // Make the corners sharp
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 2,
+                    color: Colors.grey,
+                  ),
+                  Expanded(
+                    child: TextButton.icon(
+                      icon: Icon(Icons.assistant, color: Colors.purple),
+                      onPressed: () {
+                        _showAISuggestionDialog(context);
+                      },
+                      label: const Text('Helper', style: TextStyle(color: Colors.purple)),
+                      style: TextButton.styleFrom(
+                        shape: BeveledRectangleBorder(
+                          borderRadius: BorderRadius.zero, // Make the corners sharp
                         ),
                       ),
                     ),

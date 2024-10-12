@@ -1,20 +1,15 @@
 import 'dart:convert';
-import 'dart:io';
+
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:test_app/parent_pages/feelings_stats_page.dart';
 import 'firebase_options.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:test_app/parent_pages/child_management_page.dart';
 import 'package:test_app/parent_pages/stats_page.dart';
 import 'child_pages/music_page.dart';
 import 'widgets/child_provider.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'child_pages/home_page.dart';
@@ -28,6 +23,7 @@ import 'child_pages/suggestions_page.dart';
 import 'child_pages/coloring_suggestion.dart';
 import 'child_pages/breathing_suggestion.dart';
 import 'child_pages/54321_suggestion.dart';
+import 'ai_utility.dart';
 
 typedef VoidCallBack = void Function();
 
@@ -35,7 +31,7 @@ typedef VoidCallBack = void Function();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.macos);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.windows);
 
   runApp(ChangeNotifierProvider(create: (context) => ChildProvider(), child: const MyApp(),),);
 }
@@ -93,9 +89,8 @@ class BasePageState extends State<BasePage> {
   @override
   void initState() {
     super.initState();
-    //SchedulerBinding.instance.addPostFrameCallback((_) {
+    generateSentenceSuggestion("I like");
     _loadJsonData();
-    //});
   }
 
   void onItemTapped(int index) {
@@ -150,7 +145,7 @@ class BasePageState extends State<BasePage> {
         page = DataWidget(
             data: data,
             onDataChange: (Map<String, List> newData) async {
-              await modifyData;
+              modifyData;
             },
             child: PathWidget(
                 onPathChange: updatePathOfBoard,
