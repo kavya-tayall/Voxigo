@@ -221,6 +221,8 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<bool?> _showAISuggestionDialog(BuildContext context) async {
+    bool isLoading = false;
+
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {

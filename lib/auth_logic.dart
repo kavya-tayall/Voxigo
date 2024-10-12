@@ -99,6 +99,21 @@ class AuthService {
       final childProvider = Provider.of<ChildProvider>(context, listen: false);
       childProvider.setChildData(childId, childData);
 
+      try{
+        String? boardJsonString = await childProvider.fetchJson("board.json");
+        final Map<String, dynamic> data2 = json.decode(boardJsonString!);
+        await downloadFromList(data2["buttons"]!);
+
+        String? musicJsonString = await childProvider.fetchJson("music.json");
+        final List<dynamic> data = json.decode(musicJsonString!);
+
+        for (int i=0;i<data.length; i++){
+          await downloadMp3(data[i]['link']);
+          await downloadCoverImage(data[i]['image']);
+        }
+      } catch(e){
+        print(e);
+      }
       return childData;
     } else {
       throw ChildDoesNotExistException();
@@ -116,7 +131,6 @@ class UserService {
     if (usernameExists) {
       throw UsernameAlreadyExistsException();
     }
-
 
     DocumentReference childRef = await _db.collection('children').add({
       'username': username,
