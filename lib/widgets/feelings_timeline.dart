@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 import 'package:intl/intl.dart';
 
-
+//feeligns
 class FeelingsTable extends StatelessWidget {
   final String searchText;
   final List<dynamic> selectedFeelings;
