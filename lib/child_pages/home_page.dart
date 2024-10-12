@@ -12,6 +12,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import '../widgets/child_provider.dart';
+import '../widgets/suggestionWidget.dart';
 
 
 
@@ -240,7 +241,6 @@ class HomePageState extends State<HomePage> {
     String? response = await generateSentenceSuggestion(currentPhrase, context);
     List formattedResponse = json.decode(response!).cast<String>().toList();
     print(formattedResponse[0]);
-
 
     return showDialog<bool>(
       context: context,
