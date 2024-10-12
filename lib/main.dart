@@ -89,7 +89,6 @@ class BasePageState extends State<BasePage> {
   @override
   void initState() {
     super.initState();
-    generateSentenceSuggestion("I like");
     _loadJsonData();
   }
 

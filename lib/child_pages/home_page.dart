@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:test_app/ai_utility.dart';
 import '../widgets/grid.dart';
 import '../widgets/homepage_top_bar.dart';
 import '../widgets/edit_bar.dart';
@@ -220,41 +221,53 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+
+  List<Widget> getWidgetList(List suggestions){
+    List<Widget> widgetList = [];
+    for (String suggestion in suggestions){
+      widgetList.add(Text(suggestion));
+    }
+    return widgetList;
+  }
+
+
   Future<bool?> _showAISuggestionDialog(BuildContext context) async {
-    bool isLoading = false;
+    String currentPhrase = "";
+    for (FirstButton selectedButton in selectedButtons){
+      currentPhrase = "$currentPhrase${selectedButton.text} ";
+    }
+
+    String? response = await generateSentenceSuggestion(currentPhrase, context);
+    List formattedResponse = json.decode(response!).cast<String>().toList();
+    print(formattedResponse[0]);
+
 
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Icon(Icons.assistant, color: Colors.purple),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    child: Text("Sentence Assistant", style: TextStyle(color: Colors.purple)),
-                  )
-                ]
-            ),
-          ),
-          content: Column(children: [Text('Would you like to search for a pictogram or upload a custom image?')]),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Pictogram'),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-            ),
-            TextButton(
-              child: Text('Custom Image'),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Icon(Icons.assistant, color: Colors.purple),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Text(
+                        "Sentence Assistant",
+                        style: TextStyle(color: Colors.purple),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              content: Column(mainAxisSize: MainAxisSize.min, children: [Text('AI Summary'),]),
+              actions: getWidgetList(formattedResponse),
+            );
+          },
         );
       },
     );
@@ -362,7 +375,10 @@ class HomePageState extends State<HomePage> {
                   Expanded(
                     child: TextButton.icon(
                       icon: Icon(Icons.assistant, color: Colors.purple),
-                      onPressed: () => _showAISuggestionDialog(context),
+                      onPressed: () => {
+                        _showAISuggestionDialog(context)
+                      }
+,
                       label: const Text('Helper', style: TextStyle(color: Colors.purple)),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(

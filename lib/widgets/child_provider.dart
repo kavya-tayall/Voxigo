@@ -19,37 +19,6 @@ class ChildProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<String> _uploadFile(_selectedImage) async {
-    try {
-      // Create a unique file name
-      String fileName = '${DateTime.now().millisecondsSinceEpoch}_${_selectedImage!.path.split('/').last}';
-
-      // Create a reference to Firebase Storage
-      Reference storageRef = FirebaseStorage.instance.ref().child('uploads/$fileName');
-
-      // Upload the file
-      UploadTask uploadTask = storageRef.putFile(_selectedImage!);
-
-      // Wait for the upload to complete
-      TaskSnapshot snapshot = await uploadTask;
-
-      // Get the download URL
-      String downloadURL = await snapshot.ref.getDownloadURL();
-
-      // Save the reference to Firestore
-      await FirebaseFirestore.instance.collection('children').doc(childId).update({
-        'imageUrl': downloadURL,
-        'uploadedAt': FieldValue.serverTimestamp(),
-      });
-
-      return downloadURL;
-    } catch (e) {
-      // Handle errors
-      print('Error uploading file: $e');
-      return "error " "$e";
-    }
-  }
-
   Future<void> addSelectedButton(String text, Timestamp timestamp) async {
     if (childId != null) {
       await FirebaseFirestore.instance.collection('children').doc(childId).update({
@@ -144,6 +113,45 @@ class ChildProvider with ChangeNotifier {
       print("Error uploading songs: $e");
     }
   }
+
+  Future<String> fetchChildSelectedButtons() async {
+    try {
+      DocumentSnapshot childSnapshot = await FirebaseFirestore.instance
+          .collection('children')
+          .doc(childId)
+          .get();
+
+      if (childSnapshot.exists) {
+        Map<String, dynamic>? childData = childSnapshot.data() as Map<String, dynamic>?;
+        if (childData != null &&
+            childData['data'] != null &&
+            childData['data']['selectedButtons'] != null) {
+          List<dynamic> allButtons = childData['data']['selectedButtons'];
+          print("checkpoint1ai");
+          for (int i = 0; i < allButtons.length; i++) {
+            allButtons[i]['timestamp'] = allButtons[i]['timestamp'].toDate();
+          }
+          print("checkpoint2ai");
+          var stringList = allButtons.join(", ");
+          print(stringList);
+          return stringList;
+
+        } else {
+          print("no data");
+          return "no data";
+        }
+      } else{
+        print("dont work");
+        return ("dont work");
+      }
+
+
+    } catch (e) {
+      print('Error fetching selected buttons: $e');
+      return "error";
+    }
+  }
+
 
   void logout() {
     childId = null;
