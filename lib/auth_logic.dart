@@ -161,8 +161,6 @@ class UserService {
 
   }
 
-
-
   Future<bool> _checkUsernameExists(String username) async {
     QuerySnapshot childResult = await _db.collection('children')
         .where('username', isEqualTo: username)
@@ -170,7 +168,6 @@ class UserService {
 
     return childResult.docs.isNotEmpty;
   }
-
 
   Future<void> uploadJsonFromAssets(String assetPath, String destinationPath) async {
     try {
@@ -195,6 +192,8 @@ class UserService {
       print('Error uploading JSON file: $e');
     }
   }
+
+
 
 }
 
