@@ -15,6 +15,53 @@ import '../widgets/child_provider.dart';
 import '../widgets/suggestionWidget.dart';
 
 
+class GradientText extends StatelessWidget {
+  const GradientText(
+      this.text, {
+        required this.gradient,
+        this.style,
+      });
+
+  final String text;
+  final TextStyle? style;
+  final Gradient gradient;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (bounds) => gradient.createShader(
+        Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+      ),
+      child: Text(text, style: style),
+    );
+  }
+}
+
+
+
+class GradientIcon extends StatelessWidget {
+  const GradientIcon(
+      {
+        required this.icon,
+        required this.gradient,
+      });
+
+  final Icon icon;
+  final Gradient gradient;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (bounds) => gradient.createShader(
+        Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+      ),
+      child: icon,
+    );
+  }
+}
+
 
 class DataWidget extends InheritedWidget {
   const DataWidget({
@@ -232,48 +279,6 @@ class HomePageState extends State<HomePage> {
   }
 
 
-  Future<bool?> _showAISuggestionDialog(BuildContext context) async {
-    String currentPhrase = "";
-    for (FirstButton selectedButton in selectedButtons){
-      currentPhrase = "$currentPhrase${selectedButton.text} ";
-    }
-
-    String? response = await generateSentenceSuggestion(currentPhrase, context);
-    List formattedResponse = json.decode(response!).cast<String>().toList();
-    print(formattedResponse[0]);
-
-    return showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Icon(Icons.assistant, color: Colors.purple),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: Text(
-                        "Sentence Assistant",
-                        style: TextStyle(color: Colors.purple),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              content: Column(mainAxisSize: MainAxisSize.min, children: [Text('AI Summary'),]),
-              actions: getWidgetList(formattedResponse),
-            );
-          },
-        );
-      },
-    );
-  }
-
-
   Widget build(BuildContext context) {
     if (context.findAncestorStateOfType<BasePageState>()!.isLoading) {
       return Center(child: CircularProgressIndicator());
@@ -374,12 +379,15 @@ class HomePageState extends State<HomePage> {
                   Container(width: 2, color: Colors.grey),
                   Expanded(
                     child: TextButton.icon(
-                      icon: Icon(Icons.assistant, color: Colors.purple),
+                      icon: GradientIcon(icon: Icon(Icons.assistant), gradient: LinearGradient(colors: [Color(
+                          0xFFF64CD3), Color(
+                          0xFFAF70FF)])),
                       onPressed: () => {
-                        _showAISuggestionDialog(context)
-                      }
-,
-                      label: const Text('Helper', style: TextStyle(color: Colors.purple)),
+                        _showFormDialog(context)
+                      },
+                      label: const GradientText('Helper', gradient: LinearGradient(colors: [Color(
+                          0xFFAC70F8), Color(
+                          0xFF7000FF)])),
                       style: TextButton.styleFrom(
                         shape: BeveledRectangleBorder(
                           borderRadius: BorderRadius.zero,
@@ -422,6 +430,15 @@ class HomePageState extends State<HomePage> {
         ],
       );
     }
+  }
+
+  void _showFormDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AISuggestionDialog(currentPhrase: _selectedButtons.map((button) => button.text).join(' '));
+      },
+    );
   }
 
 }

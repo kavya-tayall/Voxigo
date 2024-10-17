@@ -22,13 +22,14 @@ final safetySettings = [
 
 
 Future<String?> generateSentenceSuggestion(String currentPhrase, BuildContext context) async {
-  String childData = await Provider.of<ChildProvider>(context, listen: false).fetchChildSelectedButtons();
+// need to fix the fetchchildbuttonsdata so it gets the string correctly
+  String childData = await Provider.of<ChildProvider>(context, listen: false).fetchChildButtonsData();
   try{
     if (apiKey != null){
       print(apiKey);
       String prompt =
           '''
-          below are phrases the child has used in the past. give me suggestions for phrases that the child might type out now. so far she has typed "$currentPhrase" in the AAC board, so give me top 5 suggestions in order from most likely to least likely according to how often the prhase was clicked, and type types of phrases clicked. The suggestions should be formatted in a list, with each phrase being a comma-separated element with quotes around it like so: ["phrase1", "phrase2", "phrase3"...]. I only want this list in your response, nothing else. 
+          below are phrases the child has used in the past. give me suggestions for phrases that the child might type out now. so far she has typed "$currentPhrase" in the AAC board, so give me top 5 suggestions in order from most likely to least likely according to the data and basic commonality of the phrases. The suggestions should be formatted in a list, with each phrase being a comma-separated element with quotes around it like so: ["phrase1", "phrase2", "phrase3"...]. I only want this list in your response, nothing else. 
           $childData
           ''';
       final content = [Content.text(prompt)];
