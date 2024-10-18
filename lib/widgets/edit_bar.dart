@@ -50,7 +50,7 @@ class AddButton extends StatefulWidget {
 class AddButtonState extends State<AddButton> {
   final Color buttonColor = Colors.lightBlue;
   final Color iconColor = Colors.white;
-  final double buttonSize = 60.0;
+  final double buttonSize = 50.0;
 
   List<dynamic> pictogramsData = [];
   final ImagePicker _picker = ImagePicker();
@@ -423,7 +423,7 @@ class RemoveButtonState extends State<RemoveButton> {
 
   final Color buttonColor = Colors.lightBlue;
   final Color iconColor = Colors.white;
-  final double buttonSize = 60.0;
+  final double buttonSize = 50.0;
 
 
   void addFolder(String folderName) {
@@ -471,7 +471,7 @@ class RemoveButtonState extends State<RemoveButton> {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           shape: CircleBorder(),
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.zero,
           backgroundColor: buttonColor,
           minimumSize: Size(buttonSize, buttonSize),
         ),
@@ -481,7 +481,7 @@ class RemoveButtonState extends State<RemoveButton> {
             isRemovalMode = !isRemovalMode;
           });
         },
-        child: Icon(isRemovalMode ? Icons.check : Icons.delete, color: iconColor),
+        child: Center(child: Icon(isRemovalMode ? Icons.check : Icons.delete, color: iconColor)),
       ),
     );
   }

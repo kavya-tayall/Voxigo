@@ -57,7 +57,6 @@ class ChildProvider with ChangeNotifier {
     print("ch2");
     if (data!= null){
       String jsonString = String.fromCharCodes(data);
-      print(jsonString);
       print('Fetched JSON: $jsonString');
       return jsonString;
     } else{
@@ -114,7 +113,9 @@ class ChildProvider with ChangeNotifier {
     }
   }
 
-  Future<String> fetchChildSelectedButtons() async {
+  Future<String> fetchChildButtonsData() async {
+    // need to fix this method so it correctly gets the string
+
     try {
       DocumentSnapshot childSnapshot = await FirebaseFirestore.instance
           .collection('children')
@@ -127,11 +128,10 @@ class ChildProvider with ChangeNotifier {
             childData['data'] != null &&
             childData['data']['selectedButtons'] != null) {
           List<dynamic> allButtons = childData['data']['selectedButtons'];
-          print("checkpoint1ai");
           for (int i = 0; i < allButtons.length; i++) {
             allButtons[i]['timestamp'] = allButtons[i]['timestamp'].toDate();
           }
-          print("checkpoint2ai");
+          print(allButtons);
           var stringList = allButtons.join(", ");
           print(stringList);
           return stringList;
