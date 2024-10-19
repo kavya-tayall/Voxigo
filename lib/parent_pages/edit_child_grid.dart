@@ -49,7 +49,7 @@ class _ChildGridPageState extends State<ChildGridPage> {
     setState(() {});
   }
 
-  // Load pictogram data from a local JSON file
+
   Future<void> loadData() async {
     String jsonString = await rootBundle.loadString('assets/board_info/pictograms.json');
     List<dynamic> data = jsonDecode(jsonString);
@@ -89,7 +89,7 @@ class _ChildGridPageState extends State<ChildGridPage> {
         "image_url": imageFileName,
         "label": button['label'],
         "folder": button['folder'],
-        "buttons": button['folder'] == true ? button['buttons'] : [], // Keep nested buttons for folders
+        "buttons": button['folder'] == true ? button['buttons'] : [],
         "id": button['id'],
       });
     }
@@ -101,16 +101,32 @@ class _ChildGridPageState extends State<ChildGridPage> {
   }
   Future<String> fetchImageFromStorage(String imageName) async {
     try {
-      // Check if the image is in Firebase Storage
-      String storagePath = 'initial_board_images/$imageName';
-      Reference storageRef = FirebaseStorage.instance.ref().child(storagePath);
-      String downloadUrl = await storageRef.getDownloadURL();
-      return downloadUrl;
+
+      final localImage = File('${appDirectory!.path}/$imageName');
+      if (await localImage.exists()) {
+
+        return localImage.path;
+      } else {
+
+        String storagePath = 'initial_board_images/$imageName';
+        Reference storageRef = FirebaseStorage.instance.ref().child(storagePath);
+        String downloadUrl = await storageRef.getDownloadURL();
+
+
+        final response = await http.get(Uri.parse(downloadUrl));
+        if (response.statusCode == 200) {
+          await localImage.writeAsBytes(response.bodyBytes);
+          return localImage.path;
+        } else {
+          throw Exception('Error fetching image from Firebase');
+        }
+      }
     } catch (e) {
-      // If the image is not in Firebase, it might be a pictogram from the internet
+      print("Error fetching image: $e");
       return '';
     }
   }
+
 
 
 
@@ -150,20 +166,21 @@ class _ChildGridPageState extends State<ChildGridPage> {
     if (image != null) {
       try {
         String fileName = Uuid().v4();
+
+
+        final localImage = File('${appDirectory!.path}/$fileName.png');
+        await localImage.writeAsBytes(await image.readAsBytes());
+
+
         Reference firebaseStorageRef = FirebaseStorage.instance.ref('initial_board_images/$fileName');
-
-
         await firebaseStorageRef.putFile(File(image.path));
 
 
-        String imageUrl = await firebaseStorageRef.getDownloadURL();
-
         Map<String, dynamic> currentFolder = getCurrentFolder();
-
         setState(() {
           currentFolder['buttons'].add({
             "id": Uuid().v4(),
-            "image_url": fileName, // Store just the file name
+            "image_url": fileName,
             "label": enteredText,
             "folder": false,
             "buttons": [],
@@ -176,6 +193,7 @@ class _ChildGridPageState extends State<ChildGridPage> {
       }
     }
   }
+
 
   Future<void> _createFirstButtonFromData(Map<String, dynamic> data, String enteredText) async {
     try {
@@ -294,14 +312,13 @@ class _ChildGridPageState extends State<ChildGridPage> {
                 return GestureDetector(
                   onTap: isRemovalMode
                       ? () {
-
                     removeButton(index);
                   }
                       : () {
 
                   },
                   child: GridTile(
-                    child: Image.network(snapshot.data!, fit: BoxFit.cover),
+                    child: Image.file(File(snapshot.data!), fit: BoxFit.cover),
                     footer: GridTileBar(
                       backgroundColor: Colors.black45,
                       title: Text(item['label'] ?? ''),

@@ -12,10 +12,10 @@ class ParentLoginPage extends StatelessWidget {
 
   final AuthService _auth = AuthService();
 
-  Future<String?> _authUser(LoginData data) async {
+  Future<String?> _authUser(LoginData data, BuildContext context) async {
     try {
-      // Attempt to sign in as a parent
-      await _auth.signInParent(data.name, data.password);
+
+      await _auth.signInParent(data.name, data.password, context);
     } on UserNotParentException {
       return 'User is not a parent';
     } on ParentDoesNotExistException {
@@ -52,7 +52,7 @@ class ParentLoginPage extends StatelessWidget {
     return Stack(
       children: [
         FlutterLogin(
-          onLogin: _authUser,
+          onLogin: (loginData) => _authUser(loginData, context), // Pass the context here
           onRecoverPassword: _recoverPassword,
           onSignup: _signUp,
           additionalSignupFields: [
@@ -106,3 +106,4 @@ class ParentLoginPage extends StatelessWidget {
     );
   }
 }
+
