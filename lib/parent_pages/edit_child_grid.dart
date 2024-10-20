@@ -33,11 +33,27 @@ class _ChildGridPageState extends State<ChildGridPage> {
     super.initState();
     loadAppDirectory();
     loadData();
+
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+    ]);
+
     if (widget.buttons != null) {
       processBoardData(widget.buttons!);
     } else {
       fetchBoardInfo();
     }
+  }
+
+  @override
+  void dispose() {
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+    super.dispose();
   }
 
   Future<void> loadAppDirectory() async {
@@ -318,10 +334,25 @@ class _ChildGridPageState extends State<ChildGridPage> {
 
                   },
                   child: GridTile(
-                    child: Image.file(File(snapshot.data!), fit: BoxFit.cover),
-                    footer: GridTileBar(
-                      backgroundColor: Colors.black45,
-                      title: Text(item['label'] ?? ''),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: Image.file(
+                            File(snapshot.data!),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        SizedBox(height: 10.0),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            item['label'] ?? '',
+                            style: TextStyle(color: Colors.black),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );

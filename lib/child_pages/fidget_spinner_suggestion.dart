@@ -14,7 +14,7 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
   late AnimationController _controller;
   AudioPlayer player = AudioPlayer();
   double _rotationSpeed = 0;
-  double _currentAngle = 0; // Keep track of the current rotation angle
+  double _currentAngle = 0;
   double _friction = 0.003;
   double _threshold = 0.00001;
 
@@ -22,17 +22,17 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
   @override
   void initState() {
     super.initState();
-    // player.play(AssetSource('sound_effects/spinning-fidget-spinner-23292.mp3'));
+
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 16), // Faster updates
+      duration: Duration(milliseconds: 16),
     )..addListener(() {
       setState(() {
 
         if (_rotationSpeed.abs() > _threshold){
           if (_rotationSpeed > 0) {
             _rotationSpeed -= _friction;
-            if (_rotationSpeed < 0) _rotationSpeed = 0; // Stop at zero
+            if (_rotationSpeed < 0) _rotationSpeed = 0;
           }
           if (_rotationSpeed < 0){
             _rotationSpeed += _friction;
@@ -46,7 +46,7 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
         _currentAngle -= _rotationSpeed;
       });
     });
-    _controller.repeat(); // Continuously update the animation
+    _controller.repeat();
   }
 
 
@@ -60,23 +60,23 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
     super.dispose();
   }
 
-  // Handle pointer (mouse) drag using Listener
+
   void _spinFidgetSpinnerPointer(PointerMoveEvent event) {
     setState(() {
-      // Increase the spin speed based on the mouse or touch delta
+
       _rotationSpeed += sqrt(event.delta.dx * event.delta.dx + event.delta.dy * event.delta.dy) * 0.005; // Use dx for horizontal drag
       sqrt(event.delta.dx * event.delta.dx + event.delta.dy * event.delta.dy);
-      if (_rotationSpeed > 1) _rotationSpeed = 1; // Cap the speed for control
+      if (_rotationSpeed > 1) _rotationSpeed = 1;
     });
   }
 
-  // Handle touch drag
+
   void _spinFidgetSpinnerTouch(DragUpdateDetails details) {
     setState(() {
       if (details.primaryDelta != null) {
-        // Adjust the speed relative to the drag amount (fine-tune as needed)
+
         _rotationSpeed += sqrt(details.delta.dx * details.delta.dx + details.delta.dy * details.delta.dy) * 0.005;
-        if (_rotationSpeed > 1) _rotationSpeed = 1; // Cap the speed for control
+        if (_rotationSpeed > 1) _rotationSpeed = 1;
       }
     });
   }
@@ -96,13 +96,13 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
           )),
       body: Center(
         child: GestureDetector(
-          onPanUpdate: _spinFidgetSpinnerTouch, // Handle touch drag
+          onPanUpdate: _spinFidgetSpinnerTouch,
           child: MouseRegion(
             onEnter: (_) {
-              // Optional: Handle mouse enter to give visual feedback
+
             },
             child: Listener(
-              onPointerMove: _spinFidgetSpinnerPointer, // Handle mouse drag
+              onPointerMove: _spinFidgetSpinnerPointer,
               child: AnimatedBuilder(
                 animation: _controller,
                 builder: (context, child) {

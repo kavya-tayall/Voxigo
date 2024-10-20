@@ -99,7 +99,7 @@ class RegisterChildForm extends StatelessWidget {
                   if (_formKey.currentState!.validate()) {
                     debugPrint(_formKey.currentState?.instantValue.toString());
                     User? user = FirebaseAuth.instance.currentUser;
-                    // Show the loading dialog
+
                     _showLoadingDialog(context);
                     try {
                       await _user.registerChild(
@@ -109,8 +109,8 @@ class RegisterChildForm extends StatelessWidget {
                           _formKey.currentState?.instantValue['Username'],
                           _formKey.currentState?.instantValue['Password']);
 
-                      // Close the loading dialog
-                      Navigator.pop(context); // Close loading dialog
+
+                      Navigator.pop(context);
                       Navigator.pop(context);
                       showTopSnackBar(Overlay.of(context),
                         CustomSnackBar.success(
@@ -120,7 +120,7 @@ class RegisterChildForm extends StatelessWidget {
                         displayDuration: Duration(seconds: 3),
                       );
                     } on UsernameAlreadyExistsException{
-                      Navigator.pop(context); // Close loading dialog
+                      Navigator.pop(context);
                       showTopSnackBar(Overlay.of(context),
                         CustomSnackBar.error(
                           backgroundColor: Colors.red.shade900,
@@ -144,7 +144,7 @@ class RegisterChildForm extends StatelessWidget {
   void _showLoadingDialog(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent closing the dialog by tapping outside
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return Center(
           child: CircularProgressIndicator(),
@@ -164,8 +164,8 @@ class RegisterChildDialog extends StatelessWidget {
       content: Container(
           width: 500,
           constraints: BoxConstraints(
-            minHeight: 300, // Minimum height of the dialog
-            maxHeight: MediaQuery.of(context).size.height * 0.9, // Max height
+            minHeight: 300,
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
           ),
           child: IntrinsicHeight(child: RegisterChildForm())),
       title: Text("Add a child"),
