@@ -223,11 +223,12 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
     await seekAudio(newPosition > totalDuration ? totalDuration : newPosition);
   }
 
+  bool isUploading = false;
+
   Future<void> addMusic() async {
     TextEditingController titleController = TextEditingController();
     PlatformFile? selectedImage;
     PlatformFile? selectedAudio;
-
 
     BuildContext dialogContext = context;
 
@@ -288,36 +289,38 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
                 TextButton(
                   onPressed: () async {
                     if (titleController.text.isNotEmpty && selectedImage != null && selectedAudio != null) {
-                      String imagePath = 'music_info/cover_images/${selectedImage!.name}';
-                      String audioPath = 'music_info/mp3 files/${selectedAudio!.name}';
-
-                      await uploadFile(selectedImage!, imagePath);
-                      await uploadFile(selectedAudio!, audioPath);
-
-                      final imageUrl = await fetchImageFromStorage(selectedImage!.name);
-                      final audioUrl = await fetchAudioFromStorage(selectedAudio!.name);
-
                       setState(() {
-                        imageUrlCache[selectedImage!.name] = imageUrl;
-                        audioUrlCache[selectedAudio!.name] = audioUrl;
+                        isUploading = true;
                       });
-
-                      Map<String, dynamic> newMusicItem = {
-                        'title': titleController.text.trim(),
-                        'emotion': [],
-                        'keywords': [],
-                        'link': selectedAudio!.name,
-                        'image': selectedImage!.name,
-                      };
-
-                      setState(() {
-                        musicData.add(newMusicItem);
-                      });
-
-                      await updateMusicJson();
-
-
                       Navigator.of(dialogContext).pop();
+
+                      // Perform the upload in the background.
+                      await Future.microtask(() async {
+                        String imagePath = 'music_info/cover_images/${selectedImage!.name}';
+                        String audioPath = 'music_info/mp3 files/${selectedAudio!.name}';
+
+                        await uploadFile(selectedImage!, imagePath);
+                        await uploadFile(selectedAudio!, audioPath);
+
+                        final imageUrl = await fetchImageFromStorage(selectedImage!.name);
+                        final audioUrl = await fetchAudioFromStorage(selectedAudio!.name);
+
+                        setState(() {
+                          imageUrlCache[selectedImage!.name] = imageUrl;
+                          audioUrlCache[selectedAudio!.name] = audioUrl;
+                          musicData.add({
+                            'title': titleController.text.trim(),
+                            'emotion': [],
+                            'keywords': [],
+                            'link': selectedAudio!.name,
+                            'image': selectedImage!.name,
+                          });
+                          isUploading = false;
+                        });
+
+                        // Update the JSON file.
+                        await updateMusicJson();
+                      });
                     } else {
                       print("Error: Missing title, image, or audio file");
                     }
@@ -331,6 +334,7 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
       },
     );
   }
+
 
 
   Future<void> uploadFile(PlatformFile file, String path) async {

@@ -212,7 +212,7 @@ class HomePageState extends State<HomePage> {
       nestedData = nestedData[folder];
     }
 
-    // Show confirmation dialog before deleting the folder
+
     bool? confirmed = await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -237,18 +237,18 @@ class HomePageState extends State<HomePage> {
       },
     );
 
-    // If confirmed, remove the folder
+
     if (confirmed == true) {
       setState(() {
-        nestedData.removeAt(folderIndex); // Remove the folder from the list
+        nestedData.removeAt(folderIndex);
 
-        // Notify that the data has changed
+
         dataWidget?.onDataChange(dataWidget.data);
 
-        // Save the updated data to file
+
         context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget!.data);
 
-        // Update the UI
+
         context.findAncestorStateOfType<HomePageState>()?.updateGrid();
       });
 
@@ -287,7 +287,7 @@ class HomePageState extends State<HomePage> {
     final childProvider = Provider.of<ChildProvider>(context, listen: false);
 
     try {
-      // Add the entire phrase as one entry with the current timestamp
+
       await childProvider.addSelectedButton(phrase, Timestamp.now());
       print('Phrase added successfully to Firebase');
     } catch (e) {
@@ -311,9 +311,9 @@ class HomePageState extends State<HomePage> {
     } else {
       return Column(
         children: <Widget>[
-          // Increase the height of the top bar
+
           Container(
-            height: 190, // Adjust height to fit buttons
+            height: 190,
             color: Colors.blueAccent,
             padding: EdgeInsets.all(8),
             child: HomeTopBar(clickedButtons: selectedButtons),
@@ -326,7 +326,7 @@ class HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Path and navigation widgets
+
                   PathWidget(
                     onPathChange: context.findAncestorStateOfType<BasePageState>()!.updatePathOfBoard,
                     pathOfBoard: context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
@@ -357,7 +357,7 @@ class HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                  // Other controls like Play, Clear, Stop, etc.
+
                   Container(width: 2, color: Colors.grey),
                   Expanded(
                     child: TextButton.icon(

@@ -52,7 +52,7 @@ class ParentLoginPage extends StatelessWidget {
     return Stack(
       children: [
         FlutterLogin(
-          onLogin: (loginData) => _authUser(loginData, context), // Pass the context here
+          onLogin: (loginData) => _authUser(loginData, context),
           onRecoverPassword: _recoverPassword,
           onSignup: _signUp,
           additionalSignupFields: [
@@ -75,7 +75,7 @@ class ParentLoginPage extends StatelessWidget {
             primaryColor: Color(0xFF56B1FB),
           ),
           onSubmitAnimationCompleted: () {
-            // Navigate to ParentBasePage only after successful login
+
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => ParentBasePage(),
@@ -83,7 +83,7 @@ class ParentLoginPage extends StatelessWidget {
             );
           },
         ),
-        // Button to navigate to child login
+
         Positioned(
           top: 20,
           right: 20,

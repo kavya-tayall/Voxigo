@@ -343,13 +343,13 @@ class _ChildGridPageState extends State<ChildGridPage> {
                             fit: BoxFit.cover,
                           ),
                         ),
-                        SizedBox(height: 10.0), // Space between image and text
+                        SizedBox(height: 10.0),
                         Padding(
-                          padding: const EdgeInsets.all(8.0), // Add some padding around the text
+                          padding: const EdgeInsets.all(8.0),
                           child: Text(
                             item['label'] ?? '',
                             style: TextStyle(color: Colors.black),
-                            textAlign: TextAlign.center, // Optional: centers the text
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       ],
