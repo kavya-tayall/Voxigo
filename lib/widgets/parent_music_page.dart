@@ -96,31 +96,31 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
 
   Future<String> fetchImageFromStorage(String imageName) async {
     try {
-      // Get local directory
+
       Directory appDocDir = await getApplicationDocumentsDirectory();
       String localImagePath = '${appDocDir.path}/music_files/$imageName';
 
-      // Check if file exists locally
+
       File localFile = File(localImagePath);
       if (await localFile.exists()) {
         print("Loading image from local storage: $localImagePath");
-        return localFile.path;  // Return local file path
+        return localFile.path;
       } else {
-        // If not found locally, download from Firebase and save locally
+
         print("Image not found locally, downloading from Firebase...");
         String storagePath = 'music_info/cover_images/$imageName';
         Reference storageRef = FirebaseStorage.instance.ref().child(storagePath);
         String downloadUrl = await storageRef.getDownloadURL();
 
-        // Download and save to local storage
+
         var httpClient = HttpClient();
         var request = await httpClient.getUrl(Uri.parse(downloadUrl));
         var response = await request.close();
         var bytes = await consolidateHttpClientResponseBytes(response);
 
-        await localFile.writeAsBytes(bytes);  // Save file locally
+        await localFile.writeAsBytes(bytes);
 
-        return localFile.path;  // Return local file path
+        return localFile.path;
       }
     } catch (e) {
       print("Error loading image for $imageName: $e");
@@ -130,31 +130,31 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
 
   Future<String> fetchAudioFromStorage(String audioName) async {
     try {
-      // Get local directory
+
       Directory appDocDir = await getApplicationDocumentsDirectory();
       String localAudioPath = '${appDocDir.path}/music_files/$audioName';
 
-      // Check if file exists locally
+
       File localFile = File(localAudioPath);
       if (await localFile.exists()) {
         print("Loading audio from local storage: $localAudioPath");
-        return localFile.path;  // Return local file path
+        return localFile.path;
       } else {
-        // If not found locally, download from Firebase and save locally
+
         print("Audio not found locally, downloading from Firebase...");
         String storagePath = 'music_info/mp3 files/$audioName';
         Reference storageRef = FirebaseStorage.instance.ref().child(storagePath);
         String downloadUrl = await storageRef.getDownloadURL();
 
-        // Download and save to local storage
+
         var httpClient = HttpClient();
         var request = await httpClient.getUrl(Uri.parse(downloadUrl));
         var response = await request.close();
         var bytes = await consolidateHttpClientResponseBytes(response);
 
-        await localFile.writeAsBytes(bytes);  // Save file locally
+        await localFile.writeAsBytes(bytes);
 
-        return localFile.path;  // Return local file path
+        return localFile.path;
       }
     } catch (e) {
       print("Error loading audio for $audioName: $e");
@@ -171,12 +171,12 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
       });
     } else {
       if (currentAudioUrl != audioUrl) {
-        // Check if the audioUrl is a local file path or a remote URL
+
         if (audioUrl.startsWith('http') || audioUrl.startsWith('https')) {
-          // If it's a remote URL, play using UrlSource
+
           await audioPlayer.play(UrlSource(audioUrl));
         } else {
-          // If it's a local file, use FileSource
+
           await audioPlayer.play(DeviceFileSource(audioUrl));
         }
         setState(() {
@@ -228,7 +228,7 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
     PlatformFile? selectedImage;
     PlatformFile? selectedAudio;
 
-    // Capture the current context of the Scaffold
+
     BuildContext dialogContext = context;
 
     await showDialog(
@@ -281,7 +281,7 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.of(dialogContext).pop();  // Use outer context
+                    Navigator.of(dialogContext).pop();
                   },
                   child: Text('Cancel'),
                 ),
@@ -316,7 +316,7 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
 
                       await updateMusicJson();
 
-                      // Close the dialog after adding the song
+
                       Navigator.of(dialogContext).pop();
                     } else {
                       print("Error: Missing title, image, or audio file");
@@ -445,8 +445,8 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
             child: ListTile(
               leading: imageUrl.isNotEmpty
                   ? (imageUrl.startsWith('http') || imageUrl.startsWith('https'))
-                  ? Image.network(imageUrl, width: 50, height: 50) // Remote URL image
-                  : Image.file(File(imageUrl), width: 50, height: 50) // Local file image
+                  ? Image.network(imageUrl, width: 50, height: 50)
+                  : Image.file(File(imageUrl), width: 50, height: 50)
                   : Icon(Icons.music_note),
 
               title: Text(item['title']),
