@@ -2,6 +2,7 @@ import 'dart:convert';
 
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:test_app/parent_pages/ai_chatbot.dart';
 import 'package:test_app/parent_pages/feelings_stats_page.dart';
 import 'firebase_options.dart';
 import 'package:test_app/parent_pages/child_management_page.dart';
@@ -176,6 +177,8 @@ class BasePageState extends State<BasePage> {
     );
   }
 }
+
+
 class ParentBasePage extends StatefulWidget {
   const ParentBasePage({super.key});
 
@@ -190,6 +193,7 @@ class ParentBasePageState extends State<ParentBasePage> {
     ChildManagementPage(),
     StatsPage(),
     FeelingsStatsPage(),
+    ChatPage(),
     ParentSettingsPage(),
   ];
 
@@ -220,6 +224,10 @@ class ParentBasePageState extends State<ParentBasePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.tag_faces_sharp),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat),
             label: '',
           ),
           BottomNavigationBarItem(

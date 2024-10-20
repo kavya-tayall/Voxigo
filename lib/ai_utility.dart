@@ -45,7 +45,7 @@ Future<String?> generateSentenceSuggestion(String currentPhrase, BuildContext co
   return null;
 }
 
-Future<String?> generateSummary(List selectedData, String type) async {
+Future<String?> generateResponse(String message, String childData, BuildContext context) async {
   final apiKey = Platform.environment['GOOGLE_API_KEY'];
 
   try{
@@ -54,12 +54,10 @@ Future<String?> generateSummary(List selectedData, String type) async {
         model: 'gemini-1.5-flash-latest',
         apiKey: apiKey,
       );
-      String embeddedStringNewline = selectedData.map((item) => item['phrase'] ?? '').join('\n');
-      print(embeddedStringNewline);
+
       String prompt =
       ''' 
-      Summarize the below data. This data is about what $type the child clicked in the app. Give a summary based on the timestamps and ${type} provided.
-      ${embeddedStringNewline}
+      The admin of the child has sent the following message: $message. The data in $childData, answer the response about their child. Don't just summarize it--you need to give insights and general statements after interpreting the data. be thorough and give good summaries of their children. make sure the response doesn't have any special formatting such as bold, italics, etc. because it doesnt show up. be friendly and conversational. dont make it multiple paragraphs, but between 1-3 is good. dont yap and be direct but thorough. also dont talk about "this app" but rather just reference the child and his/her actions. only respond with a response that uses the data given if the prompt has indicated that it wants a response containing info from the data. for example, if they just say something like "thank you", no need to use the data, the response can just be normal.
           ''';
       final content = [Content.text(prompt)];
       final response = await model.generateContent(content);

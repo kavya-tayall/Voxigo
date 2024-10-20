@@ -114,8 +114,6 @@ class ChildProvider with ChangeNotifier {
   }
 
   Future<String> fetchChildButtonsData() async {
-    // need to fix this method so it correctly gets the string
-
     try {
       DocumentSnapshot childSnapshot = await FirebaseFirestore.instance
           .collection('children')
@@ -152,6 +150,42 @@ class ChildProvider with ChangeNotifier {
     }
   }
 
+  Future<String> fetchChildFeelingsData() async {
+    try {
+      DocumentSnapshot childSnapshot = await FirebaseFirestore.instance
+          .collection('children')
+          .doc(childId)
+          .get();
+
+      if (childSnapshot.exists) {
+        Map<String, dynamic>? childData = childSnapshot.data() as Map<String, dynamic>?;
+        if (childData != null &&
+            childData['data'] != null &&
+            childData['data']['selectedFeelings'] != null) {
+          List<dynamic> allFeelings = childData['data']['selectedFeelings'];
+          for (int i = 0; i < allFeelings.length; i++) {
+            allFeelings[i]['timestamp'] = allFeelings[i]['timestamp'].toDate();
+          }
+          print(allFeelings);
+          var stringList = allFeelings.join(", ");
+          print(stringList);
+          return stringList;
+
+        } else {
+          print("no data");
+          return "no data";
+        }
+      } else{
+        print("dont work");
+        return ("dont work");
+      }
+
+
+    } catch (e) {
+      print('Error fetching selected buttons: $e');
+      return "error";
+    }
+  }
 
   void logout() {
     childId = null;
