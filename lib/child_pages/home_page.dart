@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:test_app/ai_utility.dart';
+import 'package:uuid/uuid.dart';
 import '../widgets/grid.dart';
 import '../widgets/homepage_top_bar.dart';
 import '../widgets/edit_bar.dart';
@@ -103,7 +103,10 @@ class PathWidget extends InheritedWidget {
   }
 }
 
+
 class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
   State<HomePage> createState() => HomePageState();
 }
@@ -123,6 +126,29 @@ class HomePageState extends State<HomePage> {
     flutterTts.setLanguage("en-US");
     flutterTts.setPitch(1.0);
     flutterTts.setSpeechRate(0.5);
+  }
+
+  void addPhraseToTopBar(String phrase, List imagePaths) {
+    print("asdf1");
+    List<String> words = phrase.split(' ');
+
+    print("asdf");
+
+    setState(() {
+      _selectedButtons = [];
+      for (int i=0; i<words.length; i++) {
+        Uuid uuid = Uuid();
+        print(i);
+        FirstButton newButton = FirstButton(
+          id: uuid.v4(),
+          imagePath: imagePaths[i],
+          text: words[i],
+          size: 50,
+          onPressed: ()=>{}
+        );
+        _selectedButtons.add(newButton);
+      }
+    });
   }
 
   void changeRemovalState() {
@@ -433,10 +459,11 @@ class HomePageState extends State<HomePage> {
   }
 
   void _showFormDialog(BuildContext context) {
+    final basePageState = context.findAncestorStateOfType<BasePageState>();
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AISuggestionDialog(currentPhrase: _selectedButtons.map((button) => button.text).join(' '));
+        return AISuggestionDialog(currentPhrase: _selectedButtons.map((button) => button.text).join(' '), homePageKey: basePageState!.homePageKey,);
       },
     );
   }

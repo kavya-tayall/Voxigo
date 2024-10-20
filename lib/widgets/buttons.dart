@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 
@@ -72,14 +73,13 @@ class _FirstButtonState extends State<FirstButton> {
 
   Widget _loadImage(String imagePath) {
     if (imagePath.startsWith('http') || imagePath.startsWith('https')) {
-      return Image.network(
-        imagePath,
+      return CachedNetworkImage(
+        imageUrl: imagePath,
         fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
+        placeholder: (BuildContext context, String? url) {
           return Center(child: CircularProgressIndicator());
         },
-        errorBuilder: (context, error, stackTrace) {
+        errorWidget: (BuildContext context, String? url, dynamic error) {
           print("Failed to load image from URL: $imagePath");
           return Icon(Icons.broken_image);
         },
