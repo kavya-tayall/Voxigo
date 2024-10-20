@@ -74,16 +74,16 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : ListView(
-        padding: EdgeInsets.all(16.0), // Padding around the entire list
+        padding: EdgeInsets.all(16.0),
         children: childIdToUsername.entries.map((entry) {
           return Container(
-            margin: EdgeInsets.only(bottom: 16.0), // Space between each rectangle
+            margin: EdgeInsets.only(bottom: 16.0),
             decoration: BoxDecoration(
-              color: Colors.white, // Background color for each rectangle
-              borderRadius: BorderRadius.circular(10), // Rounded corners
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1), // Slight shadow effect
+                  color: Colors.black.withOpacity(0.1),
                   blurRadius: 4,
                   offset: Offset(0, 2),
                 ),
@@ -95,7 +95,7 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                 ListTile(
                   title: Text('Edit Grid'),
                   onTap: () {
-                    // Navigate to ChildGridPage and pass the username
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -108,7 +108,7 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                 ListTile(
                   title: Text('Edit Music'),
                   onTap: () {
-                    // Placeholder for edit music functionality
+
 
                     Navigator.push(
                         context,

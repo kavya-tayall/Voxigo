@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'authExceptions.dart';
 
-
 import 'widgets/child_provider.dart';
 import 'cache_utility.dart';
 
@@ -19,8 +18,7 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future <User?> registerParent(String username, String name, String email,
-      String password) async {
+  Future<User?> registerParent(String username, String name, String email, String password) async {
     bool usernameExists = await _checkUsernameExists(username);
 
     print(usernameExists);
@@ -29,8 +27,10 @@ class AuthService {
     }
 
     try {
-      UserCredential userCredential = await _auth
-          .createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       User? parent = userCredential.user;
 
       if (parent != null) {
@@ -58,7 +58,7 @@ class AuthService {
     return parentResult.docs.isNotEmpty;
   }
 
-  Future<User?> signInParent(String email, String password) async {
+  Future<User?> signInParent(String email, String password, BuildContext context) async {
     print("called func");
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
@@ -67,12 +67,10 @@ class AuthService {
       User? parent = userCredential.user;
       print(parent);
 
-
-
       if (parent != null) {
-        DocumentSnapshot userDoc = await _db.collection('parents').doc(
-            parent.uid).get();
+        DocumentSnapshot userDoc = await _db.collection('parents').doc(parent.uid).get();
         if (userDoc.exists && userDoc['role'] == 'parent') {
+          await _fetchAndStoreChildrenData(userDoc['children'], context);
           return parent;
         } else {
           throw UserNotParentException();
@@ -83,6 +81,37 @@ class AuthService {
     } catch (e) {
       print(e.toString());
       throw OtherError();
+    }
+  }
+
+  Future<void> _fetchAndStoreChildrenData(List<dynamic> childrenIds, BuildContext context) async {
+    final childProvider = Provider.of<ChildProvider>(context, listen: false);
+
+    for (String childId in childrenIds) {
+      DocumentSnapshot childDoc = await _db.collection('children').doc(childId).get();
+
+      if (childDoc.exists) {
+        var childData = childDoc.data() as Map<String, dynamic>;
+        childProvider.setChildData(childId, childData);
+
+        try {
+
+          String? boardJsonString = await childProvider.fetchJson("board.json");
+          final Map<String, dynamic> boardData = json.decode(boardJsonString!);
+          await downloadFromList(boardData["buttons"]!);
+
+
+          String? musicJsonString = await childProvider.fetchJson("music.json");
+          final List<dynamic> musicData = json.decode(musicJsonString!);
+
+          for (int i = 0; i < musicData.length; i++) {
+            await downloadMp3(musicData[i]['link']);
+            await downloadCoverImage(musicData[i]['image']);
+          }
+        } catch (e) {
+          print(e);
+        }
+      }
     }
   }
 
@@ -99,7 +128,7 @@ class AuthService {
       final childProvider = Provider.of<ChildProvider>(context, listen: false);
       childProvider.setChildData(childId, childData);
 
-      try{
+      try {
         String? boardJsonString = await childProvider.fetchJson("board.json");
         final Map<String, dynamic> data2 = json.decode(boardJsonString!);
         await downloadFromList(data2["buttons"]!);
@@ -107,11 +136,11 @@ class AuthService {
         String? musicJsonString = await childProvider.fetchJson("music.json");
         final List<dynamic> data = json.decode(musicJsonString!);
 
-        for (int i=0;i<data.length; i++){
+        for (int i = 0; i < data.length; i++) {
           await downloadMp3(data[i]['link']);
           await downloadCoverImage(data[i]['image']);
         }
-      } catch(e){
+      } catch (e) {
         print(e);
       }
       return childData;
@@ -120,6 +149,7 @@ class AuthService {
     }
   }
 }
+
 
 class UserService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -149,7 +179,7 @@ class UserService {
     await uploadJsonFromAssets('assets/board_info/board.json', '/user_folders/$username/board.json');
     await uploadJsonFromAssets('assets/songs/music.json', '/user_folders/$username/music.json');
 
-    // putting music files in cache/local storage
+
     try{
       String jsonString = await rootBundle.loadString('assets/songs/music.json');
       final List<dynamic> data = json.decode(jsonString);
@@ -162,7 +192,7 @@ class UserService {
       print(e);
     }
 
-    // putting board images in cache/local storage
+
     try{
       String jsonString = await rootBundle.loadString('assets/board_info/board.json');
       final Map<String, dynamic> data2 = json.decode(jsonString);

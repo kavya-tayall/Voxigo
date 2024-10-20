@@ -62,7 +62,6 @@ class _MusicPageState extends State<MusicPage> {
     try {
       print("checkpoint1");
 
-      // Get the application documents directory (platform-agnostic).
       final directory = await getApplicationDocumentsDirectory();
       final musicDirectory = Directory(path.join(directory.path, 'music_files'));
 
@@ -81,7 +80,7 @@ class _MusicPageState extends State<MusicPage> {
       print(newImageFilePath);
       print(newImageFile);
 
-      // Handle audio file.
+
       final audioFile = result['audioFile']!;
       final audioFileName = path.basename(audioFile.path);
       final newAudioFilePath = path.join(musicDirectory.path, audioFileName);
@@ -230,14 +229,14 @@ class _MusicPageState extends State<MusicPage> {
           title: result['title'],
           emotion: ['unknown'],
           keywords: ['user', 'added'],
-          link: result['audioFile']!.path.split('\\').last,
-          image: result['imageFile']!.path.split('\\').last,
+          link: path.basename(result['audioFile']!.path),
+          image: path.basename(result['imageFile']!.path),
           isFromAssets: false,
         );
+
         _songs.add(newSong);
         await Provider.of<ChildProvider>(context, listen: false).changeMusicJson(_songs);
 
-        // Now call setState to update the UI
         setState(() {
           _filteredSongs = List.from(_songs);
         });
