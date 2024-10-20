@@ -85,11 +85,14 @@ class BasePageState extends State<BasePage> {
   List<dynamic> pathOfBoard = ["buttons"];
   Map<String, List> data = {};
   bool isLoading = true;
+  final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
+
 
   @override
   void initState() {
     super.initState();
     _loadJsonData();
+
   }
 
   void onItemTapped(int index) {
@@ -149,7 +152,7 @@ class BasePageState extends State<BasePage> {
             child: PathWidget(
                 onPathChange: updatePathOfBoard,
                 pathOfBoard: pathOfBoard,
-                child: HomePage()));
+                child: HomePage(key: homePageKey)));
       case 1:
         page = FeelingsPage();
       case 2:
