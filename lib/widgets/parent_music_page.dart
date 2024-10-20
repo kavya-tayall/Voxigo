@@ -228,6 +228,9 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
     PlatformFile? selectedImage;
     PlatformFile? selectedAudio;
 
+    // Capture the current context of the Scaffold
+    BuildContext dialogContext = context;
+
     await showDialog(
       context: context,
       builder: (context) {
@@ -238,14 +241,11 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-
                   TextField(
                     controller: titleController,
                     decoration: InputDecoration(hintText: 'Enter Music Title'),
                   ),
                   SizedBox(height: 10),
-
-
                   ElevatedButton(
                     onPressed: () async {
                       FilePickerResult? imageResult = await FilePicker.platform.pickFiles(type: FileType.image);
@@ -259,17 +259,13 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
                   ),
                   if (selectedImage != null)
                     Text('Image Selected: ${selectedImage!.name}', style: TextStyle(color: Colors.green)),
-
                   SizedBox(height: 10),
-
-
                   ElevatedButton(
                     onPressed: () async {
                       FilePickerResult? audioResult = await FilePicker.platform.pickFiles(
                         type: FileType.custom,
                         allowedExtensions: ['mp3', 'wav'],
                       );
-
                       if (audioResult != null) {
                         setDialogState(() {
                           selectedAudio = audioResult.files.first;
@@ -285,31 +281,26 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    Navigator.of(dialogContext).pop();  // Use outer context
                   },
                   child: Text('Cancel'),
                 ),
                 TextButton(
                   onPressed: () async {
                     if (titleController.text.isNotEmpty && selectedImage != null && selectedAudio != null) {
-
                       String imagePath = 'music_info/cover_images/${selectedImage!.name}';
                       String audioPath = 'music_info/mp3 files/${selectedAudio!.name}';
-
 
                       await uploadFile(selectedImage!, imagePath);
                       await uploadFile(selectedAudio!, audioPath);
 
-
                       final imageUrl = await fetchImageFromStorage(selectedImage!.name);
                       final audioUrl = await fetchAudioFromStorage(selectedAudio!.name);
-
 
                       setState(() {
                         imageUrlCache[selectedImage!.name] = imageUrl;
                         audioUrlCache[selectedAudio!.name] = audioUrl;
                       });
-
 
                       Map<String, dynamic> newMusicItem = {
                         'title': titleController.text.trim(),
@@ -319,15 +310,14 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
                         'image': selectedImage!.name,
                       };
 
-
                       setState(() {
                         musicData.add(newMusicItem);
                       });
 
-
                       await updateMusicJson();
 
-                      Navigator.of(context).pop();
+                      // Close the dialog after adding the song
+                      Navigator.of(dialogContext).pop();
                     } else {
                       print("Error: Missing title, image, or audio file");
                     }
@@ -341,10 +331,6 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
       },
     );
   }
-
-
-
-
 
 
   Future<void> uploadFile(PlatformFile file, String path) async {
