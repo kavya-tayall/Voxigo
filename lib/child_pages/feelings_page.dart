@@ -19,20 +19,25 @@ class FeelingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            title: Center(
-              child: Container(
-                alignment: Alignment.center,
-                width: double.infinity,
-                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black, width: 5, style: BorderStyle.solid))),
-                child: Padding(
-                    padding: EdgeInsets.only(bottom: 10, top: 10), child: Text("How do you feel?", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold), textAlign: TextAlign.center,)),
-              ),
-            )),
         body:
         Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  alignment: Alignment.center,
+                  width: double.infinity,
+                  child: Text(
+                    "How do you feel?",
+                    style: TextStyle(
+                      fontSize: 45,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [

@@ -73,7 +73,7 @@ class FeelingsButton extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 25,
                 fontWeight: FontWeight.bold,
-                color: Colors.white, // Text color
+                color: Colors.white,
               ),
             ),
           ],
