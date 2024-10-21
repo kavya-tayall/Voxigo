@@ -132,7 +132,7 @@ class GridState extends State<Grid> {
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
           ),
-          physics: NeverScrollableScrollPhysics(), // Disable scrolling
+          physics: NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemCount: visibleItemCount,
           onReorder: (oldIndex, newIndex) async {
@@ -143,9 +143,9 @@ class GridState extends State<Grid> {
           },
           itemBuilder: (BuildContext context, int index) {
             final item = visibleButtons[index];
-            // Make sure appDirectory is loaded before using it
+
             if (appDirectory == null) {
-              return CircularProgressIndicator(); // Show a loading indicator until the directory is loaded
+              return CircularProgressIndicator();
             }
 
             final imagePath = '${appDirectory?.path}\\board_images\\${item["image_url"]}';
@@ -197,9 +197,8 @@ class GridState extends State<Grid> {
               );
             } else {
               return DragTarget<Map<String, dynamic>>(
-                key: itemKey, // Ensure the FolderButton also has a unique key
+                key: itemKey,
                 onWillAcceptWithDetails: (receivedItem) {
-                  // Allow dragging over folder to drop
                   return true;
                 },
                 onAcceptWithDetails: (receivedItem) {
@@ -207,14 +206,12 @@ class GridState extends State<Grid> {
                   final pathWidget = PathWidget.of(context);
 
                   setState(() {
-                    // Get the current path to where the grid is pointing
                     dynamic nestedData = dataWidget!.data;
                     for (var folder in pathWidget!.pathOfBoard) {
                       nestedData = nestedData[folder];
                     }
 
-                    // Find the folder where the item will be moved
-                    dynamic targetFolder = nestedData[index]; // Use the correct index here
+                    dynamic targetFolder = nestedData[index];
 
                     if (targetFolder["folder"] == true) {
                       // Move the item into the folder's buttons list
