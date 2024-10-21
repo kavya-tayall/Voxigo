@@ -71,6 +71,9 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Child Management'),
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : ListView(
@@ -121,7 +124,7 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                 ListTile(
                   title: Text('Edit Username/Password'),
                   onTap: () {
-
+                    // Placeholder for edit username/password functionality
                   },
                 ),
               ],

@@ -112,6 +112,7 @@ class GridState extends State<Grid> {
         // Calculate maximum number of items that can fit based on number of rows
         int maxItems = 50;
         double buttonSize = ((availableHeight - 50) / fixedRows) + 40;
+        print("Button size: $buttonSize");
 
         // Limit the number of items shown to the maximum number that fits in the grid
         int visibleItemCount = visibleButtons.length > maxItems ? maxItems : visibleButtons.length;

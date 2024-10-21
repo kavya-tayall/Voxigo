@@ -1,9 +1,6 @@
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
-
 
 class FirstButton extends StatefulWidget {
   final String id;
@@ -65,21 +62,17 @@ class _FirstButtonState extends State<FirstButton> {
     );
   }
 
-
   Widget _loadImageWithLoadingIndicator(String imagePath) {
     return _loadImage(imagePath);
   }
-
 
   Widget _loadImage(String imagePath) {
     if (imagePath.startsWith('http') || imagePath.startsWith('https')) {
       return CachedNetworkImage(
         imageUrl: imagePath,
-        fit: BoxFit.cover,
-        placeholder: (BuildContext context, String? url) {
-          return Center(child: CircularProgressIndicator());
-        },
-        errorWidget: (BuildContext context, String? url, dynamic error) {
+        fit: BoxFit.contain,
+        placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+        errorWidget: (context, url, error) {
           print("Failed to load image from URL: $imagePath");
           return Icon(Icons.broken_image);
         },
@@ -87,13 +80,12 @@ class _FirstButtonState extends State<FirstButton> {
     } else {
       return Image.file(
         File(imagePath),
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           print("Failed to load image from file: $imagePath");
           return Icon(Icons.broken_image);
         },
       );
-
     }
   }
 }
@@ -147,7 +139,7 @@ class FolderButton extends StatelessWidget {
   Widget _loadImageFromAsset(String imagePath) {
     return Image.file(
       File(imagePath),
-      fit: BoxFit.cover,
+      fit: BoxFit.contain,
       errorBuilder: (context, error, stackTrace) {
         print("Failed to load image from file: $imagePath");
         return Icon(Icons.broken_image);
