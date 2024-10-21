@@ -290,6 +290,25 @@ class _MusicPageState extends State<MusicPage> {
         : Column(
       children: [
         Padding(
+          padding: EdgeInsets.only(top: 7.0),
+          child: Text(
+            "Music",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 40,
+              fontWeight: FontWeight.bold
+            )
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+          child: Divider(
+            thickness: 2,
+            color: Colors.grey
+          ),
+        ),
+
+        Padding(
           padding: const EdgeInsets.all(12.0),
           child: TextField(
             controller: _searchController,
