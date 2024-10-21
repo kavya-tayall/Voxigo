@@ -16,33 +16,68 @@ class FeelingsButton extends StatelessWidget {
     required this.suggestions,
   }) : super(key: key);
 
+  Color _getButtonColor() {
+    switch (feeling) {
+      case "Happy":
+        return Color(0xFF128E00);
+      case "Sad":
+        return Colors.blue[300]!;
+      case "Angry":
+        return Colors.red[600]!;
+      case "Nervous":
+        return Color(0xFF80008E);
+      case "Bored":
+        return Color(0xFF636363);
+      case "Tired":
+        return Color(0xFFC86B00);
+      default:
+        return Colors.grey[300]!;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      style: TextButton.styleFrom(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
-      onPressed: () {
+    return GestureDetector(
+      onTap: () {
         Provider.of<ChildProvider>(context, listen: false).addSelectedFeelings(feeling, Timestamp.now());
         Navigator.pushNamed(context, '/suggestions', arguments: suggestions);
-      },
-      child: Column(
-        children: [
-          Image.asset(
-            imagePath,
-            width: MediaQuery.sizeOf(context).width / 7,
+        },
+      child: Container(
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: _getButtonColor(),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.black,
+            width: 2,
           ),
-          Text(
-            feeling,
-            style: TextStyle(
-              backgroundColor: Colors.transparent,
-              color: Colors.black,
-              fontSize: 20,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: Offset(3, 3),
+            )
+          ],
+      ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              imagePath,
+              height: 100,
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              feeling,
+              style: const TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // Text color
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

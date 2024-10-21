@@ -314,109 +314,132 @@ class HomePageState extends State<HomePage> {
 
           Container(
             height: 190,
-            color: Colors.blueAccent,
+            color: Colors.white,
             padding: EdgeInsets.all(8),
             child: HomeTopBar(clickedButtons: selectedButtons),
           ),
           Container(
-            padding: EdgeInsets.all(8),
+            color: Colors.white,
+            padding: EdgeInsetsDirectional.symmetric(horizontal: 10),
+            child: Divider(
+              thickness: 2,
+              color: Colors.grey,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            padding: EdgeInsets.symmetric(vertical:3, horizontal: 6),
             child: SizedBox(
               height: 50,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-
                   PathWidget(
                     onPathChange: context.findAncestorStateOfType<BasePageState>()!.updatePathOfBoard,
                     pathOfBoard: context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
-                    child: Visibility(
-                      visible: true,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
                       child: TextButton.icon(
                         icon: Icon(Icons.arrow_back_rounded),
                         onPressed: () => context.findAncestorStateOfType<BasePageState>()?.goBack(),
                         label: const Text('Back'),
                         style: TextButton.styleFrom(
-                          shape: BeveledRectangleBorder(
-                            borderRadius: BorderRadius.zero,
+                          backgroundColor: Color(0xffdde8ff),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ),
                     ),
                   ),
-                  Container(width: 2, color: Colors.grey),
                   Expanded(
-                    child: TextButton.icon(
-                      icon: Icon(Icons.backspace),
-                      onPressed: backspaceSelectedButtons,
-                      label: const Text('Backspace'),
-                      style: TextButton.styleFrom(
-                        shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                      child: TextButton.icon(
+                        icon: Icon(Icons.backspace),
+                        onPressed: backspaceSelectedButtons,
+                        label: const Text('Backspace'),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Color(0xffdde8ff),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
                     ),
                   ),
-
-                  Container(width: 2, color: Colors.grey),
                   Expanded(
-                    child: TextButton.icon(
-                      icon: Icon(Icons.clear),
-                      onPressed: clearSelectedButtons,
-                      label: const Text('Clear'),
-                      style: TextButton.styleFrom(
-                        shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                      child: TextButton.icon(
+                        icon: Icon(Icons.clear),
+                        onPressed: clearSelectedButtons,
+                        label: const Text('Clear'),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Color(0xffdde8ff),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  Container(width: 2, color: Colors.grey),
                   Expanded(
-                    child: TextButton.icon(
-                      icon: Icon(Icons.play_arrow),
-                      onPressed: () async {
-                        String fullPhrase = _selectedButtons.map((button) => button.text).join(' ');
-                        print(fullPhrase);
-                        await flutterTts.speak(fullPhrase);
-                        await addPhraseToPlay(fullPhrase);
-                      },
-                      label: const Text('Play'),
-                      style: TextButton.styleFrom(
-                        shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                      child: TextButton.icon(
+                        icon: Icon(Icons.play_arrow),
+                        onPressed: () async {
+                          String fullPhrase = _selectedButtons.map((button) => button.text).join(' ');
+                          print(fullPhrase);
+                          await flutterTts.speak(fullPhrase);
+                          await addPhraseToPlay(fullPhrase);
+                        },
+                        label: const Text('Play'),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Color(0xffdde8ff),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  Container(width: 2, color: Colors.grey),
                   Expanded(
-                    child: TextButton.icon(
-                      icon: Icon(Icons.stop),
-                      onPressed: () => flutterTts.stop(),
-                      label: const Text('Stop'),
-                      style: TextButton.styleFrom(
-                        shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                      child: TextButton.icon(
+                        icon: Icon(Icons.stop),
+                        onPressed: () => flutterTts.stop(),
+                        label: const Text('Stop'),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Color(0xffdde8ff),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  Container(width: 2, color: Colors.grey),
                   Expanded(
-                    child: TextButton.icon(
-                      icon: GradientIcon(icon: Icon(Icons.assistant), gradient: LinearGradient(colors: [Color(
-                          0xFFF64CD3), Color(
-                          0xFFAF70FF)])),
-                      onPressed: () => {
-                        _showFormDialog(context)
-                      },
-                      label: const GradientText('Helper', gradient: LinearGradient(colors: [Color(
-                          0xFFAC70F8), Color(
-                          0xFF7000FF)])),
-                      style: TextButton.styleFrom(
-                        shape: BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                      child: TextButton.icon(
+                        icon: GradientIcon(icon: Icon(Icons.assistant), gradient: LinearGradient(colors: [Color(
+                            0xFFF64CD3), Color(
+                            0xFFAF70FF)])),
+                        onPressed: () => {
+                          _showFormDialog(context)
+                        },
+                        label: const GradientText('Helper', gradient: LinearGradient(colors: [Color(
+                            0xFFAC70F8), Color(
+                            0xFF7000FF)])),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Color(0xffdde8ff),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
                     ),
@@ -427,7 +450,7 @@ class HomePageState extends State<HomePage> {
           ),
           Expanded(
             child: Container(
-              color: Colors.transparent,
+              color: Colors.white,
               child: Center(
                 child: PathWidget(
                   onPathChange: context.findAncestorStateOfType<BasePageState>()!.updatePathOfBoard,
@@ -435,7 +458,10 @@ class HomePageState extends State<HomePage> {
                   child: DataWidget(
                     onDataChange: context.findAncestorStateOfType<BasePageState>()!.modifyData,
                     data: context.findAncestorStateOfType<BasePageState>()!.data,
-                    child: Grid(onButtonPressed: selectOnPressedFunction()),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Grid(onButtonPressed: selectOnPressedFunction()),
+                    ),
                   ),
                 ),
               ),

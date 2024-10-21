@@ -37,9 +37,9 @@ class FeelingsPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
             FeelingsButton(
-              feeling: "Happy",
-              imagePath: "assets/imgs/happy.png",
-              suggestions: [],
+                feeling: "Happy",
+                imagePath: "assets/imgs/happy.png",
+                suggestions: [],
             ), FeelingsButton(
               feeling: "Sad",
               imagePath: "assets/imgs/sad.png",
