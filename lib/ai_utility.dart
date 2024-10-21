@@ -5,7 +5,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:provider/provider.dart';
 import 'package:test_app/widgets/child_provider.dart';
 
-final apiKey = Platform.environment['GOOGLE_API_KEY'];
+final apiKey = "AIzaSyCwGoxCVSmBYKH2q2sJ7WLhEYmdGkfRjdU";
 
 final model = GenerativeModel(
   model: 'gemini-1.5-flash-latest',
@@ -37,6 +37,7 @@ Future<String?> generateSentenceSuggestion(String currentPhrase, BuildContext co
 
       return response.text;
     } else{
+      print("hi: $apiKey");
       print("dont work");
     }
   } catch(e){
@@ -46,11 +47,13 @@ Future<String?> generateSentenceSuggestion(String currentPhrase, BuildContext co
 }
 
 Future<String?> generateResponse(String message, String childData, BuildContext context) async {
+  final apiKey = "AIzaSyCwGoxCVSmBYKH2q2sJ7WLhEYmdGkfRjdU";
+
   try{
     if (apiKey != null){
       final model = GenerativeModel(
         model: 'gemini-1.5-flash-latest',
-        apiKey: apiKey!,
+        apiKey: apiKey,
       );
 
       String prompt =
