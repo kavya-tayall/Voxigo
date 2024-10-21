@@ -24,7 +24,7 @@ class _ChatPageState extends State<ChatPage> {
   );
 
   List<ChatMessage> messages = <ChatMessage>[];
-  List<ChatUser> typingUsers = []; // Maintain typing users
+  List<ChatUser> typingUsers = [];
 
   @override
   void initState() {
@@ -84,7 +84,6 @@ class _ChatPageState extends State<ChatPage> {
           }
           return childrenData.toString();
 
-
         } else {
           print("no data");
           return "no data";
@@ -93,7 +92,6 @@ class _ChatPageState extends State<ChatPage> {
         print("dont work");
         return ("dont work");
       }
-
 
     } catch (e) {
       print('Error fetching selected buttons: $e');
@@ -113,7 +111,7 @@ class _ChatPageState extends State<ChatPage> {
 
     if (response != null) {
       setState(() {
-        typingUsers.remove(aiUser); // Remove AI from typing
+        typingUsers.remove(aiUser);
         messages.insert(0, ChatMessage(
           user: aiUser,
           text: response,

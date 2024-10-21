@@ -74,14 +74,12 @@ class MyApp extends StatelessWidget {
 
 class MyAppState extends ChangeNotifier {}
 
-
 class BasePage extends StatefulWidget {
   const BasePage({super.key});
 
   @override
   State<BasePage> createState() => BasePageState();
 }
-
 class BasePageState extends State<BasePage> {
   int selectedIndex = 0;
   List<dynamic> pathOfBoard = ["buttons"];
@@ -178,7 +176,6 @@ class BasePageState extends State<BasePage> {
     );
   }
 }
-
 
 class ParentBasePage extends StatefulWidget {
   const ParentBasePage({super.key});

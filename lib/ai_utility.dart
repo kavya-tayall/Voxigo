@@ -46,13 +46,11 @@ Future<String?> generateSentenceSuggestion(String currentPhrase, BuildContext co
 }
 
 Future<String?> generateResponse(String message, String childData, BuildContext context) async {
-  final apiKey = Platform.environment['GOOGLE_API_KEY'];
-
   try{
     if (apiKey != null){
       final model = GenerativeModel(
         model: 'gemini-1.5-flash-latest',
-        apiKey: apiKey,
+        apiKey: apiKey!,
       );
 
       String prompt =
