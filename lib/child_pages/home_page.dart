@@ -143,7 +143,7 @@ class HomePageState extends State<HomePage> {
           id: uuid.v4(),
           imagePath: imagePaths[i],
           text: words[i],
-          size: 50,
+          size: 151.2,
           onPressed: ()=>{}
         );
         _selectedButtons.add(newButton);
@@ -304,7 +304,7 @@ class HomePageState extends State<HomePage> {
     return widgetList;
   }
 
-
+  @override
   Widget build(BuildContext context) {
     if (context.findAncestorStateOfType<BasePageState>()!.isLoading) {
       return Center(child: CircularProgressIndicator());
@@ -473,12 +473,15 @@ class HomePageState extends State<HomePage> {
             child: DataWidget(
               data: context.findAncestorStateOfType<BasePageState>()!.data,
               onDataChange: context.findAncestorStateOfType<BasePageState>()!.modifyData,
-              child: EditBar(
-                data: context.findAncestorStateOfType<BasePageState>()?.data,
+              child: Container(
+                color: Colors.white,
+                child: EditBar(
+                  data: context.findAncestorStateOfType<BasePageState>()?.data,
+                ),
               ),
             ),
           ),
-          SizedBox(height: 20),
+          
         ],
       );
     }

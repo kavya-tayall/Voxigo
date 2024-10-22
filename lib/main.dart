@@ -3,10 +3,9 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:test_app/parent_pages/ai_chatbot.dart';
-import 'package:test_app/parent_pages/feelings_stats_page.dart';
+import 'package:test_app/parent_pages/stats_page.dart';
 import 'firebase_options.dart';
 import 'package:test_app/parent_pages/child_management_page.dart';
-import 'package:test_app/parent_pages/stats_page.dart';
 import 'child_pages/music_page.dart';
 import 'widgets/child_provider.dart';
 
@@ -64,7 +63,6 @@ class MyApp extends StatelessWidget {
           '/breathing': (_) => BreathingHome(),
           '/54321': (_) => FiveCalmDownHome(),
           '/parent_base': (_) => ParentBasePage(),
-          '/parent_stats': (_) => StatsPage(),
         },
       ),
     );
@@ -190,7 +188,6 @@ class ParentBasePageState extends State<ParentBasePage> {
   static List<Widget> _widgetOptions = <Widget>[
     ChildManagementPage(),
     StatsPage(),
-    FeelingsStatsPage(),
     ChatPage(),
     ParentSettingsPage(),
   ];
@@ -204,9 +201,6 @@ class ParentBasePageState extends State<ParentBasePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Parent Dashboard'),
-      ),
       body: Container(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
@@ -218,10 +212,6 @@ class ParentBasePageState extends State<ParentBasePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.tag_faces_sharp),
             label: '',
           ),
           BottomNavigationBarItem(

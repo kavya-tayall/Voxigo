@@ -27,14 +27,21 @@ class EditBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        AddButton(data: data),
-        RemoveButton(),
-      ],
+    return Container(
+      color: Colors.transparent,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 16.0), // Adjust the bottom padding value as needed
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            AddButton(data: data),
+            RemoveButton(),
+          ],
+        ),
+      ),
     );
   }
+
 }
 
 class AddButton extends StatefulWidget {
@@ -50,7 +57,7 @@ class AddButton extends StatefulWidget {
 class AddButtonState extends State<AddButton> {
   final Color buttonColor = Colors.lightBlue;
   final Color iconColor = Colors.white;
-  final double buttonSize = 50.0;
+  final double buttonSize = 70.0;
 
   List<dynamic> pictogramsData = [];
   final ImagePicker _picker = ImagePicker();
@@ -232,6 +239,7 @@ class AddButtonState extends State<AddButton> {
           icon: Icons.add,
           activeIcon: Icons.close,
           backgroundColor: buttonColor,
+          buttonSize: const Size(70, 70),
           iconTheme: IconThemeData(color: iconColor),
           children: [
             SpeedDialChild(
@@ -423,7 +431,7 @@ class RemoveButtonState extends State<RemoveButton> {
 
   final Color buttonColor = Colors.lightBlue;
   final Color iconColor = Colors.white;
-  final double buttonSize = 50.0;
+  final double buttonSize = 70.0;
 
 
   void addFolder(String folderName) {
