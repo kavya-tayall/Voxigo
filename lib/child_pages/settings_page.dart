@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import '../widgets/child_provider.dart';
 
 class CustomSettings extends StatelessWidget {
-  const CustomSettings({super.key});
-
+  CustomSettings({super.key});
+  
   @override
   Widget build(BuildContext context) {
     return SettingsList(
@@ -15,31 +15,30 @@ class CustomSettings extends StatelessWidget {
           title: Text('Common'),
           tiles: <SettingsTile>[
             SettingsTile.navigation(
-              leading: Icon(Icons.language),
+              leading: Icon(Icons.language, color: Colors.black),
+              trailing: Text(""),
               title: Text('Language'),
               value: Text('English'),
             ),
-            SettingsTile.switchTile(
-              onToggle: (value) {},
-              initialValue: true,
-              leading: Icon(Icons.format_paint),
-              title: Text('Enable custom theme'),
+            SettingsTile.navigation(
+              onPressed: (value) {},
+              leading: Icon(Icons.color_lens, color: Colors.black),
+              trailing: Text(""),
+              title: Text('Change Theme/Color'),
             ),
             SettingsTile.navigation(
-              leading: Icon(Icons.logout),
+              leading: Icon(Icons.logout, color: Colors.black),
               title: Text('Log out'),
+              trailing: Text(""),
               onPressed: (context) async {
-
-                final childProvider = Provider.of<ChildProvider>(context, listen: false);
-
-
+                final childProvider =
+                Provider.of<ChildProvider>(context, listen: false);
                 childProvider.logout();
-
                 await FirebaseAuth.instance.signOut();
-
-
-                Navigator.of(context).pushReplacementNamed('/parent_login');
+                Navigator.of(context)
+                    .pushReplacementNamed('/parent_login');
               },
+
             ),
           ],
         ),
@@ -47,18 +46,16 @@ class CustomSettings extends StatelessWidget {
           title: Text('Account'),
           tiles: <SettingsTile>[
             SettingsTile.navigation(
-              leading: Icon(Icons.person),
+              leading: Icon(Icons.person, color: Colors.black),
               title: Text('Profile'),
-              onPressed: (context) {
-
-              },
+              trailing: Text(""),
+              onPressed: (context) {},
             ),
             SettingsTile.navigation(
-              leading: Icon(Icons.lock),
+              leading: Icon(Icons.lock, color: Colors.black),
+              trailing: Text(""),
               title: Text('Change Password'),
-              onPressed: (context) {
-
-              },
+              onPressed: (context) {},
             ),
           ],
         ),
@@ -66,11 +63,10 @@ class CustomSettings extends StatelessWidget {
           title: Text('Notifications'),
           tiles: <SettingsTile>[
             SettingsTile.switchTile(
-              leading: Icon(Icons.notifications),
+              leading: Icon(Icons.notifications, color: Colors.black),
+              trailing: Text(""),
               title: Text('Enable Notifications'),
-              onToggle: (value) {
-
-              },
+              onToggle: (value) {},
               initialValue: true,
             ),
           ],
@@ -79,21 +75,20 @@ class CustomSettings extends StatelessWidget {
           title: Text('Privacy'),
           tiles: <SettingsTile>[
             SettingsTile.navigation(
-              leading: Icon(Icons.lock_outline),
+              leading: Icon(Icons.lock_outline, color: Colors.black),
+              trailing: Text(""),
               title: Text('Privacy Policy'),
-              onPressed: (context) {
-
-              },
+              onPressed: (context) {},
             ),
             SettingsTile.navigation(
-              leading: Icon(Icons.security),
+              leading: Icon(Icons.security, color: Colors.black),
               title: Text('Security Settings'),
-              onPressed: (context) {
-
-              },
+              trailing: Text(""),
+              onPressed: (context) {},
             ),
           ],
         ),
+
       ],
     );
   }
