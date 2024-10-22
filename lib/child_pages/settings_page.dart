@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +6,7 @@ import '../widgets/child_provider.dart';
 
 class CustomSettings extends StatelessWidget {
   CustomSettings({super.key});
-
-
+  
   @override
   Widget build(BuildContext context) {
     return SettingsList(
@@ -40,6 +38,7 @@ class CustomSettings extends StatelessWidget {
                 Navigator.of(context)
                     .pushReplacementNamed('/parent_login');
               },
+
             ),
           ],
         ),
