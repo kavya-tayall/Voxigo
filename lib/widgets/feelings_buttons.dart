@@ -39,11 +39,12 @@ class FeelingsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Provider.of<ChildProvider>(context, listen: false).addSelectedFeelings(feeling, Timestamp.now());
+        Provider.of<ChildProvider>(context, listen: false)
+            .addSelectedFeelings(feeling, Timestamp.now());
         Navigator.pushNamed(context, '/suggestions', arguments: suggestions);
-        },
+      },
       child: Container(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(20.0),  // Increased padding
         decoration: BoxDecoration(
           color: _getButtonColor(),
           borderRadius: BorderRadius.circular(20),
@@ -59,19 +60,23 @@ class FeelingsButton extends StatelessWidget {
               offset: Offset(3, 3),
             )
           ],
-      ),
+        ),
+        constraints: BoxConstraints(
+          minWidth: 200,   // Added minimum width
+          minHeight: 220,  // Added minimum height
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
               imagePath,
-              height: 100,
+              height: 150,  // Increased image size
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),  // Increased space between image and text
             Text(
               feeling,
               style: const TextStyle(
-                fontSize: 25,
+                fontSize: 30,  // Increased font size
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),

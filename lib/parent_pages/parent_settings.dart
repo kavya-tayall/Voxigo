@@ -4,13 +4,12 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
-import '../auth_logic.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
-import 'package:test_app/authExceptions.dart';
-
+import '../auth_logic.dart';
 import '../widgets/child_provider.dart';
+import '../authExceptions.dart';
 
 class ParentSettingsPage extends StatefulWidget {
   ParentSettingsPage({super.key});
@@ -20,8 +19,7 @@ class ParentSettingsPage extends StatefulWidget {
 }
 
 class _ParentSettingsPageState extends State<ParentSettingsPage> {
-  String _selectedOption =
-      'Select Child'; // Start with an empty selected option
+  String _selectedOption = 'Select Child';
   List<String> childrenNamesList = [];
   bool isLoading = true;
 
@@ -49,7 +47,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
 
       if (parentSnapshot.exists) {
         Map<String, dynamic>? parentData =
-            parentSnapshot.data() as Map<String, dynamic>?;
+        parentSnapshot.data() as Map<String, dynamic>?;
         if (parentData != null && parentData['children'] != null) {
           List<dynamic> childrenIDList = parentData['children'];
           for (String childId in childrenIDList) {
@@ -60,18 +58,14 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
 
             if (childSnapshot.exists) {
               Map<String, dynamic>? childData =
-                  childSnapshot.data() as Map<String, dynamic>?;
+              childSnapshot.data() as Map<String, dynamic>?;
               if (childData != null &&
                   childData['first name'] != null &&
                   childData['last name'] != null) {
                 String childName =
                     childData['first name'] + ", " + childData['last name'];
                 childrenNamesList.add(childName);
-              } else {
-                print("no data");
               }
-            } else {
-              print("dont work");
             }
           }
 
@@ -79,14 +73,10 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
             isLoading = false;
             if (childrenNamesList.isNotEmpty) {
               _selectedOption =
-                  childrenNamesList[0]; // Set default selected option
+              childrenNamesList[0];
             }
           });
-        } else {
-          print("no data");
         }
-      } else {
-        print("dont work");
       }
     } catch (e) {
       print('Error fetching selected buttons: $e');
@@ -95,164 +85,154 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? Center(
-            child:
-                CircularProgressIndicator()) // Show loading indicator while fetching data
-        : SettingsList(
-            sections: [
-              SettingsSection(
-                title: Text('Common'),
-                tiles: <SettingsTile>[
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.language, color: Colors.black),
-                    trailing: Text("English", style: TextStyle(color: Colors.black87)),
-                    title: Text('Language'),
-                    value: Text('English'),
-                  ),
-                  SettingsTile.switchTile(
-                    onToggle: (value) {},
-                    initialValue: true,
-                    leading: Icon(Icons.format_paint, color: Colors.black),
-                    trailing: Text(""),
-                    title: Text('Enable custom theme'),
-                  ),
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.logout, color: Colors.black),
-                    title: Text('Log out'),
-                    trailing: Text(""),
-                    onPressed: (context) async {
-                      final childProvider =
-                          Provider.of<ChildProvider>(context, listen: false);
-                      childProvider.logout();
-                      await FirebaseAuth.instance.signOut();
-                      Navigator.of(context)
-                          .pushReplacementNamed('/parent_login');
-                    },
-                  ),
-                ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Settings'),
+        centerTitle: true,
+        automaticallyImplyLeading: false, // Removes the back button
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SettingsList(
+        sections: [
+          SettingsSection(
+            title: Text('Common'),
+            tiles: <SettingsTile>[
+              SettingsTile.navigation(
+                leading: Icon(Icons.language, color: Colors.black),
+                trailing: Text("English", style: TextStyle(color: Colors.black87)),
+                title: Text('Language'),
+                value: Text('English'),
               ),
-              SettingsSection(
-                title: Text('Account'),
-                tiles: <SettingsTile>[
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.person, color: Colors.black),
-                    title: Text('Profile'),
-                    trailing: Text(""),
-                    onPressed: (context) {},
-                  ),
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.lock, color: Colors.black),
-                    trailing: Text(""),
-                    title: Text('Change Password'),
-                    onPressed: (context) {},
-                  ),
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.add, color: Colors.black),
-                    trailing: Text(""),
-                    title: Text('Add Child'),
-                    onPressed: (context) {
-                      _showFormDialog(context);
-                    },
-                  ),
-                ],
+              SettingsTile.switchTile(
+                onToggle: (value) {},
+                initialValue: true,
+                leading: Icon(Icons.format_paint, color: Colors.black),
+                title: Text('Enable custom theme'),
               ),
-              SettingsSection(
-                title: Text('Notifications'),
-                tiles: <SettingsTile>[
-                  SettingsTile.switchTile(
-                    leading: Icon(Icons.notifications, color: Colors.black),
-                    trailing: Text(""),
-                    title: Text('Enable Notifications'),
-                    onToggle: (value) {},
-                    initialValue: true,
-                  ),
-                ],
-              ),
-              SettingsSection(
-                title: Text('Privacy'),
-                tiles: <SettingsTile>[
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.lock_outline, color: Colors.black),
-                    trailing: Text(""),
-                    title: Text('Privacy Policy'),
-                    onPressed: (context) {},
-                  ),
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.security, color: Colors.black),
-                    title: Text('Security Settings'),
-                    trailing: Text(""),
-                    onPressed: (context) {},
-                  ),
-                ],
-              ),
-              SettingsSection(
-                title: Text('Child Settings'),
-                tiles: <SettingsTile>[
-                  SettingsTile(
-                    title: Text('Select a child'),
-                    trailing: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey,
-                            width: 1.5,
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: DropdownButton<String>(
-                          value: _selectedOption.isNotEmpty
-                              ? _selectedOption
-                              : null,
-                          hint: Text("Select a child"),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedOption = newValue!;
-                            });
-                          },
-                          items: childrenNamesList
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          underline:
-                              SizedBox.shrink(), // Remove the default underline
-                        ),
-                      ),
-                    ),
-                  ),
-                  SettingsTile.switchTile(
-                    leading: Icon(Icons.assistant, color: Colors.black),
-                    title: Text('Can use sentence helper'),
-                    initialValue: true,
-                    onToggle: (bool value) {},
-                  ),
-                  SettingsTile.switchTile(
-                    leading: Icon(Icons.grid_on_rounded, color: Colors.black),
-                    title: Text('Can use grid controls'),
-                    initialValue: true,
-                    onToggle: (bool value) {},
-                  ),
-                  SettingsTile.switchTile(
-                    leading: Icon(Icons.settings, color: Colors.black),
-                    title: Text('Can use settings'),
-                    initialValue: true,
-                    onToggle: (bool value) {},
-                  ),
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.color_lens, color: Colors.black),
-                    title: Text('Child Theme'),
-                    trailing: Text(""),
-                    onPressed: (context) {},
-                  ),
-                ],
+              SettingsTile.navigation(
+                leading: Icon(Icons.logout, color: Colors.black),
+                title: Text('Log out'),
+                onPressed: (context) async {
+                  final childProvider =
+                  Provider.of<ChildProvider>(context, listen: false);
+                  childProvider.logout();
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.of(context)
+                      .pushReplacementNamed('/parent_login');
+                },
               ),
             ],
-          );
+          ),
+          SettingsSection(
+            title: Text('Account'),
+            tiles: <SettingsTile>[
+              SettingsTile.navigation(
+                leading: Icon(Icons.person, color: Colors.black),
+                title: Text('Profile'),
+              ),
+              SettingsTile.navigation(
+                leading: Icon(Icons.lock, color: Colors.black),
+                title: Text('Change Password'),
+              ),
+              SettingsTile.navigation(
+                leading: Icon(Icons.add, color: Colors.black),
+                title: Text('Add Child'),
+                onPressed: (context) {
+                  _showFormDialog(context);
+                },
+              ),
+            ],
+          ),
+          SettingsSection(
+            title: Text('Notifications'),
+            tiles: <SettingsTile>[
+              SettingsTile.switchTile(
+                leading: Icon(Icons.notifications, color: Colors.black),
+                title: Text('Enable Notifications'),
+                onToggle: (value) {},
+                initialValue: true,
+              ),
+            ],
+          ),
+          SettingsSection(
+            title: Text('Privacy'),
+            tiles: <SettingsTile>[
+              SettingsTile.navigation(
+                leading: Icon(Icons.lock_outline, color: Colors.black),
+                title: Text('Privacy Policy'),
+              ),
+              SettingsTile.navigation(
+                leading: Icon(Icons.security, color: Colors.black),
+                title: Text('Security Settings'),
+              ),
+            ],
+          ),
+          SettingsSection(
+            title: Text('Child Settings'),
+            tiles: <SettingsTile>[
+              SettingsTile(
+                title: Text('Select a child'),
+                trailing: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 1.5,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: DropdownButton<String>(
+                      value: _selectedOption.isNotEmpty
+                          ? _selectedOption
+                          : null,
+                      hint: Text("Select a child"),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedOption = newValue!;
+                        });
+                      },
+                      items: childrenNamesList
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      underline: SizedBox.shrink(),
+                    ),
+                  ),
+                ),
+              ),
+              SettingsTile.switchTile(
+                leading: Icon(Icons.assistant, color: Colors.black),
+                title: Text('Can use sentence helper'),
+                initialValue: true,
+                onToggle: (bool value) {},
+              ),
+              SettingsTile.switchTile(
+                leading: Icon(Icons.grid_on_rounded, color: Colors.black),
+                title: Text('Can use grid controls'),
+                initialValue: true,
+                onToggle: (bool value) {},
+              ),
+              SettingsTile.switchTile(
+                leading: Icon(Icons.settings, color: Colors.black),
+                title: Text('Can use settings'),
+                initialValue: true,
+                onToggle: (bool value) {},
+              ),
+              SettingsTile.navigation(
+                leading: Icon(Icons.color_lens, color: Colors.black),
+                title: Text('Child Theme'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -268,7 +248,7 @@ class RegisterChildForm extends StatelessWidget {
     return FormBuilder(
       key: _formKey,
       child:
-          Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+      Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
         Padding(
           padding: EdgeInsets.only(bottom: 8),
           child: FormBuilderTextField(
@@ -395,11 +375,12 @@ class RegisterChildDialog extends StatelessWidget {
 }
 
 final childSuccessSnackBar = SnackBar(
-    content: Text('Child has been added'),
-    behavior: SnackBarBehavior.floating,
-    margin: EdgeInsets.only(top: 10, left: 10.0, right: 10.0),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(0),
-    ),
-    backgroundColor: Colors.green,
-    duration: Duration(seconds: 3));
+  content: Text('Child has been added'),
+  behavior: SnackBarBehavior.floating,
+  margin: EdgeInsets.only(top: 10, left: 10.0, right: 10.0),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(0),
+  ),
+  backgroundColor: Colors.green,
+  duration: Duration(seconds: 3),
+);
