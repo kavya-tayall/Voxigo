@@ -185,21 +185,26 @@ class ParentBasePage extends StatefulWidget {
 class ParentBasePageState extends State<ParentBasePage> {
   int _selectedIndex = 0;
 
-  static List<Widget> _widgetOptions = <Widget>[
-    ChildManagementPage(),
-    StatsPage(),
-    ChatPage(),
-    ParentSettingsPage(),
-  ];
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
+    List<Widget> _widgetOptions = <Widget>[
+      ChildManagementPage(
+        onNavigate: (int index) {
+          _onItemTapped(index);
+        },
+      ),
+      StatsPage(),
+      ChatPage(),
+      ParentSettingsPage(),
+    ];
+
     return Scaffold(
       body: Container(
         child: _widgetOptions.elementAt(_selectedIndex),

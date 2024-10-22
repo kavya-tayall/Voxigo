@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../child_pages/home_page.dart';
 import '../widgets/buttons_table.dart';
 import '../widgets/feelings_timeline.dart';
 
@@ -150,16 +151,33 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Stats Page'),
-        bottom: TabBar(
-          controller: _tabController,
-          onTap: (_) => fetchDataForCurrentTab(),
-          tabs: [
-            Tab(text: 'Button Stats'),
-            Tab(text: 'Feeling Stats'),
+        backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(Icons.bar_chart, color: Colors.black, size: 30),
+            Row(children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 3.0),
+                child: Image.asset("assets/imgs/logo_without_text.png",
+                    width: 60),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 12),
+                child: GradientText("MindBridge",
+                    gradient: LinearGradient(colors: [
+                      Colors.blue,
+                      Colors.blueAccent,
+                      Colors.deepPurpleAccent
+                    ]),
+                    style:
+                    TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
+              )
+            ]),
           ],
-        ),
-      ),
+        )),
       body: TabBarView(
         controller: _tabController,
         children: [

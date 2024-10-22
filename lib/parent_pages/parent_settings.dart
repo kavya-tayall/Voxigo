@@ -10,6 +10,7 @@ import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
 import 'package:test_app/authExceptions.dart';
 
+import '../child_pages/home_page.dart';
 import '../widgets/child_provider.dart';
 
 class ParentSettingsPage extends StatefulWidget {
@@ -95,7 +96,31 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(Icons.settings, color: Colors.black, size: 30),
+            Row(children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 3.0),
+                child: Image.asset("assets/imgs/logo_without_text.png", width: 60),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 12),
+                child: GradientText("MindBridge", gradient: LinearGradient(colors: [Colors.blue, Colors.blueAccent, Colors.deepPurpleAccent]), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
+              )
+            ]
+            ),
+          ],
+        )
+    ),
+
+
+      body: isLoading
         ? Center(
             child:
                 CircularProgressIndicator()) // Show loading indicator while fetching data
@@ -252,7 +277,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                 ],
               ),
             ],
-          );
+      ));
   }
 }
 
