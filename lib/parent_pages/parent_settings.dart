@@ -106,7 +106,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                 tiles: <SettingsTile>[
                   SettingsTile.navigation(
                     leading: Icon(Icons.language, color: Colors.black),
-                    trailing: Text(""),
+                    trailing: Text("English", style: TextStyle(color: Colors.black87)),
                     title: Text('Language'),
                     value: Text('English'),
                   ),
@@ -229,19 +229,19 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                     leading: Icon(Icons.assistant, color: Colors.black),
                     title: Text('Can use sentence helper'),
                     initialValue: true,
-                    onToggle: (bool value) {  },
+                    onToggle: (bool value) {},
                   ),
                   SettingsTile.switchTile(
                     leading: Icon(Icons.grid_on_rounded, color: Colors.black),
                     title: Text('Can use grid controls'),
                     initialValue: true,
-                    onToggle: (bool value) {  },
+                    onToggle: (bool value) {},
                   ),
                   SettingsTile.switchTile(
                     leading: Icon(Icons.settings, color: Colors.black),
                     title: Text('Can use settings'),
                     initialValue: true,
-                    onToggle: (bool value) {  },
+                    onToggle: (bool value) {},
                   ),
                   SettingsTile.navigation(
                     leading: Icon(Icons.color_lens, color: Colors.black),
