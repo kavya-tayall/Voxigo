@@ -46,7 +46,7 @@ class FeelingsTable extends StatelessWidget {
 
     return Timeline.tileBuilder(
       theme: TimelineThemeData(
-        nodePosition: 0,
+        nodePosition: -1.0, // Align the node further to the left
         color: Color(0xff989898),
         indicatorTheme: IndicatorThemeData(
           position: 0,
@@ -59,46 +59,56 @@ class FeelingsTable extends StatelessWidget {
       physics: ScrollPhysics(),
       builder: TimelineTileBuilder(
         itemCount: sortedFeelings.length,
-        contentsAlign: ContentsAlign.values[0],
+        contentsAlign: ContentsAlign.basic, // Ensures basic alignment of the contents
         contentsBuilder: (context, index) {
-          return TimelineTile(
-            contents: Row(
-              crossAxisAlignment: CrossAxisAlignment.center, // Ensure top-left alignment
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          return Padding(
+            padding: EdgeInsets.only(left: 10.0), // Reduced padding for tighter left alignment
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start, // Aligns the content to the top-left
+              mainAxisAlignment: MainAxisAlignment.start, // Aligns items to the left
               children: [
-                Text(
-                  "${sortedFeelings[index]['text']}",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold
-                  ), // Adjust text styling as needed
-                ),
-                Text(
-                  "${sortedFeelings[index]['formattedTimestamp']}",
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: Color(0xFF606060)
-                  ), // Adjust text styling as needed
+                Expanded( // Ensure content spans the full width
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start, // Align text to the left
+                    children: [
+                      Text(
+                        "${sortedFeelings[index]['text']}",
+                        style: TextStyle(
+                          fontSize: 18, // Smaller font size for feelings text
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 5), // Add some spacing between text and timestamp
+                      Text(
+                        "${sortedFeelings[index]['formattedTimestamp']}",
+                        style: TextStyle(
+                          fontSize: 14, // Smaller font size for timestamp
+                          color: Color(0xFF606060),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            node: TimelineNode(
-              indicator: Image.asset(
-                "assets/imgs/${sortedFeelings[index]['text'].toLowerCase()}.png",
-                width: 40,
-              ),
-              startConnector: DashedLineConnector(
-                space: 70,
-                color: Color(0xFF91A4B1),
-              ),
-              endConnector: DashedLineConnector(
-                space: 70,
-                color: Color(0xFF91A4B1),
-              ),
-            ),
           );
         },
+        indicatorBuilder: (context, index) => Image.asset(
+          "assets/imgs/${sortedFeelings[index]['text'].toLowerCase()}.png",
+          width: 40,
+        ),
+        startConnectorBuilder: (context, index) => DashedLineConnector(
+          space: 70,
+          color: Color(0xFF91A4B1),
+        ),
+        endConnectorBuilder: (context, index) => DashedLineConnector(
+          space: 70,
+          color: Color(0xFF91A4B1),
+        ),
       ),
     );
+
+
+
   }
 }
