@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:test_app/ai_utility.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
-
+import '../child_pages/home_page.dart';
 import '../widgets/child_provider.dart';
 
 class ChatPage extends StatefulWidget {
@@ -21,6 +21,7 @@ class _ChatPageState extends State<ChatPage> {
   ChatUser aiUser = ChatUser(
     id: '2',
     firstName: 'MindAI',
+    profileImage: 'assets/imgs/img.png',
   );
 
   List<ChatMessage> messages = <ChatMessage>[];
@@ -30,12 +31,11 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
     messages.add(ChatMessage(
-      user: user,
+      user: aiUser,
       createdAt: DateTime.now(),
-      text: "hello",
+      text: "Hi! How can I help you today?",
     ));
   }
-
 
   Future<String> fetchChildrenData() async {
     try {
@@ -49,7 +49,7 @@ class _ChatPageState extends State<ChatPage> {
         if (parentData != null && parentData['children'] != null) {
           List<dynamic> childrenIDList = parentData['children'];
           Map<String, dynamic> childrenData = {};
-          for (String childId in childrenIDList){
+          for (String childId in childrenIDList) {
             DocumentSnapshot childSnapshot = await FirebaseFirestore.instance
                 .collection('children')
                 .doc(childId)
@@ -73,34 +73,34 @@ class _ChatPageState extends State<ChatPage> {
                 var stringFeelingList = allFeelings.join(", ");
                 var stringButtonList = allButtons.join(", ");
 
-                childrenData[childId] = {"first name": childData['first name'], "last name": childData['last name'], "username": childData['username'], "feelingsData": stringFeelingList, "buttonsData": stringButtonList};
-
+                childrenData[childId] = {
+                  "first name": childData['first name'],
+                  "last name": childData['last name'],
+                  "username": childData['username'],
+                  "feelingsData": stringFeelingList,
+                  "buttonsData": stringButtonList
+                };
               } else {
                 print("no data");
               }
-            } else{
-              print("dont work");
+            } else {
+              print("don't work");
             }
           }
           return childrenData.toString();
-
         } else {
           print("no data");
           return "no data";
         }
-      } else{
-        print("dont work");
-        return ("dont work");
+      } else {
+        print("don't work");
+        return "don't work";
       }
-
     } catch (e) {
       print('Error fetching selected buttons: $e');
       return "error";
     }
   }
-
-
-
 
   Future<void> getAIResponse(ChatMessage m) async {
     setState(() {
@@ -121,22 +121,38 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: DashChat(
-        currentUser: user,
-        onSend: (ChatMessage m) {
-          setState(() {
-            messages.insert(0, m);
-          });
-          getAIResponse(m);
-        },
-        typingUsers: typingUsers, // Pass the typing users list
-        messages: messages,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: GradientText(
+          'MindAI',
+          gradient: LinearGradient(
+            colors: [Color(0xFFAC70F8), Color(0xFF7000FF)],
+          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
+
+      body: Column(
+        children: [
+          Expanded(
+            child: DashChat(
+              currentUser: user,
+              onSend: (ChatMessage m) {
+                setState(() {
+                  messages.insert(0, m);
+                });
+                getAIResponse(m);
+              },
+              typingUsers: typingUsers,
+              messages: messages,
+            ),
+          ),
+        ],
       ),
     );
   }

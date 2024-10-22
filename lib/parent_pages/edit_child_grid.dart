@@ -301,12 +301,13 @@ class _ChildGridPageState extends State<ChildGridPage> {
           : gridData.isEmpty
           ? Center(child: Text("No data found for this child"))
           : Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 75.0), // Add horizontal padding here
         child: GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 5,
+            crossAxisCount: 10, // Keep the number of columns 10
             crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
+            mainAxisSpacing: 20, // Increase vertical spacing
+            childAspectRatio: 0.6, // Control the height/width ratio
           ),
           itemCount: getCurrentFolder()['buttons'].length,
           itemBuilder: (context, index) {
@@ -330,17 +331,18 @@ class _ChildGridPageState extends State<ChildGridPage> {
                       ? () {
                     removeButton(index);
                   }
-                      : () {
-
-                  },
+                      : () {},
                   child: GridTile(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(
-                          child: Image.file(
-                            File(snapshot.data!),
-                            fit: BoxFit.cover,
+                          child: SizedBox(
+                            height: 150.0, // Adjust height to make it bigger vertically
+                            child: Image.file(
+                              File(snapshot.data!),
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                         SizedBox(height: 10.0),
@@ -348,7 +350,8 @@ class _ChildGridPageState extends State<ChildGridPage> {
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
                             item['label'] ?? '',
-                            style: TextStyle(color: Colors.black),
+
+                            style: TextStyle(color: Colors.black, fontSize: 9),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -361,6 +364,7 @@ class _ChildGridPageState extends State<ChildGridPage> {
           },
         ),
       ),
+
       floatingActionButton: SpeedDial(
         icon: Icons.add,
         children: [

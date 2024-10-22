@@ -6,90 +6,112 @@ import '../widgets/child_provider.dart';
 
 class CustomSettings extends StatelessWidget {
   CustomSettings({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
-    return SettingsList(
-      sections: [
-        SettingsSection(
-          title: Text('Common'),
-          tiles: <SettingsTile>[
-            SettingsTile.navigation(
-              leading: Icon(Icons.language, color: Colors.black),
-              trailing: Text(""),
-              title: Text('Language'),
-              value: Text('English'),
-            ),
-            SettingsTile.navigation(
-              onPressed: (value) {},
-              leading: Icon(Icons.color_lens, color: Colors.black),
-              trailing: Text(""),
-              title: Text('Change Theme/Color'),
-            ),
-            SettingsTile.navigation(
-              leading: Icon(Icons.logout, color: Colors.black),
-              title: Text('Log out'),
-              trailing: Text(""),
-              onPressed: (context) async {
-                final childProvider =
-                Provider.of<ChildProvider>(context, listen: false);
-                childProvider.logout();
-                await FirebaseAuth.instance.signOut();
-                Navigator.of(context)
-                    .pushReplacementNamed('/parent_login');
-              },
+    // Detect the screen size to adjust for iPad or large screens
+    bool isLargeScreen = MediaQuery.of(context).size.width > 600;
+    double titleFontSize = isLargeScreen ? 24.0 : 16.0;
 
-            ),
-          ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Settings',
+          style: TextStyle(fontSize: isLargeScreen ? 32 : 20), // Larger title for iPad
         ),
-        SettingsSection(
-          title: Text('Account'),
-          tiles: <SettingsTile>[
-            SettingsTile.navigation(
-              leading: Icon(Icons.person, color: Colors.black),
-              title: Text('Profile'),
-              trailing: Text(""),
-              onPressed: (context) {},
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+      ),
+      body: SettingsList(
+        sections: [
+          SettingsSection(
+            title: Text(
+              'Common',
+              style: TextStyle(fontSize: titleFontSize), // Adjusted title font size
             ),
-            SettingsTile.navigation(
-              leading: Icon(Icons.lock, color: Colors.black),
-              trailing: Text(""),
-              title: Text('Change Password'),
-              onPressed: (context) {},
+            tiles: <SettingsTile>[
+              SettingsTile.navigation(
+                leading: Icon(Icons.language, color: Colors.black),
+                trailing: Text(""),
+                title: Text('Language', style: TextStyle(fontSize: titleFontSize)),
+                value: Text('English', style: TextStyle(fontSize: titleFontSize)),
+              ),
+              SettingsTile.navigation(
+                onPressed: (value) {},
+                leading: Icon(Icons.color_lens, color: Colors.black),
+                trailing: Text(""),
+                title: Text('Change Theme/Color', style: TextStyle(fontSize: titleFontSize)),
+              ),
+              SettingsTile.navigation(
+                leading: Icon(Icons.logout, color: Colors.black),
+                title: Text('Log out', style: TextStyle(fontSize: titleFontSize)),
+                trailing: Text(""),
+                onPressed: (context) async {
+                  final childProvider = Provider.of<ChildProvider>(context, listen: false);
+                  childProvider.logout();
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.of(context).pushReplacementNamed('/parent_login');
+                },
+              ),
+            ],
+          ),
+          SettingsSection(
+            title: Text(
+              'Account',
+              style: TextStyle(fontSize: titleFontSize), // Adjusted title font size
             ),
-          ],
-        ),
-        SettingsSection(
-          title: Text('Notifications'),
-          tiles: <SettingsTile>[
-            SettingsTile.switchTile(
-              leading: Icon(Icons.notifications, color: Colors.black),
-              trailing: Text(""),
-              title: Text('Enable Notifications'),
-              onToggle: (value) {},
-              initialValue: true,
+            tiles: <SettingsTile>[
+              SettingsTile.navigation(
+                leading: Icon(Icons.person, color: Colors.black),
+                title: Text('Profile', style: TextStyle(fontSize: titleFontSize)),
+                trailing: Text(""),
+                onPressed: (context) {},
+              ),
+              SettingsTile.navigation(
+                leading: Icon(Icons.lock, color: Colors.black),
+                trailing: Text(""),
+                title: Text('Change Password', style: TextStyle(fontSize: titleFontSize)),
+                onPressed: (context) {},
+              ),
+            ],
+          ),
+          SettingsSection(
+            title: Text(
+              'Notifications',
+              style: TextStyle(fontSize: titleFontSize), // Adjusted title font size
             ),
-          ],
-        ),
-        SettingsSection(
-          title: Text('Privacy'),
-          tiles: <SettingsTile>[
-            SettingsTile.navigation(
-              leading: Icon(Icons.lock_outline, color: Colors.black),
-              trailing: Text(""),
-              title: Text('Privacy Policy'),
-              onPressed: (context) {},
+            tiles: <SettingsTile>[
+              SettingsTile.switchTile(
+                leading: Icon(Icons.notifications, color: Colors.black),
+                trailing: Text(""),
+                title: Text('Enable Notifications', style: TextStyle(fontSize: titleFontSize)),
+                onToggle: (value) {},
+                initialValue: true,
+              ),
+            ],
+          ),
+          SettingsSection(
+            title: Text(
+              'Privacy',
+              style: TextStyle(fontSize: titleFontSize), // Adjusted title font size
             ),
-            SettingsTile.navigation(
-              leading: Icon(Icons.security, color: Colors.black),
-              title: Text('Security Settings'),
-              trailing: Text(""),
-              onPressed: (context) {},
-            ),
-          ],
-        ),
-
-      ],
+            tiles: <SettingsTile>[
+              SettingsTile.navigation(
+                leading: Icon(Icons.lock_outline, color: Colors.black),
+                trailing: Text(""),
+                title: Text('Privacy Policy', style: TextStyle(fontSize: titleFontSize)),
+                onPressed: (context) {},
+              ),
+              SettingsTile.navigation(
+                leading: Icon(Icons.security, color: Colors.black),
+                title: Text('Security Settings', style: TextStyle(fontSize: titleFontSize)),
+                trailing: Text(""),
+                onPressed: (context) {},
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

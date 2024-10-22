@@ -289,25 +289,28 @@ class _MusicPageState extends State<MusicPage> {
         ? Center(child: CircularProgressIndicator())
         : Column(
       children: [
+        // Floating "Music" title with shadow and centered alignment
         Padding(
-          padding: EdgeInsets.only(top: 7.0),
-          child: Text(
-            "Music",
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 40,
-              fontWeight: FontWeight.bold
-            )
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6.0),
-          child: Divider(
-            thickness: 2,
-            color: Colors.grey
+          padding: const EdgeInsets.only(top: 30.0),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Text(
+                "Music",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
         ),
 
+        // Adding space between the title and the rest of the UI
+        SizedBox(height: 20),
+
+        // Search bar UI
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: TextField(
@@ -333,6 +336,7 @@ class _MusicPageState extends State<MusicPage> {
           ),
         ),
 
+        // Song list UI
         Expanded(
           child: _filteredSongs.isEmpty
               ? Center(
@@ -367,6 +371,7 @@ class _MusicPageState extends State<MusicPage> {
           ),
         ),
 
+        // Bottom button to add songs
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
@@ -382,6 +387,7 @@ class _MusicPageState extends State<MusicPage> {
       ],
     );
   }
+
 }
 
 

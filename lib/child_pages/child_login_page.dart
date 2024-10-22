@@ -45,7 +45,7 @@ class ChildLoginPage extends StatelessWidget {
         userType: LoginUserType.name,
         theme: LoginTheme(primaryColor: Color(0xFF56B1FB)),
         messages: LoginMessages(userHint: 'Username'),
-        footer: "ConnectAutism, Inc",
+        footer: "MindBridge",
         onSubmitAnimationCompleted: () {
           Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => BasePage(),
