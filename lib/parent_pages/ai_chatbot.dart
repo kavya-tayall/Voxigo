@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:test_app/ai_utility.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import '../child_pages/home_page.dart';
-import '../widgets/child_provider.dart';
 
 class ChatPage extends StatefulWidget {
   @override
@@ -21,7 +20,7 @@ class _ChatPageState extends State<ChatPage> {
   ChatUser aiUser = ChatUser(
     id: '2',
     firstName: 'MindAI',
-    profileImage: 'assets/imgs/img.png',
+    profileImage: 'assets/imgs/logo_without_text_whitebg.jpg',
   );
 
   List<ChatMessage> messages = <ChatMessage>[];
@@ -115,7 +114,7 @@ class _ChatPageState extends State<ChatPage> {
         messages.insert(0, ChatMessage(
           user: aiUser,
           text: response,
-          createdAt: DateTime.now(),
+          createdAt: DateTime.now()
         ));
       });
     }
@@ -124,18 +123,41 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0,
-        title: GradientText(
-          'MindAI',
-          gradient: LinearGradient(
-            colors: [Color(0xFFAC70F8), Color(0xFF7000FF)],
-          ),
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-      ),
+        automaticallyImplyLeading: false,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            GradientText(
+              'MindAI',
+              gradient: LinearGradient(
+                colors: [Color(0xFFAC70F8), Color(0xFF7000FF)],
+              ),
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            ),
+            Row(children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 3.0),
+                child: Image.asset("assets/imgs/logo_without_text.png",
+                    width: 60),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 12),
+                child: GradientText("MindBridge",
+                    gradient: LinearGradient(colors: [
+                      Colors.blue,
+                      Colors.blueAccent,
+                      Colors.deepPurpleAccent
+                    ]),
+                    style:
+                    TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
+              )
+            ]),
+          ],
+        )),
 
       body: Column(
         children: [

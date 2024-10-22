@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../auth_logic.dart';
 import '../child_pages/child_login_page.dart';
@@ -55,6 +56,30 @@ class ParentLoginPage extends StatelessWidget {
           onLogin: (loginData) => _authUser(loginData, context),
           onRecoverPassword: _recoverPassword,
           onSignup: _signUp,
+          footer: "MindBridge",
+          loginProviders: <LoginProvider>[
+            LoginProvider(
+              icon: FontAwesomeIcons.google,
+              label: 'Google',
+              callback: () async {
+                return null;
+              },
+            ),
+            LoginProvider(
+              icon: FontAwesomeIcons.facebookF,
+              label: 'Facebook',
+              callback: () async {
+                return null;
+              },
+            ),
+            LoginProvider(
+              icon: FontAwesomeIcons.linkedinIn,
+              label: 'Linkedin',
+              callback: () async {
+                return null;
+              },
+            ),
+          ],
           additionalSignupFields: [
             UserFormField(
               keyName: "First name",
@@ -75,7 +100,6 @@ class ParentLoginPage extends StatelessWidget {
             primaryColor: Color(0xFF56B1FB),
           ),
           onSubmitAnimationCompleted: () {
-
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => ParentBasePage(),

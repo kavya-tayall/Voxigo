@@ -70,6 +70,7 @@ flutter:
     - assets/imgs/nervous.png
     - assets/imgs/final_spinner.png
     - assets/imgs/logo_without_text.png
+    - assets/imgs/logo_without_text_whitebg.jpg
     - assets/imgs/logo_with_text.png
     - assets/sound_effects/spinning-fidget-spinner-23292.mp3
     - assets/songs/Twinkle, Twinkle, Little Star.mp3

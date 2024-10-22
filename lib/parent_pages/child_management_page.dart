@@ -258,7 +258,6 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                               style:
                               TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
                             ),
-
                           ),
                           SizedBox(height: 16.0), // Add some space below the header
                           ListView(
