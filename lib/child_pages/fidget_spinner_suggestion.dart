@@ -38,7 +38,7 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
             _rotationSpeed += _friction;
             if (_rotationSpeed > 0){
               _rotationSpeed = 0;
-            }; // Stop at zero
+            };
           }
         }
         print(_rotationSpeed);
@@ -64,7 +64,7 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
   void _spinFidgetSpinnerPointer(PointerMoveEvent event) {
     setState(() {
 
-      _rotationSpeed += sqrt(event.delta.dx * event.delta.dx + event.delta.dy * event.delta.dy) * 0.005; // Use dx for horizontal drag
+      _rotationSpeed += sqrt(event.delta.dx * event.delta.dx + event.delta.dy * event.delta.dy) * 0.005;
       sqrt(event.delta.dx * event.delta.dx + event.delta.dy * event.delta.dy);
       if (_rotationSpeed > 1) _rotationSpeed = 1;
     });

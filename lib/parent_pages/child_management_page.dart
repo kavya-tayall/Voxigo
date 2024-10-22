@@ -103,7 +103,9 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xffdde8ff),
-      appBar: AppBar(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(75.0),
+        child: AppBar(
           backgroundColor: Colors.white,
           automaticallyImplyLeading: false,
           title: Row(
@@ -125,13 +127,16 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                         Colors.blueAccent,
                         Colors.deepPurpleAccent
                       ]),
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 30)),
                 )
               ]),
             ],
-          )),
-      body: isLoading
+          ),
+          toolbarHeight: 80, // Add this to adjust the height as needed
+        ),
+      ),
+        body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Padding(
@@ -140,7 +145,7 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Hello $adminName!👋",
+                      "Hello $adminName! 👋",
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 30,

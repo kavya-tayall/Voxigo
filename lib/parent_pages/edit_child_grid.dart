@@ -301,13 +301,13 @@ class _ChildGridPageState extends State<ChildGridPage> {
           : gridData.isEmpty
           ? Center(child: Text("No data found for this child"))
           : Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 75.0), // Add horizontal padding here
+        padding: const EdgeInsets.symmetric(horizontal: 75.0),
         child: GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 10, // Keep the number of columns 10
+            crossAxisCount: 10,
             crossAxisSpacing: 10,
-            mainAxisSpacing: 20, // Increase vertical spacing
-            childAspectRatio: 0.6, // Control the height/width ratio
+            mainAxisSpacing: 20,
+            childAspectRatio: 0.6,
           ),
           itemCount: getCurrentFolder()['buttons'].length,
           itemBuilder: (context, index) {
@@ -331,14 +331,24 @@ class _ChildGridPageState extends State<ChildGridPage> {
                       ? () {
                     removeButton(index);
                   }
-                      : () {},
+                      : () {
+
+                    if (item['folder'] == true) {
+                      setState(() {
+
+                        currentFolderPath.add(item['id']);
+                      });
+                    } else {
+
+                    }
+                  },
                   child: GridTile(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(
                           child: SizedBox(
-                            height: 150.0, // Adjust height to make it bigger vertically
+                            height: 150.0,
                             child: Image.file(
                               File(snapshot.data!),
                               fit: BoxFit.cover,
@@ -488,9 +498,12 @@ class _ChildGridPageState extends State<ChildGridPage> {
 
   void navigateBack() {
     setState(() {
-      currentFolderPath.removeLast();
+      if (currentFolderPath.isNotEmpty) {
+        currentFolderPath.removeLast();
+      }
     });
   }
+
 
   void removeButton(int index) {
     setState(() {
