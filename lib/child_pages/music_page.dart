@@ -289,7 +289,7 @@ class _MusicPageState extends State<MusicPage> {
         ? Center(child: CircularProgressIndicator())
         : Column(
       children: [
-        // Floating "Music" title with shadow and centered alignment
+
         Padding(
           padding: const EdgeInsets.only(top: 30.0),
           child: Stack(
@@ -307,10 +307,10 @@ class _MusicPageState extends State<MusicPage> {
           ),
         ),
 
-        // Adding space between the title and the rest of the UI
+
         SizedBox(height: 20),
 
-        // Search bar UI
+
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: TextField(
@@ -336,7 +336,7 @@ class _MusicPageState extends State<MusicPage> {
           ),
         ),
 
-        // Song list UI
+
         Expanded(
           child: _filteredSongs.isEmpty
               ? Center(

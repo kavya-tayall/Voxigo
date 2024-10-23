@@ -9,7 +9,7 @@ class CustomSettings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Detect the screen size to adjust for iPad or large screens
+
     bool isLargeScreen = MediaQuery.of(context).size.width > 600;
     double titleFontSize = isLargeScreen ? 24.0 : 16.0;
 
@@ -17,7 +17,7 @@ class CustomSettings extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Settings',
-          style: TextStyle(fontSize: isLargeScreen ? 32 : 20), // Larger title for iPad
+          style: TextStyle(fontSize: isLargeScreen ? 32 : 20),
         ),
         centerTitle: true,
         automaticallyImplyLeading: false,
@@ -27,7 +27,7 @@ class CustomSettings extends StatelessWidget {
           SettingsSection(
             title: Text(
               'Common',
-              style: TextStyle(fontSize: titleFontSize), // Adjusted title font size
+              style: TextStyle(fontSize: titleFontSize),
             ),
             tiles: <SettingsTile>[
               SettingsTile.navigation(
@@ -58,7 +58,7 @@ class CustomSettings extends StatelessWidget {
           SettingsSection(
             title: Text(
               'Account',
-              style: TextStyle(fontSize: titleFontSize), // Adjusted title font size
+              style: TextStyle(fontSize: titleFontSize),
             ),
             tiles: <SettingsTile>[
               SettingsTile.navigation(
@@ -78,7 +78,7 @@ class CustomSettings extends StatelessWidget {
           SettingsSection(
             title: Text(
               'Notifications',
-              style: TextStyle(fontSize: titleFontSize), // Adjusted title font size
+              style: TextStyle(fontSize: titleFontSize),
             ),
             tiles: <SettingsTile>[
               SettingsTile.switchTile(
@@ -93,7 +93,7 @@ class CustomSettings extends StatelessWidget {
           SettingsSection(
             title: Text(
               'Privacy',
-              style: TextStyle(fontSize: titleFontSize), // Adjusted title font size
+              style: TextStyle(fontSize: titleFontSize),
             ),
             tiles: <SettingsTile>[
               SettingsTile.navigation(
