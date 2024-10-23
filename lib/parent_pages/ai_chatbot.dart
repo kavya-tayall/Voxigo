@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import 'package:test_app/ai_utility.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import '../child_pages/home_page.dart';
@@ -123,7 +124,6 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
@@ -163,15 +163,18 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Expanded(
             child: DashChat(
-              currentUser: user,
-              onSend: (ChatMessage m) {
-                setState(() {
-                  messages.insert(0, m);
-                });
-                getAIResponse(m);
-              },
-              typingUsers: typingUsers,
-              messages: messages,
+            currentUser: user,
+            onSend: (ChatMessage m) {
+              setState(() {
+                messages.insert(0, m);
+              });
+              getAIResponse(m);
+            },
+            typingUsers: typingUsers,
+            messages: messages,
+            messageOptions: MessageOptions(
+              timeFormat: DateFormat('HH:MM AA'),
+            ),
             ),
           ),
         ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 
-Map<String, String> temp = {"Fidget Spinner": "/fidget", "Deep Breathing": "/breathing", "Coloring": "/coloring", "Music": "/feelings", "Calm Down with 54321": "/54321"};
+Map<String, String> temp = {"Fidget Spinner": "/fidget", "Deep Breathing": "/breathing", "Coloring": "/coloring", "Music": "/music", "Calm Down with 54321": "/54321"};
 
 class SuggestionsPage extends StatelessWidget {
   const SuggestionsPage({super.key});

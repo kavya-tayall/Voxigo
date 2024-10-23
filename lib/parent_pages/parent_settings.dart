@@ -25,6 +25,11 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
       'Select Child'; // Start with an empty selected option
   List<String> childrenNamesList = [];
   bool isLoading = true;
+  bool enableNotifications = true;
+  bool useSentenceHelper = true;
+  bool canUseGridControls = true;
+  bool canUseSettings = true;
+
 
   @override
   void initState() {
@@ -187,10 +192,13 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                 tiles: <SettingsTile>[
                   SettingsTile.switchTile(
                     leading: Icon(Icons.notifications, color: Colors.black),
-                    trailing: Text(""),
                     title: Text('Enable Notifications'),
-                    onToggle: (value) {},
-                    initialValue: true,
+                    initialValue: enableNotifications,
+                    onToggle: (value) {
+                      setState(() {
+                        enableNotifications = value;
+                      });
+                    },
                   ),
                 ],
               ),
@@ -253,20 +261,29 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                   SettingsTile.switchTile(
                     leading: Icon(Icons.assistant, color: Colors.black),
                     title: Text('Can use sentence helper'),
-                    initialValue: true,
-                    onToggle: (bool value) {},
+                    initialValue: useSentenceHelper,
+                    onToggle: (value) {
+                      setState(() {
+                        useSentenceHelper = value;
+                      });
+                    },
                   ),
+
                   SettingsTile.switchTile(
                     leading: Icon(Icons.grid_on_rounded, color: Colors.black),
                     title: Text('Can use grid controls'),
-                    initialValue: true,
-                    onToggle: (bool value) {},
+                    initialValue: canUseGridControls,
+                    onToggle: (bool value) {
+                      canUseGridControls = value;
+                    },
                   ),
                   SettingsTile.switchTile(
                     leading: Icon(Icons.settings, color: Colors.black),
                     title: Text('Can use settings'),
-                    initialValue: true,
-                    onToggle: (bool value) {},
+                    initialValue: canUseSettings,
+                    onToggle: (bool value) {
+                      canUseSettings = value;
+                    },
                   ),
                   SettingsTile.navigation(
                     leading: Icon(Icons.color_lens, color: Colors.black),

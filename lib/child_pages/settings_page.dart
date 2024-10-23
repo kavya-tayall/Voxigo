@@ -17,7 +17,7 @@ class CustomSettings extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Settings',
-          style: TextStyle(fontSize: isLargeScreen ? 32 : 20),
+          style: TextStyle(fontSize: isLargeScreen ? 40 : 30, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         automaticallyImplyLeading: false,
