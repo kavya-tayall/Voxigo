@@ -185,6 +185,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
           _buildStatsContent('Feelings Table', selectedFeelings),
         ],
       ),
+
     );
   }
 

@@ -73,8 +73,8 @@ class ParentLoginPage extends StatelessWidget {
               },
             ),
             LoginProvider(
-              icon: FontAwesomeIcons.linkedinIn,
-              label: 'Linkedin',
+              icon: FontAwesomeIcons.apple,
+              label: 'Apple',
               callback: () async {
                 return null;
               },
