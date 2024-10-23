@@ -296,11 +296,17 @@ class _MusicPageState extends State<MusicPage> {
             alignment: Alignment.center,
             children: [
               Text(
-                "Music",
+                'Music & Stories',
                 style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 40,
                   fontWeight: FontWeight.bold,
+                  fontSize: 60,
+                  color: Colors.blueAccent,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(2, 4.0),
+                      color: Colors.grey.withOpacity(0.5),
+                    ),
+                  ],
                 ),
               ),
             ],

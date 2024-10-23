@@ -173,7 +173,7 @@ class _ChatPageState extends State<ChatPage> {
             typingUsers: typingUsers,
             messages: messages,
             messageOptions: MessageOptions(
-              timeFormat: DateFormat('HH:MM AA'), // Custom time format (12-hour format with AM/PM)
+              timeFormat: DateFormat('HH:MM AA'),
             ),
             ),
           ),

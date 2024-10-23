@@ -26,12 +26,18 @@ class FeelingsPage extends StatelessWidget {
             child: Container(
               alignment: Alignment.center,
               width: double.infinity,
-              child: GradientText(
+              child: Text(
                 'How do you feel?',
-                gradient: LinearGradient(colors: [Color(0xFFAC70F8), Color(0xFF7000FF)]),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 90,
+                  color: Colors.blueAccent,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(2, 4.0),
+                      color: Colors.grey.withOpacity(0.5),
+                    ),
+                  ],
                 ),
               ),
             ),
