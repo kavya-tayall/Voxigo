@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 import '../child_pages/home_page.dart';
 import '../widgets/buttons_table.dart';
 import '../widgets/feelings_timeline.dart';
@@ -151,33 +152,62 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.white, // Top part is white
+        elevation: 4, // Adds subtle shadow for depth
         automaticallyImplyLeading: false,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(Icons.bar_chart, color: Colors.black, size: 30),
-            Row(children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 3.0),
-                child: Image.asset("assets/imgs/logo_without_text.png",
-                    width: 60),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: GradientText("MindBridge",
-                    gradient: LinearGradient(colors: [
-                      Colors.blue,
-                      Colors.blueAccent,
-                      Colors.deepPurpleAccent
-                    ]),
-                    style:
-                    TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
-              )
-            ]),
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 3.0),
+                  child: Image.asset("assets/imgs/logo_without_text.png", width: 60),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: GradientText(
+                    "MindBridge",
+                    gradient: LinearGradient(
+                      colors: [Colors.blue, Colors.blueAccent, Colors.deepPurpleAccent],
+                    ),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 28 // Adjusted font size for balance
+                    ),
+                  ),
+                )
+              ],
+            ),
           ],
-        )),
+        ),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(80.0),
+          child: Column(
+            children: [
+              Container(
+                color: Colors.grey[300],
+                child: TabBar(
+                  controller: _tabController,
+                  tabs: [
+                    Tab(text: 'Button Stats'),
+                    Tab(text: 'Feeling Stats'),
+                  ],
+                  indicatorColor: Colors.blueAccent,
+                  indicatorWeight: 3,
+                  labelColor: Colors.black,
+                  unselectedLabelColor: Colors.grey[600],
+                  labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+
       body: TabBarView(
         controller: _tabController,
         children: [
@@ -188,6 +218,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
 
     );
   }
+
 
   Widget _buildStatsContent(String label, List<dynamic> items) {
     return Column(
