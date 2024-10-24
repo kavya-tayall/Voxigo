@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test_app/widgets/feelings_buttons.dart';
 
-import 'home_page.dart';
 
 Map<String, Map<String, Widget>> suggestions = {
   "Angry": {},

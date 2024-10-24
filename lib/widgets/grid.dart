@@ -17,7 +17,7 @@ class Grid extends StatefulWidget {
 
 class GridState extends State<Grid> {
   dynamic visibleButtons = [];
-  Directory? appDirectory; // Store the directory here
+  Directory? appDirectory;
 
   @override
   void didChangeDependencies() {
@@ -27,8 +27,8 @@ class GridState extends State<Grid> {
   }
 
   Future<void> loadAppDirectory() async {
-    appDirectory = await getApplicationDocumentsDirectory(); // Await the directory and store it
-    setState(() {}); // Refresh UI after loading the directory
+    appDirectory = await getApplicationDocumentsDirectory();
+    setState(() {});
   }
 
   void updateVisibleButtons() {
@@ -42,7 +42,6 @@ class GridState extends State<Grid> {
         buttons = buttons[folder];
       }
 
-      // Ensure buttons is a list
       if (buttons is List) {
         visibleButtons = List.from(buttons);
       } else {
@@ -61,7 +60,7 @@ class GridState extends State<Grid> {
       updatedPath.add(folderPath);
       updatedPath.add(folderPath2);
 
-      pathWidget.onPathChange(updatedPath); // Notify that path has changed
+      pathWidget.onPathChange(updatedPath);
       updateVisibleButtons();
     });
   }
@@ -71,22 +70,18 @@ class GridState extends State<Grid> {
     final pathWidget = PathWidget.of(context);
 
     setState(() {
-      // Directly reorder visibleButtons without recomputing nestedData
       final item = visibleButtons.removeAt(oldIndex);
       visibleButtons.insert(newIndex, item);
 
-      // Update the nestedData based on visibleButtons only after reordering
       dynamic nestedData = dataWidget!.data;
       for (var folder in pathWidget!.pathOfBoard) {
         nestedData = nestedData[folder];
       }
 
-      // Apply the reordered visibleButtons back to nestedData
       nestedData.clear();
       nestedData.addAll(visibleButtons);
     });
 
-    // Avoid async operations in setState; do these after
     await dataWidget?.onDataChange(dataWidget.data);
     context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget!.data.cast<String, dynamic>());
     context.findAncestorStateOfType<HomePageState>()?.updateGrid();
@@ -95,26 +90,23 @@ class GridState extends State<Grid> {
 
   @override
   Widget build(BuildContext context) {
-    // Check if the data has loaded, otherwise show a loading indicator
     if (visibleButtons.isEmpty || appDirectory == null) {
       return Center(
-        child: CircularProgressIndicator(), // Show loading until data and directory are ready
+        child: CircularProgressIndicator(),
       );
     }
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        int crossAxisCount = 10; // Fixed number of columns
-        int fixedRows = 5; // Fixed number of rows
+        int crossAxisCount = 10;
+        int fixedRows = 5;
 
         double availableHeight = constraints.maxHeight;
 
-        // Calculate maximum number of items that can fit based on number of rows
         int maxItems = 50;
         double buttonSize = ((availableHeight - 50) / fixedRows) + 40;
         print("Button size: $buttonSize");
 
-        // Limit the number of items shown to the maximum number that fits in the grid
         int visibleItemCount = visibleButtons.length > maxItems ? maxItems : visibleButtons.length;
 
         if (visibleButtons.isEmpty) {
@@ -127,7 +119,7 @@ class GridState extends State<Grid> {
         }
 
         return ReorderableGridView.builder(
-          key: UniqueKey(),  // Ensure the ReorderableGridView has a unique key
+          key: UniqueKey(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 10,
@@ -152,7 +144,6 @@ class GridState extends State<Grid> {
             final imagePath = '${appDirectory?.path}\\board_images\\${item["image_url"]}';
             final label = item["label"] ?? 'No Label';
 
-            // Combine 'id' with 'index' to ensure uniqueness, in case 'id' alone isn't unique
             final itemKey = ValueKey('${item["id"]}_$index');
 
             if (item["folder"] == false) {
@@ -215,20 +206,15 @@ class GridState extends State<Grid> {
                     dynamic targetFolder = nestedData[index];
 
                     if (targetFolder["folder"] == true) {
-                      // Move the item into the folder's buttons list
                       targetFolder["buttons"].add(receivedItem);
 
-                      // Remove the item from its original location
                       nestedData.remove(receivedItem);
 
 
-                      // Notify the widget that the data has changed
                       dataWidget.onDataChange(dataWidget.data);
 
-                      // Save the updated data to file
                       context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
 
-                      // Update the UI
                       context.findAncestorStateOfType<HomePageState>()?.updateGrid();
                     } else {
                       print("Target index is not a folder.");
@@ -247,9 +233,9 @@ class GridState extends State<Grid> {
                       if (homePageState == null) print("null");
 
                       if (homePageState?.inRemovalState == true) {
-                        homePageState?.removeFolder(index); // Call removeFolder if in removal mode
+                        homePageState?.removeFolder(index);
                       } else {
-                        updateGridPath(index, "buttons"); // Navigate into the folder
+                        updateGridPath(index, "buttons");
                       }
                     },
                   );

@@ -152,8 +152,8 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white, // Top part is white
-        elevation: 4, // Adds subtle shadow for depth
+        backgroundColor: Colors.white,
+        elevation: 4,
         automaticallyImplyLeading: false,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -175,7 +175,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                     ),
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 28 // Adjusted font size for balance
+                        fontSize: 28
                     ),
                   ),
                 )

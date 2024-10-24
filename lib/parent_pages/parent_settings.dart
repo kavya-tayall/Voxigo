@@ -253,7 +253,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                             );
                           }).toList(),
                           underline:
-                              SizedBox.shrink(), // Remove the default underline
+                              SizedBox.shrink(),
                         ),
                       ),
                     ),

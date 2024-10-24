@@ -294,7 +294,6 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
                       });
                       Navigator.of(dialogContext).pop();
 
-                      // Perform the upload in the background.
                       await Future.microtask(() async {
                         String imagePath = 'music_info/cover_images/${selectedImage!.name}';
                         String audioPath = 'music_info/mp3 files/${selectedAudio!.name}';
@@ -317,8 +316,6 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
                           });
                           isUploading = false;
                         });
-
-                        // Update the JSON file.
                         await updateMusicJson();
                       });
                     } else {

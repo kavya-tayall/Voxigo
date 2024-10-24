@@ -17,9 +17,6 @@ import 'buttons.dart';
 
 
 
-// need to finish add button functionality
-
-
 class EditBar extends StatelessWidget {
   final dynamic data;
 
@@ -30,7 +27,7 @@ class EditBar extends StatelessWidget {
     return Container(
       color: Colors.transparent,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 16.0), // Adjust the bottom padding value as needed
+        padding: const EdgeInsets.only(bottom: 16.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -76,7 +73,6 @@ class AddButtonState extends State<AddButton> {
       pictogramsData = data;
     });
   }
-// need to change await stuff to be outside the setstate, and then make it so that the images (when adding buttons) get added to firebase storage
   void addVisibleButtons(FirstButton button) {
     final dataWidget = DataWidget.of(context);
     final pathWidget = PathWidget.of(context);
@@ -123,14 +119,8 @@ class AddButtonState extends State<AddButton> {
   Future<void> saveImageLocally(File imageFile) async {
     try {
       final Directory appDir = await getApplicationDocumentsDirectory();
-
-      // Manually extract the file name from the image path
       String fileName = imageFile.path.split('\\').last;
-
-      // Create the local file path
       final String localPath = '${appDir.path}\\board_images\\$fileName';
-
-      // Copy the file to the app's local directory
       await imageFile.copy(localPath);
     } catch (e) {
       print("Error saving image locally: $e");
@@ -139,24 +129,18 @@ class AddButtonState extends State<AddButton> {
 
   Future<void> downloadImageFromNetworkToLocalAndFirebase(String imageUrl) async {
     try {
-      // Send a request to download the image
       final http.Response response = await http.get(Uri.parse(imageUrl));
 
       if (response.statusCode == 200) {
-        // Get the application's documents directory
         final Directory appDir = await getApplicationDocumentsDirectory();
 
-        // Extract the file name from the URL
         String fileName = imageUrl.split('/').last;
 
-        // Create a local path to save the file
         final String localPath = '${appDir.path}\\board_images\\$fileName';
 
-        // Write the downloaded image bytes to the local file
         File imageFile = File(localPath);
         await imageFile.writeAsBytes(response.bodyBytes);
 
-        // Upload the image to Firebase Storage
         Reference firebaseStorageRef = FirebaseStorage.instance.ref('initial_board_images/$fileName');
         SettableMetadata imageMetadata = SettableMetadata(
           contentType: 'image/png',
@@ -254,12 +238,12 @@ class AddButtonState extends State<AddButton> {
                     dynamic buttonData = searchButtonData(pictogramsData, enteredText);
                     if (buttonData != null) {
                       setState(() {
-                        _isUploading = true; // Start loading
+                        _isUploading = true;
                       });
                       FirstButton button = await _createFirstButtonFromData(buttonData, enteredText);
                       addVisibleButtons(button);
                       setState(() {
-                        _isUploading = false; // Stop loading
+                        _isUploading = false;
                       });
                     } else {
                       bool? useCustomImage = await _showConfirmationDialog(context, "Pictogram not found. Would you like to upload a custom image?");
@@ -293,7 +277,7 @@ class AddButtonState extends State<AddButton> {
         ),
           if (_isUploading)
             Center(
-              child: CircularProgressIndicator(), // Show loading spinner
+              child: CircularProgressIndicator(),
             ),
       ]
     ),
