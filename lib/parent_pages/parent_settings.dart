@@ -22,7 +22,7 @@ class ParentSettingsPage extends StatefulWidget {
 
 class _ParentSettingsPageState extends State<ParentSettingsPage> {
   String _selectedOption =
-      'Select Child'; // Start with an empty selected option
+      'Select Child';
   List<String> childrenNamesList = [];
   bool isLoading = true;
   bool enableNotifications = true;
@@ -85,7 +85,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
             isLoading = false;
             if (childrenNamesList.isNotEmpty) {
               _selectedOption =
-                  childrenNamesList[0]; // Set default selected option
+                  childrenNamesList[0];
             }
           });
         } else {
@@ -128,7 +128,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
       body: isLoading
         ? Center(
             child:
-                CircularProgressIndicator()) // Show loading indicator while fetching data
+                CircularProgressIndicator())
         : SettingsList(
             sections: [
               SettingsSection(

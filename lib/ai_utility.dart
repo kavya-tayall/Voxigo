@@ -5,7 +5,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:provider/provider.dart';
 import 'package:test_app/widgets/child_provider.dart';
 
-const apiKey = "AIzaSyCwGoxCVSmBYKH2q2sJ7WLhEYmdGkfRjdU";
+var apiKey; //insert api key here
 
 final model = GenerativeModel(
   model: 'gemini-1.5-flash-latest',
