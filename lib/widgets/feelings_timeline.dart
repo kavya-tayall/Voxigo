@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 import 'package:intl/intl.dart';
 
-//feeligns
+
 class FeelingsTable extends StatelessWidget {
   final String searchText;
   final List<dynamic> selectedFeelings;
@@ -28,13 +28,11 @@ class FeelingsTable extends StatelessWidget {
 
     List sortedFeelings = selectedFeelings;
     for (var feeling in sortedFeelings) {
-      // Convert Timestamp to DateTime if necessary
       if (feeling['timestamp'] is Timestamp) {
         DateTime time = (feeling['timestamp'] as Timestamp).toDate();
-        feeling['timestamp'] = time; // Now it's a DateTime
+        feeling['timestamp'] = time;
       }
 
-      // Format the DateTime as a string after the conversion
       if (feeling['timestamp'] is DateTime) {
         feeling['formattedTimestamp'] = DateFormat('h:mm a, MMMM d').format(feeling['timestamp']);
       }
@@ -46,7 +44,7 @@ class FeelingsTable extends StatelessWidget {
 
     return Timeline.tileBuilder(
       theme: TimelineThemeData(
-        nodePosition: -1.0, // Align the node further to the left
+        nodePosition: -1.0,
         color: Color(0xff989898),
         indicatorTheme: IndicatorThemeData(
           position: 0,
@@ -59,30 +57,30 @@ class FeelingsTable extends StatelessWidget {
       physics: ScrollPhysics(),
       builder: TimelineTileBuilder(
         itemCount: sortedFeelings.length,
-        contentsAlign: ContentsAlign.basic, // Ensures basic alignment of the contents
+        contentsAlign: ContentsAlign.basic,
         contentsBuilder: (context, index) {
           return Padding(
-            padding: EdgeInsets.only(left: 10.0), // Reduced padding for tighter left alignment
+            padding: EdgeInsets.only(left: 10.0),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start, // Aligns the content to the top-left
-              mainAxisAlignment: MainAxisAlignment.start, // Aligns items to the left
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Expanded( // Ensure content spans the full width
+                Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start, // Align text to the left
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "${sortedFeelings[index]['text']}",
                         style: TextStyle(
-                          fontSize: 18, // Smaller font size for feelings text
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 5), // Add some spacing between text and timestamp
+                      SizedBox(height: 5),
                       Text(
                         "${sortedFeelings[index]['formattedTimestamp']}",
                         style: TextStyle(
-                          fontSize: 14, // Smaller font size for timestamp
+                          fontSize: 14,
                           color: Color(0xFF606060),
                         ),
                       ),

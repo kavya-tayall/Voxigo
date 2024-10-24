@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:test_app/parent_pages/ai_chatbot.dart';
 import 'package:test_app/parent_pages/stats_page.dart';
@@ -23,17 +22,20 @@ import 'child_pages/suggestions_page.dart';
 import 'child_pages/coloring_suggestion.dart';
 import 'child_pages/breathing_suggestion.dart';
 import 'child_pages/54321_suggestion.dart';
-import 'ai_utility.dart';
 
 typedef VoidCallBack = void Function();
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.ios);
 
-  runApp(ChangeNotifierProvider(create: (context) => ChildProvider(), child: const MyApp(),),);
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ChildProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -41,7 +43,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
@@ -69,7 +70,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
 class MyAppState extends ChangeNotifier {}
 
 class BasePage extends StatefulWidget {
@@ -78,6 +78,7 @@ class BasePage extends StatefulWidget {
   @override
   State<BasePage> createState() => BasePageState();
 }
+
 class BasePageState extends State<BasePage> {
   int selectedIndex = 0;
   List<dynamic> pathOfBoard = ["buttons"];
@@ -85,12 +86,10 @@ class BasePageState extends State<BasePage> {
   bool isLoading = true;
   final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
 
-
   @override
   void initState() {
     super.initState();
     _loadJsonData();
-
   }
 
   void onItemTapped(int index) {
@@ -100,7 +99,9 @@ class BasePageState extends State<BasePage> {
   }
 
   Future<void> _loadJsonData() async {
-    String? jsonString = await Provider.of<ChildProvider>(context, listen: false).fetchJson('board.json');
+    String? jsonString =
+        await Provider.of<ChildProvider>(context, listen: false)
+            .fetchJson('board.json');
 
     final jsonData = jsonDecode(jsonString!);
 
@@ -110,14 +111,13 @@ class BasePageState extends State<BasePage> {
     });
   }
 
-
   void updatePathOfBoard(List<dynamic> newPath) {
     setState(() {
       pathOfBoard = List.from(newPath);
     });
   }
 
-  void goBack(){
+  void goBack() {
     setState(() {
       if (pathOfBoard.length > 1) {
         pathOfBoard.removeLast();
@@ -128,14 +128,13 @@ class BasePageState extends State<BasePage> {
     });
   }
 
-
   Future<void> modifyData(Map<String, List> newData) async {
     setState(() {
       data = Map.from(newData);
     });
-    await Provider.of<ChildProvider>(context, listen: false).changeGridJson(newData);
+    await Provider.of<ChildProvider>(context, listen: false)
+        .changeGridJson(newData);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -190,7 +189,6 @@ class ParentBasePageState extends State<ParentBasePage> {
       _selectedIndex = index;
     });
   }
-
 
   @override
   Widget build(BuildContext context) {

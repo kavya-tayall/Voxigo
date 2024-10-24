@@ -82,7 +82,6 @@ class _MusicTileState extends State<MusicTile> {
     _audioPlayer.seek(newPosition);
   }
 
-  // Show confirmation dialog before deleting
   Future<void> _showDeleteConfirmationDialog() async {
     return showDialog<void>(
       context: context,
@@ -132,11 +131,10 @@ class _MusicTileState extends State<MusicTile> {
 
   Future<String> _setImagePath() async {
     final directory = await getApplicationDocumentsDirectory();
-    // Assuming widget.song.image contains the unique image name
-    String imageName = widget.song.image; // Unique image name
+    String imageName = widget.song.image;
     String imagePath = '${directory.path}/music_files/$imageName';
-    print('Image path: $imagePath'); // Debugging line
-    return imagePath; // Return the full path
+    print('Image path: $imagePath');
+    return imagePath;
   }
 
 
@@ -169,12 +167,10 @@ class _MusicTileState extends State<MusicTile> {
       ),
       child: Row(
         children: [
-          // Use FutureBuilder to wait until _imagePath is set
           FutureBuilder<String>(
             future: _imagePathFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                // Show a loading indicator while waiting for the image path
                 return Container(
                   height: 80,
                   width: 80,
@@ -185,7 +181,6 @@ class _MusicTileState extends State<MusicTile> {
                   child: CircularProgressIndicator(),
                 );
               } else if (snapshot.hasError) {
-                // Show an error icon if something went wrong
                 return Container(
                   height: 80,
                   width: 80,
@@ -196,7 +191,6 @@ class _MusicTileState extends State<MusicTile> {
                   child: Icon(Icons.error, size: 40, color: Colors.red),
                 );
               } else if (snapshot.hasData && File(snapshot.data!).existsSync()) {
-                // Render the image once the path is ready
                 return Container(
                   height: 80,
                   width: 80,
@@ -209,7 +203,6 @@ class _MusicTileState extends State<MusicTile> {
                   ),
                 );
               } else {
-                // Show a placeholder if the file doesn't exist
                 return Container(
                   height: 80,
                   width: 80,

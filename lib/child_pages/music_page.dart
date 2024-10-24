@@ -8,10 +8,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:test_app/widgets/child_provider.dart';
 import 'package:path/path.dart' as path;
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:test_app/auth_logic.dart';
-
 import '../widgets/music_tile.dart';
 
 
@@ -60,25 +56,17 @@ class _MusicPageState extends State<MusicPage> {
 
   Future<void> _saveSongs(result) async {
     try {
-      print("checkpoint1");
-
       final directory = await getApplicationDocumentsDirectory();
       final musicDirectory = Directory(path.join(directory.path, 'music_files'));
-
 
       if (!(await musicDirectory.exists())) {
         await musicDirectory.create(recursive: true);
       }
 
-
       final imageFile = result['imageFile']!;
       final imageFileName = path.basename(imageFile.path);
       final newImageFilePath = path.join(musicDirectory.path, imageFileName);
       final newImageFile = await imageFile.copy(newImageFilePath);
-
-      print(imageFileName);
-      print(newImageFilePath);
-      print(newImageFile);
 
 
       final audioFile = result['audioFile']!;
@@ -86,9 +74,6 @@ class _MusicPageState extends State<MusicPage> {
       final newAudioFilePath = path.join(musicDirectory.path, audioFileName);
       final newAudioFile = await audioFile.copy(newAudioFilePath);
 
-      print(audioFileName);
-      print(newAudioFilePath);
-      print(newAudioFile);
 
     } catch (e) {
       print('Error saving songs to local storage: $e');
@@ -289,7 +274,6 @@ class _MusicPageState extends State<MusicPage> {
         ? Center(child: CircularProgressIndicator())
         : Column(
       children: [
-
         Padding(
           padding: const EdgeInsets.only(top: 30.0),
           child: Stack(
@@ -313,9 +297,7 @@ class _MusicPageState extends State<MusicPage> {
           ),
         ),
 
-
         SizedBox(height: 20),
-
 
         Padding(
           padding: const EdgeInsets.all(12.0),

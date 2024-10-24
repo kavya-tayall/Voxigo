@@ -166,7 +166,7 @@ class UserService {
       'username': username,
       'first name': firstName,
       'last name': lastName,
-      'password': password, // Consider hashing this password for security
+      'password': password,
       'parents': [parentId],
       'data': {'selectedButtons': [], 'selectedFeelings': []},
     });

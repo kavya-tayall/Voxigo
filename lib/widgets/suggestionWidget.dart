@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:test_app/ai_utility.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:test_app/main.dart';
 
 import '../child_pages/home_page.dart';
 
@@ -57,7 +56,6 @@ class _AISuggestionDialogState extends State<AISuggestionDialog> {
       });
     }
   }
-//hi
 
   @override
   Widget build(BuildContext context) {

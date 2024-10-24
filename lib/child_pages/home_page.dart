@@ -129,10 +129,7 @@ class HomePageState extends State<HomePage> {
   }
 
   void addPhraseToTopBar(String phrase, List imagePaths) {
-    print("asdf1");
     List<String> words = phrase.split(' ');
-
-    print("asdf");
 
     setState(() {
       _selectedButtons = [];
@@ -178,9 +175,7 @@ class HomePageState extends State<HomePage> {
   void removeVisibleButton(FirstButton button) {
     final dataWidget = DataWidget.of(context);
     final pathWidget = PathWidget.of(context);
-    print("checkopint 1");
     if (dataWidget != null) {
-      print("checkpoint 2");
       setState(() {
 
         dynamic nestedData = dataWidget.data;
@@ -189,8 +184,7 @@ class HomePageState extends State<HomePage> {
           nestedData = nestedData[folder];
         }
         nestedData.removeWhere((b) => b['id'] == button.id);
-        print("checkpoint 3");
-        print(nestedData);
+
 
         dataWidget.onDataChange(dataWidget.data);
         context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
@@ -287,7 +281,6 @@ class HomePageState extends State<HomePage> {
     final childProvider = Provider.of<ChildProvider>(context, listen: false);
 
     try {
-
       await childProvider.addSelectedButton(phrase, Timestamp.now());
       print('Phrase added successfully to Firebase');
     } catch (e) {
@@ -311,7 +304,6 @@ class HomePageState extends State<HomePage> {
     } else {
       return Column(
         children: <Widget>[
-
           Container(
             height: 190,
             color: Colors.white,

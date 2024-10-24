@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:test_app/child_pages/music_page.dart';
 
 
@@ -47,14 +46,10 @@ class ChildProvider with ChangeNotifier {
 
   Future<String?> fetchJson(String jsonName) async{
     FirebaseStorage storage = FirebaseStorage.instance;
-    print(childData);
     Reference ref = storage.ref().child('user_folders/${childData!['username']}/$jsonName');
 
-    print("ch1");
 
-    print(ref.fullPath);
     final data = await ref.getData();
-    print("ch2");
     if (data!= null){
       String jsonString = String.fromCharCodes(data);
       print('Fetched JSON: $jsonString');
@@ -67,10 +62,8 @@ class ChildProvider with ChangeNotifier {
 
   Future<void> changeMusicJson(List<Song> info) async{
     try {
-      // Convert List<Song> to List<Map<String, dynamic>>
       List<Map<String, dynamic>> songListJson = info.map((song) => song.toJson()).toList();
 
-      // Convert the List<Map<String, dynamic>> to JSON string
       String jsonData = json.encode(songListJson);
 
       final directory = Directory.systemTemp;
@@ -94,7 +87,6 @@ class ChildProvider with ChangeNotifier {
 
   Future<void> changeGridJson(Map<String, List> info) async{
     try {
-      // Convert List<Song> to List<Map<String, dynamic>>
       String jsonData = json.encode(info);
 
       final directory = Directory.systemTemp;
@@ -166,9 +158,7 @@ class ChildProvider with ChangeNotifier {
           for (int i = 0; i < allFeelings.length; i++) {
             allFeelings[i]['timestamp'] = allFeelings[i]['timestamp'].toDate();
           }
-          print(allFeelings);
           var stringList = allFeelings.join(", ");
-          print(stringList);
           return stringList;
 
         } else {

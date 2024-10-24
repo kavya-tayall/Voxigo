@@ -44,7 +44,7 @@ class FeelingsButton extends StatelessWidget {
         Navigator.pushNamed(context, '/suggestions', arguments: suggestions);
       },
       child: Container(
-        padding: const EdgeInsets.all(20.0),  // Increased padding
+        padding: const EdgeInsets.all(20.0),
         decoration: BoxDecoration(
           color: _getButtonColor(),
           borderRadius: BorderRadius.circular(20),
@@ -62,21 +62,21 @@ class FeelingsButton extends StatelessWidget {
           ],
         ),
         constraints: BoxConstraints(
-          minWidth: 200,   // Added minimum width
-          minHeight: 220,  // Added minimum height
+          minWidth: 200,
+          minHeight: 220,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
               imagePath,
-              height: 150,  // Increased image size
+              height: 150,
             ),
-            const SizedBox(height: 16),  // Increased space between image and text
+            const SizedBox(height: 16),
             Text(
               feeling,
               style: const TextStyle(
-                fontSize: 30,  // Increased font size
+                fontSize: 30,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),

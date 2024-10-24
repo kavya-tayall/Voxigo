@@ -52,7 +52,7 @@ class ButtonsTable extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: Color(0xffdde8ff), // New color for the tile
+              color: Color(0xffdde8ff),
               borderRadius: BorderRadius.circular(8.0),
               boxShadow: [
                 BoxShadow(
@@ -64,13 +64,12 @@ class ButtonsTable extends StatelessWidget {
               ],
             ),
             child: SizedBox(
-              height: 80, // Reduced height of the tile
+              height: 80,
               child: Stack(
                 children: [
-                  // "See More" button aligned to the far left
                   Positioned(
                     bottom: 8,
-                    left: 0, // Moved to the left
+                    left: 0,
                     child: TextButton(
                       onPressed: () {
                         Navigator.push(
@@ -88,8 +87,6 @@ class ButtonsTable extends StatelessWidget {
                       child: Text('See More'),
                     ),
                   ),
-
-                  // Button text
                   Positioned(
                     top: 8,
                     left: 8,
@@ -101,8 +98,6 @@ class ButtonsTable extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  // Quantity indicator
                   Positioned(
                     top: 8,
                     right: 8,

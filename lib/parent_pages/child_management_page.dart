@@ -133,7 +133,7 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
               ]),
             ],
           ),
-          toolbarHeight: 80, // Add this to adjust the height as needed
+          toolbarHeight: 80,
         ),
       ),
         body: isLoading
@@ -167,7 +167,7 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                             style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(
-                                      8), // Rounded corners
+                                      8),
                                 ),
                                 padding: EdgeInsets.zero,
                                 elevation: 4),
@@ -180,10 +180,10 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                   colors: [
                                     Color(0xFFF64CD3),
                                     Color(0xFFAF70FF)
-                                  ], // Gradient colors
+                                  ],
                                 ),
                                 borderRadius:
-                                    BorderRadius.circular(8), // Rounded corners
+                                    BorderRadius.circular(8),
                               ),
                               child: Container(
                                 width: 150,
@@ -264,12 +264,10 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                               TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
                             ),
                           ),
-                          SizedBox(height: 16.0), // Add some space below the header
+                          SizedBox(height: 16.0),
                           ListView(
                             shrinkWrap: true,
-                            // Makes sure the ListView takes only the necessary height
                             physics: NeverScrollableScrollPhysics(),
-                            // Disable scrolling for the ListView itself
                             children: childIdToUsername.entries.map((entry) {
                               return Container(
                                 margin: EdgeInsets.only(bottom: 16.0, left: 6, right: 6),
@@ -314,7 +312,6 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                     ListTile(
                                       title: Text('Edit Username/Password'),
                                       onTap: () {
-                                        // Placeholder for edit username/password functionality
                                       },
                                     ),
                                   ],
