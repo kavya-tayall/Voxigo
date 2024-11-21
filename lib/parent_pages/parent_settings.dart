@@ -21,15 +21,13 @@ class ParentSettingsPage extends StatefulWidget {
 }
 
 class _ParentSettingsPageState extends State<ParentSettingsPage> {
-  String _selectedOption =
-      'Select Child';
+  String _selectedOption = 'Select Child';
   List<String> childrenNamesList = [];
   bool isLoading = true;
   bool enableNotifications = true;
   bool useSentenceHelper = true;
   bool canUseGridControls = true;
   bool canUseSettings = true;
-
 
   @override
   void initState() {
@@ -55,7 +53,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
 
       if (parentSnapshot.exists) {
         Map<String, dynamic>? parentData =
-            parentSnapshot.data() as Map<String, dynamic>?;
+        parentSnapshot.data() as Map<String, dynamic>?;
         if (parentData != null && parentData['children'] != null) {
           List<dynamic> childrenIDList = parentData['children'];
           for (String childId in childrenIDList) {
@@ -66,7 +64,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
 
             if (childSnapshot.exists) {
               Map<String, dynamic>? childData =
-                  childSnapshot.data() as Map<String, dynamic>?;
+              childSnapshot.data() as Map<String, dynamic>?;
               if (childData != null &&
                   childData['first name'] != null &&
                   childData['last name'] != null) {
@@ -84,8 +82,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
           setState(() {
             isLoading = false;
             if (childrenNamesList.isNotEmpty) {
-              _selectedOption =
-                  childrenNamesList[0];
+              _selectedOption = childrenNamesList[0];
             }
           });
         } else {
@@ -102,306 +99,364 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(Icons.settings, color: Colors.black, size: 30),
-            Row(children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 3.0),
-                child: Image.asset("assets/imgs/logo_without_text.png", width: 60),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: GradientText("MindBridge", gradient: LinearGradient(colors: [Colors.blue, Colors.blueAccent, Colors.deepPurpleAccent]), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
-              )
-            ]
+        appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(Icons.settings, color: Colors.black, size: 30),
+                Row(children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3.0),
+                    child: Image.asset("assets/imgs/logo_without_text.png",
+                        width: 60),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: GradientText("MindBridge",
+                        gradient: LinearGradient(colors: [
+                          Colors.blue,
+                          Colors.blueAccent,
+                          Colors.deepPurpleAccent
+                        ]),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 30)),
+                  )
+                ]),
+              ],
+            )),
+        body: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : SettingsList(
+          sections: [
+            SettingsSection(
+              title: Text('Common'),
+              tiles: <SettingsTile>[
+                SettingsTile.navigation(
+                  leading: Icon(Icons.language, color: Colors.black),
+                  trailing: Text("English",
+                      style: TextStyle(color: Colors.black87)),
+                  title: Text('Language'),
+                  value: Text('English'),
+                ),
+                SettingsTile.switchTile(
+                  onToggle: (value) {},
+                  initialValue: true,
+                  leading: Icon(Icons.format_paint, color: Colors.black),
+                  trailing: Text(""),
+                  title: Text('Enable custom theme'),
+                ),
+                SettingsTile.navigation(
+                  leading: Icon(Icons.logout, color: Colors.black),
+                  title: Text('Log out'),
+                  trailing: Text(""),
+                  onPressed: (context) async {
+                    final childProvider = Provider.of<ChildProvider>(
+                        context,
+                        listen: false);
+                    childProvider.logout();
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.of(context)
+                        .pushReplacementNamed('/parent_login');
+                  },
+                ),
+              ],
             ),
-          ],
-        )
-    ),
-
-
-      body: isLoading
-        ? Center(
-            child:
-                CircularProgressIndicator())
-        : SettingsList(
-            sections: [
-              SettingsSection(
-                title: Text('Common'),
-                tiles: <SettingsTile>[
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.language, color: Colors.black),
-                    trailing: Text("English", style: TextStyle(color: Colors.black87)),
-                    title: Text('Language'),
-                    value: Text('English'),
-                  ),
-                  SettingsTile.switchTile(
-                    onToggle: (value) {},
-                    initialValue: true,
-                    leading: Icon(Icons.format_paint, color: Colors.black),
-                    trailing: Text(""),
-                    title: Text('Enable custom theme'),
-                  ),
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.logout, color: Colors.black),
-                    title: Text('Log out'),
-                    trailing: Text(""),
-                    onPressed: (context) async {
-                      final childProvider =
-                          Provider.of<ChildProvider>(context, listen: false);
-                      childProvider.logout();
-                      await FirebaseAuth.instance.signOut();
-                      Navigator.of(context)
-                          .pushReplacementNamed('/parent_login');
-                    },
-                  ),
-                ],
-              ),
-              SettingsSection(
-                title: Text('Account'),
-                tiles: <SettingsTile>[
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.person, color: Colors.black),
-                    title: Text('Profile'),
-                    trailing: Text(""),
-                    onPressed: (context) {},
-                  ),
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.lock, color: Colors.black),
-                    trailing: Text(""),
-                    title: Text('Change Password'),
-                    onPressed: (context) {},
-                  ),
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.add, color: Colors.black),
-                    trailing: Text(""),
-                    title: Text('Add Child'),
-                    onPressed: (context) {
-                      _showFormDialog(context);
-                    },
-                  ),
-                ],
-              ),
-              SettingsSection(
-                title: Text('Notifications'),
-                tiles: <SettingsTile>[
-                  SettingsTile.switchTile(
-                    leading: Icon(Icons.notifications, color: Colors.black),
-                    title: Text('Enable Notifications'),
-                    initialValue: enableNotifications,
-                    onToggle: (value) {
-                      setState(() {
-                        enableNotifications = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              SettingsSection(
-                title: Text('Privacy'),
-                tiles: <SettingsTile>[
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.lock_outline, color: Colors.black),
-                    trailing: Text(""),
-                    title: Text('Privacy Policy'),
-                    onPressed: (context) {},
-                  ),
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.security, color: Colors.black),
-                    title: Text('Security Settings'),
-                    trailing: Text(""),
-                    onPressed: (context) {},
-                  ),
-                ],
-              ),
-              SettingsSection(
-                title: Text('Child Settings'),
-                tiles: <SettingsTile>[
-                  SettingsTile(
-                    title: Text('Select a child'),
-                    trailing: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey,
-                            width: 1.5,
-                          ),
-                          borderRadius: BorderRadius.circular(8),
+            SettingsSection(
+              title: Text('Account'),
+              tiles: <SettingsTile>[
+                SettingsTile.navigation(
+                  leading: Icon(Icons.person, color: Colors.black),
+                  title: Text('Profile'),
+                  trailing: Text(""),
+                  onPressed: (context) {},
+                ),
+                SettingsTile.navigation(
+                  leading: Icon(Icons.lock, color: Colors.black),
+                  trailing: Text(""),
+                  title: Text('Change Password'),
+                  onPressed: (context) {},
+                ),
+                SettingsTile.navigation(
+                  leading: Icon(Icons.add, color: Colors.black),
+                  trailing: Text(""),
+                  title: Text('Add Child'),
+                  onPressed: (context) {
+                    _showFormDialog(context);
+                  },
+                ),
+              ],
+            ),
+            SettingsSection(
+              title: Text('Notifications'),
+              tiles: <SettingsTile>[
+                SettingsTile.switchTile(
+                  leading: Icon(Icons.notifications, color: Colors.black),
+                  title: Text('Enable Notifications'),
+                  initialValue: enableNotifications,
+                  onToggle: (value) {
+                    setState(() {
+                      enableNotifications = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+            SettingsSection(
+              title: Text('Privacy'),
+              tiles: <SettingsTile>[
+                SettingsTile.navigation(
+                  leading: Icon(Icons.lock_outline, color: Colors.black),
+                  trailing: Text(""),
+                  title: Text('Privacy Policy'),
+                  onPressed: (context) {},
+                ),
+                SettingsTile.navigation(
+                  leading: Icon(Icons.security, color: Colors.black),
+                  title: Text('Security Settings'),
+                  trailing: Text(""),
+                  onPressed: (context) {},
+                ),
+              ],
+            ),
+            SettingsSection(
+              title: Text('Child Settings'),
+              tiles: <SettingsTile>[
+                SettingsTile(
+                  title: Text('Select a child'),
+                  trailing: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.grey,
+                          width: 1.5,
                         ),
-                        child: DropdownButton<String>(
-                          value: _selectedOption.isNotEmpty
-                              ? _selectedOption
-                              : null,
-                          hint: Text("Select a child"),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedOption = newValue!;
-                            });
-                          },
-                          items: childrenNamesList
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          underline:
-                              SizedBox.shrink(),
-                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: DropdownButton<String>(
+                        value: _selectedOption.isNotEmpty
+                            ? _selectedOption
+                            : null,
+                        hint: Text("Select a child"),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedOption = newValue!;
+                          });
+                        },
+                        items: childrenNamesList
+                            .map<DropdownMenuItem<String>>(
+                                (String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                        underline: SizedBox.shrink(),
                       ),
                     ),
                   ),
-                  SettingsTile.switchTile(
-                    leading: Icon(Icons.assistant, color: Colors.black),
-                    title: Text('Can use sentence helper'),
-                    initialValue: useSentenceHelper,
-                    onToggle: (value) {
-                      setState(() {
-                        useSentenceHelper = value;
-                      });
-                    },
-                  ),
-
-                  SettingsTile.switchTile(
-                    leading: Icon(Icons.grid_on_rounded, color: Colors.black),
-                    title: Text('Can use grid controls'),
-                    initialValue: canUseGridControls,
-                    onToggle: (bool value) {
-                      canUseGridControls = value;
-                    },
-                  ),
-                  SettingsTile.switchTile(
-                    leading: Icon(Icons.settings, color: Colors.black),
-                    title: Text('Can use settings'),
-                    initialValue: canUseSettings,
-                    onToggle: (bool value) {
-                      canUseSettings = value;
-                    },
-                  ),
-                  SettingsTile.navigation(
-                    leading: Icon(Icons.color_lens, color: Colors.black),
-                    title: Text('Child Theme'),
-                    trailing: Text(""),
-                    onPressed: (context) {},
-                  ),
-                ],
-              ),
-            ],
-      ));
+                ),
+                SettingsTile.switchTile(
+                  leading: Icon(Icons.assistant, color: Colors.black),
+                  title: Text('Can use sentence helper'),
+                  initialValue: useSentenceHelper,
+                  onToggle: (value) {
+                    setState(() {
+                      useSentenceHelper = value;
+                    });
+                  },
+                ),
+                SettingsTile.switchTile(
+                  leading:
+                  Icon(Icons.grid_on_rounded, color: Colors.black),
+                  title: Text('Can use grid controls'),
+                  initialValue: canUseGridControls,
+                  onToggle: (bool value) {
+                    canUseGridControls = value;
+                  },
+                ),
+                SettingsTile.switchTile(
+                  leading: Icon(Icons.settings, color: Colors.black),
+                  title: Text('Can use settings'),
+                  initialValue: canUseSettings,
+                  onToggle: (bool value) {
+                    canUseSettings = value;
+                  },
+                ),
+                SettingsTile.navigation(
+                  leading: Icon(Icons.color_lens, color: Colors.black),
+                  title: Text('Child Theme'),
+                  trailing: Text(""),
+                  onPressed: (context) {},
+                ),
+              ],
+            ),
+          ],
+        ));
   }
 }
 
-class RegisterChildForm extends StatelessWidget {
-  RegisterChildForm({super.key});
+class RegisterChildForm extends StatefulWidget {
+  const RegisterChildForm({super.key});
 
+  @override
+  State<RegisterChildForm> createState() => _RegisterChildFormState();
+}
+
+class _RegisterChildFormState extends State<RegisterChildForm> {
   final UserService _user = UserService();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final _formKey = GlobalKey<FormBuilderState>();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return FormBuilder(
+    return Form(
       key: _formKey,
-      child:
-          Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        Padding(
-          padding: EdgeInsets.only(bottom: 8),
-          child: FormBuilderTextField(
-            name: 'Username',
-            decoration: const InputDecoration(labelText: 'Username'),
-            validator: FormBuilderValidators.compose([
-              FormBuilderValidators.username(),
-            ]),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          child: FormBuilderTextField(
-            name: 'First name',
-            decoration: const InputDecoration(labelText: 'First name'),
-            validator: FormBuilderValidators.compose([
-              FormBuilderValidators.firstName(),
-              FormBuilderValidators.required(),
-            ]),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          child: FormBuilderTextField(
-            name: 'Last name',
-            decoration: const InputDecoration(labelText: 'Last name'),
-            validator: FormBuilderValidators.compose([
-              FormBuilderValidators.lastName(),
-              FormBuilderValidators.required(),
-            ]),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          child: FormBuilderTextField(
-            name: 'Password',
-            decoration: const InputDecoration(labelText: 'Password'),
-            validator: FormBuilderValidators.compose([
-              FormBuilderValidators.required(),
-              FormBuilderValidators.password(),
-            ]),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 8),
-          child: Row(children: [
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    debugPrint(_formKey.currentState?.instantValue.toString());
-                    User? user = FirebaseAuth.instance.currentUser;
-
-                    _showLoadingDialog(context);
-                    try {
-                      await _user.registerChild(
-                          user!.uid,
-                          _formKey.currentState?.instantValue['First name'],
-                          _formKey.currentState?.instantValue['Last name'],
-                          _formKey.currentState?.instantValue['Username'],
-                          _formKey.currentState?.instantValue['Password']);
-
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                      showTopSnackBar(
-                        Overlay.of(context),
-                        CustomSnackBar.success(
-                          backgroundColor: Colors.green,
-                          message: "Child has been added",
-                        ),
-                        displayDuration: Duration(seconds: 3),
-                      );
-                    } on UsernameAlreadyExistsException {
-                      Navigator.pop(context);
-                      showTopSnackBar(
-                        Overlay.of(context),
-                        CustomSnackBar.error(
-                          backgroundColor: Colors.red.shade900,
-                          message: "Username already exists",
-                        ),
-                        displayDuration: Duration(seconds: 3),
-                      );
-                    }
-                  }
-                },
-                child: const Text('Register Child'),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Username Field
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: TextFormField(
+              controller: _usernameController,
+              decoration: const InputDecoration(
+                labelText: 'Username',
+                border: OutlineInputBorder(),
               ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Username is required';
+                } else if (value.length < 3) {
+                  return 'Username must be at least 3 characters long';
+                }
+                return null;
+              },
             ),
-          ]),
-        )
-      ]),
+          ),
+          // First Name Field
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: TextFormField(
+              controller: _firstNameController,
+              decoration: const InputDecoration(
+                labelText: 'First Name',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'First Name is required';
+                }
+                return null;
+              },
+            ),
+          ),
+          // Last Name Field
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: TextFormField(
+              controller: _lastNameController,
+              decoration: const InputDecoration(
+                labelText: 'Last Name',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Last Name is required';
+                }
+                return null;
+              },
+            ),
+          ),
+          // Password Field
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: TextFormField(
+              controller: _passwordController,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Password is required';
+                } else if (value.length < 6) {
+                  return 'Password must be at least 6 characters long';
+                }
+                return null;
+              },
+            ),
+          ),
+          // Submit Button
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        _showLoadingDialog(context);
+                        try {
+                          User? user = FirebaseAuth.instance.currentUser;
+                          await _user.registerChild(
+                            user!.uid,
+                            _firstNameController.text.trim(),
+                            _lastNameController.text.trim(),
+                            _usernameController.text.trim(),
+                            _passwordController.text.trim(),
+                          );
+
+                          // Success Handling
+                          Navigator.pop(context); // Close loading dialog
+                          Navigator.pop(context); // Close form dialog
+                          showTopSnackBar(
+                            Overlay.of(context),
+                            CustomSnackBar.success(
+                              backgroundColor: Colors.green,
+                              message: "Child has been added",
+                            ),
+                            displayDuration: const Duration(seconds: 3),
+                          );
+                        } on UsernameAlreadyExistsException {
+                          // Error Handling
+                          Navigator.pop(context); // Close loading dialog
+                          showTopSnackBar(
+                            Overlay.of(context),
+                            CustomSnackBar.error(
+                              backgroundColor: Colors.red.shade900,
+                              message: "Username already exists",
+                            ),
+                            displayDuration: const Duration(seconds: 3),
+                          );
+                        }
+                      }
+                    },
+                    child: const Text("Register Child"),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -410,7 +465,7 @@ class RegisterChildForm extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return Center(
+        return const Center(
           child: CircularProgressIndicator(),
         );
       },

@@ -28,7 +28,14 @@ typedef VoidCallBack = void Function();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.ios);
+  try {
+    // Attempt to initialize Firebase only if no instance exists
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.ios);
+    }
+  } catch (e) {
+    print("Firebase initialization error: $e");
+  }
 
   runApp(
     ChangeNotifierProvider(
@@ -101,8 +108,8 @@ class BasePageState extends State<BasePage> {
 
   Future<void> _loadJsonData() async {
     String? jsonString =
-        await Provider.of<ChildProvider>(context, listen: false)
-            .fetchJson('board.json');
+    await Provider.of<ChildProvider>(context, listen: false)
+        .fetchJson('board.json');
 
     final jsonData = jsonDecode(jsonString!);
 

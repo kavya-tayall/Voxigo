@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import '../child_pages/home_page.dart';
@@ -47,8 +46,6 @@ class GridState extends State<Grid> {
       } else {
         visibleButtons = [];
       }
-
-      print("Updated visible buttons");
     });
   }
 
@@ -83,10 +80,11 @@ class GridState extends State<Grid> {
     });
 
     await dataWidget?.onDataChange(dataWidget.data);
-    context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget!.data.cast<String, dynamic>());
+    context
+        .findAncestorStateOfType<HomePageState>()
+        ?.saveUpdatedData(dataWidget!.data.cast<String, dynamic>());
     context.findAncestorStateOfType<HomePageState>()?.updateGrid();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -98,153 +96,144 @@ class GridState extends State<Grid> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        int crossAxisCount = 10;
-        int fixedRows = 5;
+        final double screenWidth = constraints.maxWidth;
 
-        double availableHeight = constraints.maxHeight;
+        // Dynamically determine crossAxisCount and button size
+        int crossAxisCount = screenWidth < 600
+            ? 3 // For mobile: 3 items per row
+            : (screenWidth / 120)
+            .floor(); // Approx. 120px per icon for larger screens
+        double buttonSize =
+            (screenWidth / crossAxisCount) - 16; // Adjust for padding
 
-        int maxItems = 50;
-        double buttonSize = ((availableHeight - 50) / fixedRows) + 40;
-        print("Button size: $buttonSize");
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(10.0), // Consistent padding
+            child: ReorderableGridView.builder(
+              key: UniqueKey(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+              ),
+              physics:
+              NeverScrollableScrollPhysics(), // Prevent internal scrolling
+              shrinkWrap: true,
+              itemCount: visibleButtons.length,
+              onReorder: (oldIndex, newIndex) async {
+                await reorderGrid(oldIndex, newIndex);
+                setState(() {});
+              },
+              itemBuilder: (BuildContext context, int index) {
+                final item = visibleButtons[index];
+                final imagePath =
+                    '${appDirectory?.path}${Platform.pathSeparator}board_images${Platform.pathSeparator}${item["image_url"]}';
 
-        int visibleItemCount = visibleButtons.length > maxItems ? maxItems : visibleButtons.length;
+                final label = item["label"] ?? 'No Label';
 
-        if (visibleButtons.isEmpty) {
-          return Center(
-            child: Text(
-              "No items to display",
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-          );
-        }
+                final itemKey = ValueKey('${item["id"]}_$index');
 
-        return ReorderableGridView.builder(
-          key: UniqueKey(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-          ),
-          physics: NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: visibleItemCount,
-          onReorder: (oldIndex, newIndex) async {
-
-            await reorderGrid(oldIndex, newIndex);
-            setState(() {
-            });
-          },
-          itemBuilder: (BuildContext context, int index) {
-            final item = visibleButtons[index];
-
-            if (appDirectory == null) {
-              return CircularProgressIndicator();
-            }
-
-            final imagePath = '${appDirectory?.path}\\board_images\\${item["image_url"]}';
-            final label = item["label"] ?? 'No Label';
-
-            final itemKey = ValueKey('${item["id"]}_$index');
-
-            if (item["folder"] == false) {
-              return LongPressDraggable<Map<String, dynamic>>(
-                key: itemKey, // Ensure the item has a unique key
-                data: item,
-                feedback: Material(
-                  child: FirstButton(
-                    id: item["id"],
-                    imagePath: imagePath,
-                    text: label,
-                    size: buttonSize,
-                    onPressed: () {},
-                  ),
-                ),
-                childWhenDragging: Opacity(
-                  opacity: 0.5,
-                  child: FirstButton(
-                    id: item["id"],
-                    imagePath: imagePath,
-                    text: label,
-                    size: buttonSize,
-                    onPressed: () {},
-                  ),
-                ),
-                child: FirstButton(
-                  id: item["id"],
-                  imagePath: imagePath,
-                  text: label,
-                  size: buttonSize,
-                  onPressed: () {
-                    widget.onButtonPressed(
-                      FirstButton(
+                if (item["folder"] == false) {
+                  return LongPressDraggable<Map<String, dynamic>>(
+                    key: itemKey,
+                    data: item,
+                    feedback: Material(
+                      child: FirstButton(
                         id: item["id"],
                         imagePath: imagePath,
                         text: label,
                         size: buttonSize,
                         onPressed: () {},
                       ),
-                    );
-                  },
-                ),
-              );
-            } else {
-              return DragTarget<Map<String, dynamic>>(
-                key: itemKey,
-                onWillAcceptWithDetails: (receivedItem) {
-                  return true;
-                },
-                onAcceptWithDetails: (receivedItem) {
-                  final dataWidget = DataWidget.of(context);
-                  final pathWidget = PathWidget.of(context);
-
-                  setState(() {
-                    dynamic nestedData = dataWidget!.data;
-                    for (var folder in pathWidget!.pathOfBoard) {
-                      nestedData = nestedData[folder];
-                    }
-
-                    dynamic targetFolder = nestedData[index];
-
-                    if (targetFolder["folder"] == true) {
-                      targetFolder["buttons"].add(receivedItem);
-
-                      nestedData.remove(receivedItem);
-
-
-                      dataWidget.onDataChange(dataWidget.data);
-
-                      context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
-
-                      context.findAncestorStateOfType<HomePageState>()?.updateGrid();
-                    } else {
-                      print("Target index is not a folder.");
-                    }
-                  });
-                },
-                builder: (context, acceptedItems, rejectedItems) {
-                  return FolderButton(
+                    ),
+                    childWhenDragging: Opacity(
+                      opacity: 0.5,
+                      child: FirstButton(
+                        id: item["id"],
+                        imagePath: imagePath,
+                        text: label,
+                        size: buttonSize,
+                        onPressed: () {},
+                      ),
+                    ),
+                    child: FirstButton(
+                      id: item["id"],
+                      imagePath: imagePath,
+                      text: label,
+                      size: buttonSize,
+                      onPressed: () {
+                        widget.onButtonPressed(
+                          FirstButton(
+                            id: item["id"],
+                            imagePath: imagePath,
+                            text: label,
+                            size: buttonSize,
+                            onPressed: () {},
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                } else {
+                  return DragTarget<Map<String, dynamic>>(
                     key: itemKey,
-                    imagePath: imagePath,
-                    text: label,
-                    ind: index,
-                    size: buttonSize,
-                    onPressed: () {
-                      final homePageState = context.findAncestorStateOfType<HomePageState>();
-                      if (homePageState == null) print("null");
+                    onWillAcceptWithDetails: (receivedItem) {
+                      return true;
+                    },
+                    onAcceptWithDetails: (receivedItem) {
+                      final dataWidget = DataWidget.of(context);
+                      final pathWidget = PathWidget.of(context);
 
-                      if (homePageState?.inRemovalState == true) {
-                        homePageState?.removeFolder(index);
-                      } else {
-                        updateGridPath(index, "buttons");
-                      }
+                      setState(() {
+                        dynamic nestedData = dataWidget!.data;
+                        for (var folder in pathWidget!.pathOfBoard) {
+                          nestedData = nestedData[folder];
+                        }
+
+                        dynamic targetFolder = nestedData[index];
+
+                        if (targetFolder["folder"] == true) {
+                          targetFolder["buttons"].add(receivedItem);
+
+                          nestedData.remove(receivedItem);
+
+                          dataWidget.onDataChange(dataWidget.data);
+
+                          context
+                              .findAncestorStateOfType<HomePageState>()
+                              ?.saveUpdatedData(dataWidget.data);
+
+                          context
+                              .findAncestorStateOfType<HomePageState>()
+                              ?.updateGrid();
+                        }
+                      });
+                    },
+                    builder: (context, acceptedItems, rejectedItems) {
+                      return FolderButton(
+                        key: itemKey,
+                        imagePath: imagePath,
+                        text: label,
+                        ind: index,
+                        size: buttonSize,
+                        onPressed: () {
+                          final homePageState =
+                          context.findAncestorStateOfType<HomePageState>();
+                          if (homePageState?.inRemovalState == true) {
+                            homePageState?.removeFolder(index);
+                          } else {
+                            updateGridPath(index, "buttons");
+                          }
+                        },
+                      );
                     },
                   );
-                },
-              );
-            }
-          },
+                }
+              },
+            ),
+          ),
         );
       },
     );
   }
-} 
+}

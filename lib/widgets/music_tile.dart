@@ -1,12 +1,10 @@
 import 'dart:io';
-
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:test_app/auth_logic.dart';
 import 'package:path_provider/path_provider.dart';
-
 import '../child_pages/music_page.dart';
 
 class MusicTile extends StatefulWidget {
@@ -35,50 +33,60 @@ class _MusicTileState extends State<MusicTile> {
   Duration _position = Duration.zero;
   Future<String>? _imagePathFuture;
 
-
   void _togglePlayPause() async {
-    final directory = await getApplicationDocumentsDirectory();
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final audioPath = '${directory.path}/music_files/${widget.song.link}';
 
-    if (!mounted) return;
-    if (_isPlaying) {
-      await _audioPlayer.pause();
-      if (mounted) {
-        setState(() {
-          _isPlaying = false;
-        });
-      }
-    } else {
-      if (!widget.isPlaying) {
-        print("playing right now");
-        print('${directory.path}/music_files/${widget.song.link}');
-        await _audioPlayer.play(DeviceFileSource('${directory.path}/music_files/${widget.song.link}'));
+      if (!mounted) return;
+
+      if (_isPlaying) {
+        await _audioPlayer.pause();
+        if (mounted) {
+          setState(() {
+            _isPlaying = false;
+          });
+        }
       } else {
-        await _audioPlayer.resume();
+        if (!widget.isPlaying) {
+          if (await File(audioPath).exists()) {
+            await _audioPlayer.play(DeviceFileSource(audioPath));
+          } else {
+            throw Exception('Audio file not found: $audioPath');
+          }
+        } else {
+          await _audioPlayer.resume();
+        }
+        if (mounted) {
+          setState(() {
+            _isPlaying = true;
+          });
+        }
       }
-      if (mounted) {
-        setState(() {
-          _isPlaying = true;
-        });
-      }
+      widget.onPlayPause(widget.index, _audioPlayer);
+    } catch (e) {
+      print('Error playing audio: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error playing audio: $e')),
+      );
     }
-    widget.onPlayPause(widget.index, _audioPlayer);
   }
 
-  // Rewind and fast forward
   void _rewind() {
     final newPosition = _position - Duration(seconds: 5);
-    _audioPlayer.seek(newPosition);
+    _audioPlayer
+        .seek(newPosition > Duration.zero ? newPosition : Duration.zero);
   }
 
   void _fastForward() {
     final newPosition = _position + Duration(seconds: 5);
-    _audioPlayer.seek(newPosition);
+    _audioPlayer.seek(newPosition < _duration ? newPosition : _duration);
   }
-
 
   void _onTapProgressBar(double tapPositionX, double totalWidth) {
     final double progress = tapPositionX / totalWidth;
-    final newPosition = Duration(milliseconds: (progress * _duration.inMilliseconds).toInt());
+    final newPosition =
+    Duration(milliseconds: (progress * _duration.inMilliseconds).toInt());
     _audioPlayer.seek(newPosition);
   }
 
@@ -115,28 +123,33 @@ class _MusicTileState extends State<MusicTile> {
     super.initState();
     _imagePathFuture = _setImagePath();
 
-
     _audioPlayer.onDurationChanged.listen((Duration d) {
-      setState(() {
-        _duration = d;
-      });
+      if (mounted) {
+        setState(() {
+          _duration = d;
+        });
+      }
     });
 
     _audioPlayer.onPositionChanged.listen((Duration p) {
-      setState(() {
-        _position = p;
-      });
+      if (mounted) {
+        setState(() {
+          _position = p;
+        });
+      }
     });
   }
 
   Future<String> _setImagePath() async {
-    final directory = await getApplicationDocumentsDirectory();
-    String imageName = widget.song.image;
-    String imagePath = '${directory.path}/music_files/$imageName';
-    print('Image path: $imagePath');
-    return imagePath;
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      String imageName = widget.song.image;
+      return '${directory.path}/music_files/$imageName';
+    } catch (e) {
+      print('Error fetching image path: $e');
+      return '';
+    }
   }
-
 
   @override
   void dispose() {
@@ -150,8 +163,11 @@ class _MusicTileState extends State<MusicTile> {
         ? _position.inMilliseconds / _duration.inMilliseconds
         : 0.0;
 
+    final isTablet = MediaQuery.of(context).size.width > 600;
+
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+      margin:
+      EdgeInsets.symmetric(vertical: 15, horizontal: isTablet ? 40 : 20),
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.blue[50],
@@ -190,7 +206,9 @@ class _MusicTileState extends State<MusicTile> {
                   ),
                   child: Icon(Icons.error, size: 40, color: Colors.red),
                 );
-              } else if (snapshot.hasData && File(snapshot.data!).existsSync()) {
+              } else if (snapshot.hasData &&
+                  snapshot.data!.isNotEmpty &&
+                  File(snapshot.data!).existsSync()) {
                 return Container(
                   height: 80,
                   width: 80,
@@ -222,15 +240,20 @@ class _MusicTileState extends State<MusicTile> {
               children: [
                 Text(
                   widget.song.title,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: isTablet ? 22 : 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
                 SizedBox(height: 12),
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTapDown: (details) {
-
-                      final RenderBox box = context.findRenderObject() as RenderBox;
+                      final RenderBox box =
+                      context.findRenderObject() as RenderBox;
                       final totalWidth = box.size.width;
                       _onTapProgressBar(details.localPosition.dx, totalWidth);
                     },
@@ -261,33 +284,33 @@ class _MusicTileState extends State<MusicTile> {
             ),
           ),
           SizedBox(width: 25),
-
           IconButton(
             icon: Icon(Icons.replay_5),
-            iconSize: 35,
+            iconSize: isTablet ? 40 : 35,
             color: Colors.blue,
             onPressed: _rewind,
           ),
           IconButton(
-            icon: Icon(_isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled),
-            iconSize: 55,
+            icon: Icon(_isPlaying
+                ? Icons.pause_circle_filled
+                : Icons.play_circle_filled),
+            iconSize: isTablet ? 60 : 55,
             color: Colors.blue,
             onPressed: _togglePlayPause,
           ),
           IconButton(
             icon: Icon(Icons.forward_5),
-            iconSize: 35,
+            iconSize: isTablet ? 40 : 35,
             color: Colors.blue,
             onPressed: _fastForward,
           ),
           IconButton(
             icon: Icon(Icons.delete, color: Colors.red),
-            iconSize: 35,
+            iconSize: isTablet ? 40 : 35,
             onPressed: _showDeleteConfirmationDialog,
           ),
         ],
       ),
     );
   }
-
 }

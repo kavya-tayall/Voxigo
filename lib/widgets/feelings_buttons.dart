@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:test_app/widgets/child_provider.dart';
 
-
 class FeelingsButton extends StatelessWidget {
   final String feeling;
   final String imagePath;
@@ -19,19 +18,19 @@ class FeelingsButton extends StatelessWidget {
   Color _getButtonColor() {
     switch (feeling) {
       case "Happy":
-        return Color(0xFF128E00);
+        return const Color(0xFF43A047); // Green accent
       case "Sad":
-        return Colors.blue[300]!;
+        return const Color(0xFF2196F3); // Blue
       case "Angry":
-        return Colors.red[600]!;
+        return const Color(0xFFD32F2F); // Red accent
       case "Nervous":
-        return Color(0xFF80008E);
+        return const Color(0xFF8E24AA); // Purple accent
       case "Bored":
-        return Color(0xFF636363);
+        return const Color(0xFF757575); // Grey
       case "Tired":
-        return Color(0xFFC86B00);
+        return const Color(0xFFFFA000); // Amber
       default:
-        return Colors.grey[300]!;
+        return Colors.grey[300]!; // Light grey for default
     }
   }
 
@@ -49,36 +48,49 @@ class FeelingsButton extends StatelessWidget {
           color: _getButtonColor(),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.black,
+            color: Colors.white,
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: Offset(3, 3),
-            )
+              color: Colors.black.withOpacity(0.15),
+              spreadRadius: 3,
+              blurRadius: 6,
+              offset: const Offset(4, 4),
+            ),
+            BoxShadow(
+              color: Colors.white.withOpacity(0.8),
+              spreadRadius: -2,
+              blurRadius: 3,
+              offset: const Offset(-4, -4),
+            ),
           ],
         ),
-        constraints: BoxConstraints(
+        constraints: const BoxConstraints(
           minWidth: 200,
-          minHeight: 220,
+          minHeight: 240,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              imagePath,
-              height: 150,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Image.asset(
+                imagePath,
+                height: 120,
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               feeling,
+              textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
+                fontSize: 26,
+                fontWeight: FontWeight.w600,
                 color: Colors.white,
+                letterSpacing: 1.2,
               ),
             ),
           ],

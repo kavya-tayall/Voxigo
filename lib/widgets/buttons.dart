@@ -6,7 +6,7 @@ class FirstButton extends StatefulWidget {
   final String id;
   final String imagePath;
   final String text;
-  final double size;
+  final double size; // Size is passed for compatibility
   final VoidCallback onPressed;
 
   const FirstButton({
@@ -34,9 +34,8 @@ class FirstButton extends StatefulWidget {
 class _FirstButtonState extends State<FirstButton> {
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: widget.size,
-      height: widget.size,
+    return AspectRatio(
+      aspectRatio: 1, // Maintain square shape
       child: ElevatedButton(
         onPressed: widget.onPressed,
         style: ElevatedButton.styleFrom(
@@ -47,14 +46,15 @@ class _FirstButtonState extends State<FirstButton> {
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Expanded(
+            Flexible(
               child: _loadImageWithLoadingIndicator(widget.imagePath),
             ),
+            const SizedBox(height: 4), // Space between image and text
             Text(
               widget.text,
               textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12),
             ),
           ],
         ),
@@ -71,10 +71,11 @@ class _FirstButtonState extends State<FirstButton> {
       return CachedNetworkImage(
         imageUrl: imagePath,
         fit: BoxFit.contain,
-        placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+        placeholder: (context, url) =>
+        const Center(child: CircularProgressIndicator()),
         errorWidget: (context, url, error) {
           print("Failed to load image from URL: $imagePath");
-          return Icon(Icons.broken_image);
+          return const Icon(Icons.broken_image);
         },
       );
     } else {
@@ -83,7 +84,7 @@ class _FirstButtonState extends State<FirstButton> {
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           print("Failed to load image from file: $imagePath");
-          return Icon(Icons.broken_image);
+          return const Icon(Icons.broken_image);
         },
       );
     }
@@ -94,10 +95,10 @@ class FolderButton extends StatelessWidget {
   final String imagePath;
   final String text;
   final int ind;
-  final double size;
+  final double size; // Size is passed for compatibility
   final VoidCallback onPressed;
 
-  FolderButton({
+  const FolderButton({
     Key? key,
     required this.imagePath,
     required this.text,
@@ -108,9 +109,8 @@ class FolderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
+    return AspectRatio(
+      aspectRatio: 1, // Maintain square shape
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -121,14 +121,15 @@ class FolderButton extends StatelessWidget {
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Expanded(
+            Flexible(
               child: _loadImageFromAsset(imagePath),
             ),
+            const SizedBox(height: 4), // Space between image and text
             Text(
               text,
               textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12),
             ),
           ],
         ),
@@ -142,7 +143,7 @@ class FolderButton extends StatelessWidget {
       fit: BoxFit.contain,
       errorBuilder: (context, error, stackTrace) {
         print("Failed to load image from file: $imagePath");
-        return Icon(Icons.broken_image);
+        return const Icon(Icons.broken_image);
       },
     );
   }

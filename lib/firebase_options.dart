@@ -31,7 +31,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
+              'you can reconfigure this by running the FlutterFire CLI again.',
         );
       default:
         throw UnsupportedError(
@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCdbQv3GYIjQ1IXsyz2Hfgff0vrc21ZlOw',
-    appId: '1:662430635566:android:98198abe528d468b5771bf',
+    appId: '1:662430635566:android:114537d11282fad95771bf',
     messagingSenderId: '662430635566',
     projectId: 'aac-app-24',
     databaseURL: 'https://aac-app-24-default-rtdb.firebaseio.com',
@@ -73,22 +73,22 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyBPY7ngSGol9gA65rqMRtHHt7fels1Yt7E',
-    appId: '1:662430635566:ios:91dde89dcf62d08e5771bf',
+    appId: '1:662430635566:ios:88701b6210ca0e865771bf',
     messagingSenderId: '662430635566',
     projectId: 'aac-app-24',
     databaseURL: 'https://aac-app-24-default-rtdb.firebaseio.com',
     storageBucket: 'aac-app-24.appspot.com',
-    iosBundleId: 'com.example.testt',
+    iosBundleId: 'com.example.mindbridgeBetaMain',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBPY7ngSGol9gA65rqMRtHHt7fels1Yt7E',
-    appId: '1:662430635566:ios:91dde89dcf62d08e5771bf',
+    appId: '1:662430635566:ios:88701b6210ca0e865771bf',
     messagingSenderId: '662430635566',
     projectId: 'aac-app-24',
     databaseURL: 'https://aac-app-24-default-rtdb.firebaseio.com',
     storageBucket: 'aac-app-24.appspot.com',
-    iosBundleId: 'com.example.testt',
+    iosBundleId: 'com.example.mindbridgeBetaMain',
   );
 
 }

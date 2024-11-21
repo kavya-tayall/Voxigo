@@ -62,10 +62,10 @@ class _FiveCalmDownHomeState extends State<FiveCalmDownHome> {
               duration: const Duration(milliseconds: 1800),
               child: Center(
                   child: Text(
-                "All Done!",
-                style: TextStyle(fontSize: 100, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ))),
+                    "All Done!",
+                    style: TextStyle(fontSize: 100, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ))),
           child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [

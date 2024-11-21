@@ -60,7 +60,7 @@ class SuggestionTile extends StatelessWidget {
               backgroundColor: Colors.blue,
               elevation: 3.5,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)
+                  borderRadius: BorderRadius.circular(12)
               ),
             ),
             child: Text(suggestion, style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 50))),
@@ -68,5 +68,3 @@ class SuggestionTile extends StatelessWidget {
     );
   }
 }
-
-

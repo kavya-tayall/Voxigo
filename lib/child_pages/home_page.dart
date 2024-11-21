@@ -14,7 +14,6 @@ import 'package:path_provider/path_provider.dart';
 import '../widgets/child_provider.dart';
 import '../widgets/suggestionWidget.dart';
 
-
 class GradientText extends StatelessWidget {
   const GradientText(
       this.text, {
@@ -38,14 +37,11 @@ class GradientText extends StatelessWidget {
   }
 }
 
-
-
 class GradientIcon extends StatelessWidget {
-  const GradientIcon(
-      {
-        required this.icon,
-        required this.gradient,
-      });
+  const GradientIcon({
+    required this.icon,
+    required this.gradient,
+  });
 
   final Icon icon;
   final Gradient gradient;
@@ -61,7 +57,6 @@ class GradientIcon extends StatelessWidget {
     );
   }
 }
-
 
 class DataWidget extends InheritedWidget {
   const DataWidget({
@@ -103,7 +98,6 @@ class PathWidget extends InheritedWidget {
   }
 }
 
-
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -133,16 +127,15 @@ class HomePageState extends State<HomePage> {
 
     setState(() {
       _selectedButtons = [];
-      for (int i=0; i<words.length; i++) {
+      for (int i = 0; i < words.length; i++) {
         Uuid uuid = Uuid();
         print(i);
         FirstButton newButton = FirstButton(
-          id: uuid.v4(),
-          imagePath: imagePaths[i],
-          text: words[i],
-          size: 151.2,
-          onPressed: ()=>{}
-        );
+            id: uuid.v4(),
+            imagePath: imagePaths[i],
+            text: words[i],
+            size: 151.2,
+            onPressed: () => {});
         _selectedButtons.add(newButton);
       }
     });
@@ -158,8 +151,8 @@ class HomePageState extends State<HomePage> {
     setState(() {
       selectedButtons.add(button);
     });
-
   }
+
   void clearSelectedButtons() {
     setState(() {
       selectedButtons.clear();
@@ -177,7 +170,6 @@ class HomePageState extends State<HomePage> {
     final pathWidget = PathWidget.of(context);
     if (dataWidget != null) {
       setState(() {
-
         dynamic nestedData = dataWidget.data;
 
         for (var folder in pathWidget!.pathOfBoard) {
@@ -185,9 +177,10 @@ class HomePageState extends State<HomePage> {
         }
         nestedData.removeWhere((b) => b['id'] == button.id);
 
-
         dataWidget.onDataChange(dataWidget.data);
-        context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
+        context
+            .findAncestorStateOfType<HomePageState>()
+            ?.saveUpdatedData(dataWidget.data);
         context.findAncestorStateOfType<HomePageState>()?.updateGrid();
       });
     } else {
@@ -198,32 +191,45 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> removeFolder(int folderIndex) async {
+    // Retrieve the data and path widgets
     final dataWidget = DataWidget.of(context);
     final pathWidget = PathWidget.of(context);
 
-    dynamic nestedData = dataWidget?.data;
-    for (var folder in pathWidget!.pathOfBoard) {
+    // Ensure widgets are not null
+    if (dataWidget == null || pathWidget == null) {
+      print("DataWidget or PathWidget is null. Cannot proceed.");
+      return;
+    }
+
+    // Traverse the nested data based on the path of the board
+    dynamic nestedData = dataWidget.data;
+    for (var folder in pathWidget.pathOfBoard) {
+      if (nestedData[folder] == null) {
+        print("Invalid folder path: $folder");
+        return;
+      }
       nestedData = nestedData[folder];
     }
 
-
+    // Show a confirmation dialog to the user
     bool? confirmed = await showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text("Delete Folder"),
-          content: Text("Are you sure you want to delete this folder and all its contents?"),
+          title: const Text("Delete Folder"),
+          content: const Text(
+              "Are you sure you want to delete this folder and all its contents?"),
           actions: [
             TextButton(
-              child: Text("Cancel"),
+              child: const Text("Cancel"),
               onPressed: () {
-                Navigator.of(context).pop(false);
+                Navigator.of(dialogContext).pop(false);
               },
             ),
             TextButton(
-              child: Text("Delete"),
+              child: const Text("Delete"),
               onPressed: () {
-                Navigator.of(context).pop(true);
+                Navigator.of(dialogContext).pop(true);
               },
             ),
           ],
@@ -231,22 +237,32 @@ class HomePageState extends State<HomePage> {
       },
     );
 
-
     if (confirmed == true) {
-      setState(() {
+      try {
+        // Remove the folder and update state
         nestedData.removeAt(folderIndex);
 
+        // Notify DataWidget of the change
+        await dataWidget.onDataChange(dataWidget.data);
+        print("DataWidget updated successfully.");
 
-        dataWidget?.onDataChange(dataWidget.data);
+        // Access HomePageState and update data/grid
+        final homePageState = context.findAncestorStateOfType<HomePageState>();
+        if (homePageState != null) {
+          print("Calling saveUpdatedData and updateGrid...");
+          await homePageState.saveUpdatedData(dataWidget.data);
+          await homePageState.updateGrid();
+          print("Grid updated successfully.");
+        } else {
+          print("HomePageState not found. Unable to call updateGrid.");
+        }
 
-
-        context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget!.data);
-
-
-        context.findAncestorStateOfType<HomePageState>()?.updateGrid();
-      });
-
-      print("Folder at index $folderIndex removed");
+        print("Folder successfully removed at index $folderIndex.");
+      } catch (error) {
+        print("Error while removing folder: $error");
+      }
+    } else {
+      print("Folder deletion canceled by the user.");
     }
   }
 
@@ -276,7 +292,6 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-
   Future<void> addPhraseToPlay(String phrase) async {
     final childProvider = Provider.of<ChildProvider>(context, listen: false);
 
@@ -288,10 +303,9 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-
-  List<Widget> getWidgetList(List suggestions){
+  List<Widget> getWidgetList(List suggestions) {
     List<Widget> widgetList = [];
-    for (String suggestion in suggestions){
+    for (String suggestion in suggestions) {
       widgetList.add(Text(suggestion));
     }
     return widgetList;
@@ -302,178 +316,208 @@ class HomePageState extends State<HomePage> {
     if (context.findAncestorStateOfType<BasePageState>()!.isLoading) {
       return Center(child: CircularProgressIndicator());
     } else {
-      return Column(
+      return Stack(
         children: <Widget>[
-          Container(
-            height: 190,
-            color: Colors.white,
-            padding: EdgeInsets.all(8),
-            child: HomeTopBar(clickedButtons: selectedButtons),
-          ),
-          Container(
-            color: Colors.white,
-            padding: EdgeInsetsDirectional.symmetric(horizontal: 10),
-            child: Divider(
-              thickness: 2,
-              color: Colors.grey,
-            ),
-          ),
-          Container(
-            color: Colors.white,
-            padding: EdgeInsets.symmetric(vertical:3, horizontal: 6),
-            child: SizedBox(
-              height: 50,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  PathWidget(
-                    onPathChange: context.findAncestorStateOfType<BasePageState>()!.updatePathOfBoard,
-                    pathOfBoard: context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                      child: TextButton.icon(
-                        icon: Icon(Icons.arrow_back_rounded),
-                        onPressed: () => context.findAncestorStateOfType<BasePageState>()?.goBack(),
-                        label: const Text('Back'),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Color(0xffdde8ff),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                      child: TextButton.icon(
-                        icon: Icon(Icons.backspace),
-                        onPressed: backspaceSelectedButtons,
-                        label: const Text('Backspace'),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Color(0xffdde8ff),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                      child: TextButton.icon(
-                        icon: Icon(Icons.clear),
-                        onPressed: clearSelectedButtons,
-                        label: const Text('Clear'),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Color(0xffdde8ff),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                      child: TextButton.icon(
-                        icon: Icon(Icons.play_arrow),
-                        onPressed: () async {
-                          String fullPhrase = _selectedButtons.map((button) => button.text).join(' ');
-                          print(fullPhrase);
-                          await flutterTts.speak(fullPhrase);
-                          await addPhraseToPlay(fullPhrase);
-                        },
-                        label: const Text('Play'),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Color(0xffdde8ff),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                      child: TextButton.icon(
-                        icon: Icon(Icons.stop),
-                        onPressed: () => flutterTts.stop(),
-                        label: const Text('Stop'),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Color(0xffdde8ff),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                      child: TextButton.icon(
-                        icon: GradientIcon(icon: Icon(Icons.assistant), gradient: LinearGradient(colors: [Color(
-                            0xFFF64CD3), Color(
-                            0xFFAF70FF)])),
-                        onPressed: () => {
-                          _showFormDialog(context)
-                        },
-                        label: const GradientText('Helper', gradient: LinearGradient(colors: [Color(
-                            0xFFAC70F8), Color(
-                            0xFF7000FF)])),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Color(0xffdde8ff),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+          Column(
+            children: <Widget>[
+              Container(
+                height: 190,
+                color: Colors.white,
+                padding: EdgeInsets.all(8),
+                child: HomeTopBar(clickedButtons: selectedButtons),
               ),
-            ),
-          ),
-          Expanded(
-            child: Container(
-              color: Colors.white,
-              child: Center(
-                child: PathWidget(
-                  onPathChange: context.findAncestorStateOfType<BasePageState>()!.updatePathOfBoard,
-                  pathOfBoard: context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
-                  child: DataWidget(
-                    onDataChange: context.findAncestorStateOfType<BasePageState>()!.modifyData,
-                    data: context.findAncestorStateOfType<BasePageState>()!.data,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Grid(onButtonPressed: selectOnPressedFunction()),
+              Container(
+                color: Colors.white,
+                padding: EdgeInsetsDirectional.symmetric(horizontal: 10),
+                child: Divider(
+                  thickness: 2,
+                  color: Colors.grey,
+                ),
+              ),
+              Container(
+                color: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 3, horizontal: 6),
+                child: SizedBox(
+                  height: 50,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      PathWidget(
+                        onPathChange: context
+                            .findAncestorStateOfType<BasePageState>()!
+                            .updatePathOfBoard,
+                        pathOfBoard: context
+                            .findAncestorStateOfType<BasePageState>()!
+                            .pathOfBoard,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                          child: TextButton.icon(
+                            icon: Icon(Icons.arrow_back_rounded),
+                            onPressed: () => context
+                                .findAncestorStateOfType<BasePageState>()
+                                ?.goBack(),
+                            label: const Text('Back'),
+                            style: TextButton.styleFrom(
+                              backgroundColor: Color(0xffdde8ff),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                          child: TextButton.icon(
+                            icon: Icon(Icons.backspace),
+                            onPressed: backspaceSelectedButtons,
+                            label: const Text('Backspace'),
+                            style: TextButton.styleFrom(
+                              backgroundColor: Color(0xffdde8ff),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                          child: TextButton.icon(
+                            icon: Icon(Icons.clear),
+                            onPressed: clearSelectedButtons,
+                            label: const Text('Clear'),
+                            style: TextButton.styleFrom(
+                              backgroundColor:
+                              Color.fromARGB(255, 97, 120, 171),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                          child: TextButton.icon(
+                            icon: Icon(Icons.play_arrow),
+                            onPressed: () async {
+                              String fullPhrase = _selectedButtons
+                                  .map((button) => button.text)
+                                  .join(' ');
+                              print(fullPhrase);
+                              await flutterTts.speak(fullPhrase);
+                              await addPhraseToPlay(fullPhrase);
+                            },
+                            label: const Text('Play'),
+                            style: TextButton.styleFrom(
+                              backgroundColor: Color(0xffdde8ff),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                          child: TextButton.icon(
+                            icon: Icon(Icons.stop),
+                            onPressed: () => flutterTts.stop(),
+                            label: const Text('Stop'),
+                            style: TextButton.styleFrom(
+                              backgroundColor: Color(0xffdde8ff),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                          child: TextButton.icon(
+                            icon: GradientIcon(
+                                icon: Icon(Icons.assistant),
+                                gradient: LinearGradient(colors: [
+                                  Color(0xFFF64CD3),
+                                  Color(0xFFAF70FF)
+                                ])),
+                            onPressed: () => {_showFormDialog(context)},
+                            label: const GradientText('Helper',
+                                gradient: LinearGradient(colors: [
+                                  Color(0xFFAC70F8),
+                                  Color(0xFF7000FF)
+                                ])),
+                            style: TextButton.styleFrom(
+                              backgroundColor: Color(0xffdde8ff),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  color: Colors.white,
+                  child: Center(
+                    child: PathWidget(
+                      onPathChange: context
+                          .findAncestorStateOfType<BasePageState>()!
+                          .updatePathOfBoard,
+                      pathOfBoard: context
+                          .findAncestorStateOfType<BasePageState>()!
+                          .pathOfBoard,
+                      child: DataWidget(
+                        onDataChange: context
+                            .findAncestorStateOfType<BasePageState>()!
+                            .modifyData,
+                        data: context
+                            .findAncestorStateOfType<BasePageState>()!
+                            .data,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child:
+                          Grid(onButtonPressed: selectOnPressedFunction()),
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-          PathWidget(
-            onPathChange: context.findAncestorStateOfType<BasePageState>()!.updatePathOfBoard,
-            pathOfBoard: context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
-            child: DataWidget(
-              data: context.findAncestorStateOfType<BasePageState>()!.data,
-              onDataChange: context.findAncestorStateOfType<BasePageState>()!.modifyData,
-              child: Container(
-                color: Colors.white,
+          Positioned(
+            bottom: 16.0,
+            right: 16.0,
+            child: PathWidget(
+              onPathChange: context
+                  .findAncestorStateOfType<BasePageState>()!
+                  .updatePathOfBoard,
+              pathOfBoard:
+              context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
+              child: DataWidget(
+                data: context.findAncestorStateOfType<BasePageState>()!.data,
+                onDataChange: context
+                    .findAncestorStateOfType<BasePageState>()!
+                    .modifyData,
                 child: EditBar(
                   data: context.findAncestorStateOfType<BasePageState>()?.data,
                 ),
               ),
             ),
           ),
-          
         ],
       );
     }
@@ -484,9 +528,12 @@ class HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AISuggestionDialog(currentPhrase: _selectedButtons.map((button) => button.text).join(' '), homePageKey: basePageState!.homePageKey,);
+        return AISuggestionDialog(
+          currentPhrase:
+          _selectedButtons.map((button) => button.text).join(' '),
+          homePageKey: basePageState!.homePageKey,
+        );
       },
     );
   }
-
 }

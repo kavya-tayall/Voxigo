@@ -80,7 +80,8 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
     }
   }
 
-  Future<void> fetchImageAndAudioUrls(String imageName, String audioName) async {
+  Future<void> fetchImageAndAudioUrls(
+      String imageName, String audioName) async {
     final imageUrl = await fetchImageFromStorage(imageName);
     final audioUrl = await fetchAudioFromStorage(audioName);
 
@@ -93,25 +94,22 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
     });
   }
 
-
   Future<String> fetchImageFromStorage(String imageName) async {
     try {
-
       Directory appDocDir = await getApplicationDocumentsDirectory();
-      String localImagePath = '${appDocDir.path}/music_files/$imageName';
-
+      String localImagePath =
+          '${appDocDir.path}${Platform.pathSeparator}music_files${Platform.pathSeparator}$imageName';
 
       File localFile = File(localImagePath);
       if (await localFile.exists()) {
         print("Loading image from local storage: $localImagePath");
         return localFile.path;
       } else {
-
         print("Image not found locally, downloading from Firebase...");
         String storagePath = 'music_info/cover_images/$imageName';
-        Reference storageRef = FirebaseStorage.instance.ref().child(storagePath);
+        Reference storageRef =
+        FirebaseStorage.instance.ref().child(storagePath);
         String downloadUrl = await storageRef.getDownloadURL();
-
 
         var httpClient = HttpClient();
         var request = await httpClient.getUrl(Uri.parse(downloadUrl));
@@ -130,22 +128,20 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
 
   Future<String> fetchAudioFromStorage(String audioName) async {
     try {
-
       Directory appDocDir = await getApplicationDocumentsDirectory();
-      String localAudioPath = '${appDocDir.path}/music_files/$audioName';
-
+      String localAudioPath =
+          '${appDocDir.path}${Platform.pathSeparator}music_files${Platform.pathSeparator}$audioName';
 
       File localFile = File(localAudioPath);
       if (await localFile.exists()) {
         print("Loading audio from local storage: $localAudioPath");
         return localFile.path;
       } else {
-
         print("Audio not found locally, downloading from Firebase...");
         String storagePath = 'music_info/mp3 files/$audioName';
-        Reference storageRef = FirebaseStorage.instance.ref().child(storagePath);
+        Reference storageRef =
+        FirebaseStorage.instance.ref().child(storagePath);
         String downloadUrl = await storageRef.getDownloadURL();
-
 
         var httpClient = HttpClient();
         var request = await httpClient.getUrl(Uri.parse(downloadUrl));
@@ -162,7 +158,6 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
     }
   }
 
-
   Future<void> playAudio(String audioUrl) async {
     if (currentAudioUrl == audioUrl && isPlaying) {
       audioPlayer.pause();
@@ -171,12 +166,9 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
       });
     } else {
       if (currentAudioUrl != audioUrl) {
-
         if (audioUrl.startsWith('http') || audioUrl.startsWith('https')) {
-
           await audioPlayer.play(UrlSource(audioUrl));
         } else {
-
           await audioPlayer.play(DeviceFileSource(audioUrl));
         }
         setState(() {
@@ -191,7 +183,6 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
       }
     }
   }
-
 
   Future<void> pauseAudio() async {
     await audioPlayer.pause();
@@ -249,7 +240,8 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
                   SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () async {
-                      FilePickerResult? imageResult = await FilePicker.platform.pickFiles(type: FileType.image);
+                      FilePickerResult? imageResult = await FilePicker.platform
+                          .pickFiles(type: FileType.image);
                       if (imageResult != null) {
                         setDialogState(() {
                           selectedImage = imageResult.files.first;
@@ -259,11 +251,13 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
                     child: Text('Select Cover Image'),
                   ),
                   if (selectedImage != null)
-                    Text('Image Selected: ${selectedImage!.name}', style: TextStyle(color: Colors.green)),
+                    Text('Image Selected: ${selectedImage!.name}',
+                        style: TextStyle(color: Colors.green)),
                   SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () async {
-                      FilePickerResult? audioResult = await FilePicker.platform.pickFiles(
+                      FilePickerResult? audioResult =
+                      await FilePicker.platform.pickFiles(
                         type: FileType.custom,
                         allowedExtensions: ['mp3', 'wav'],
                       );
@@ -276,7 +270,8 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
                     child: Text('Select Audio File'),
                   ),
                   if (selectedAudio != null)
-                    Text('Audio Selected: ${selectedAudio!.name}', style: TextStyle(color: Colors.green)),
+                    Text('Audio Selected: ${selectedAudio!.name}',
+                        style: TextStyle(color: Colors.green)),
                 ],
               ),
               actions: [
@@ -288,21 +283,27 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
                 ),
                 TextButton(
                   onPressed: () async {
-                    if (titleController.text.isNotEmpty && selectedImage != null && selectedAudio != null) {
+                    if (titleController.text.isNotEmpty &&
+                        selectedImage != null &&
+                        selectedAudio != null) {
                       setState(() {
                         isUploading = true;
                       });
                       Navigator.of(dialogContext).pop();
 
                       await Future.microtask(() async {
-                        String imagePath = 'music_info/cover_images/${selectedImage!.name}';
-                        String audioPath = 'music_info/mp3 files/${selectedAudio!.name}';
+                        String imagePath =
+                            'music_info/cover_images/${selectedImage!.name}';
+                        String audioPath =
+                            'music_info/mp3 files/${selectedAudio!.name}';
 
                         await uploadFile(selectedImage!, imagePath);
                         await uploadFile(selectedAudio!, audioPath);
 
-                        final imageUrl = await fetchImageFromStorage(selectedImage!.name);
-                        final audioUrl = await fetchAudioFromStorage(selectedAudio!.name);
+                        final imageUrl =
+                        await fetchImageFromStorage(selectedImage!.name);
+                        final audioUrl =
+                        await fetchAudioFromStorage(selectedAudio!.name);
 
                         setState(() {
                           imageUrlCache[selectedImage!.name] = imageUrl;
@@ -332,33 +333,24 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
     );
   }
 
-
-
   Future<void> uploadFile(PlatformFile file, String path) async {
     try {
       print("Debug: Attempting to upload to path: $path");
 
-
       Reference ref = FirebaseStorage.instance.ref().child(path);
-
 
       if (file.bytes != null) {
         print("Debug: Uploading file from memory: ${file.name}");
 
-
         await ref.putData(file.bytes!).then((taskSnapshot) {
           print("Debug: Upload completed: ${taskSnapshot.state}");
         });
-
       } else if (file.path != null) {
-
         final fileToUpload = File(file.path!);
-
 
         bool fileExists = await fileToUpload.exists();
         if (fileExists) {
           print("Debug: Uploading file from path: ${file.path}");
-
 
           await ref.putFile(fileToUpload).then((taskSnapshot) {
             print("Debug: Upload completed: ${taskSnapshot.state}");
@@ -367,28 +359,20 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
           print("Error: File does not exist at path: ${file.path}");
           return;
         }
-
       } else {
         print("Error: No valid file source found for ${file.name}");
         return;
       }
 
       print("Success: File uploaded successfully to path: $path");
-
     } on FirebaseException catch (e) {
-
-
       print("Firebase Error: ${e.message}");
       print("Error Code: ${e.code}");
-
     } catch (e, stackTrace) {
-
       print("General Error: $e");
       print("Stack Trace: $stackTrace");
     }
   }
-
-
 
   Future<void> updateMusicJson() async {
     String path = 'user_folders/${widget.username}/music.json';
@@ -403,7 +387,6 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
 
     await deleteFile('music_info/cover_images/$imageName');
     await deleteFile('music_info/mp3 files/$audioName');
-
 
     musicData.removeAt(index);
     await updateMusicJson();
@@ -445,11 +428,11 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
           return Card(
             child: ListTile(
               leading: imageUrl.isNotEmpty
-                  ? (imageUrl.startsWith('http') || imageUrl.startsWith('https'))
+                  ? (imageUrl.startsWith('http') ||
+                  imageUrl.startsWith('https'))
                   ? Image.network(imageUrl, width: 50, height: 50)
                   : Image.file(File(imageUrl), width: 50, height: 50)
                   : Icon(Icons.music_note),
-
               title: Text(item['title']),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -481,7 +464,8 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
                     },
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         "${currentPosition.inMinutes}:${currentPosition.inSeconds.remainder(60).toString().padLeft(2, '0')}",
@@ -520,4 +504,3 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
     super.dispose();
   }
 }
-

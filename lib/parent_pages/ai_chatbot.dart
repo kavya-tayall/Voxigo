@@ -113,9 +113,9 @@ class _ChatPageState extends State<ChatPage> {
       setState(() {
         typingUsers.remove(aiUser);
         messages.insert(0, ChatMessage(
-          user: aiUser,
-          text: response,
-          createdAt: DateTime.now()
+            user: aiUser,
+            text: response,
+            createdAt: DateTime.now()
         ));
       });
     }
@@ -125,56 +125,56 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            GradientText(
-              'MindAI',
-              gradient: LinearGradient(
-                colors: [Color(0xFFAC70F8), Color(0xFF7000FF)],
+          backgroundColor: Colors.white,
+          automaticallyImplyLeading: false,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              GradientText(
+                'MindAI',
+                gradient: LinearGradient(
+                  colors: [Color(0xFFAC70F8), Color(0xFF7000FF)],
+                ),
+                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               ),
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            ),
-            Row(children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 3.0),
-                child: Image.asset("assets/imgs/logo_without_text.png",
-                    width: 60),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: GradientText("MindBridge",
-                    gradient: LinearGradient(colors: [
-                      Colors.blue,
-                      Colors.blueAccent,
-                      Colors.deepPurpleAccent
-                    ]),
-                    style:
-                    TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
-              )
-            ]),
-          ],
-        )),
+              Row(children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 3.0),
+                  child: Image.asset("assets/imgs/logo_without_text.png",
+                      width: 60),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: GradientText("MindBridge",
+                      gradient: LinearGradient(colors: [
+                        Colors.blue,
+                        Colors.blueAccent,
+                        Colors.deepPurpleAccent
+                      ]),
+                      style:
+                      TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
+                )
+              ]),
+            ],
+          )),
 
       body: Column(
         children: [
           Expanded(
             child: DashChat(
-            currentUser: user,
-            onSend: (ChatMessage m) {
-              setState(() {
-                messages.insert(0, m);
-              });
-              getAIResponse(m);
-            },
-            typingUsers: typingUsers,
-            messages: messages,
-            messageOptions: MessageOptions(
-              timeFormat: DateFormat('HH:MM AA'),
-            ),
+              currentUser: user,
+              onSend: (ChatMessage m) {
+                setState(() {
+                  messages.insert(0, m);
+                });
+                getAIResponse(m);
+              },
+              typingUsers: typingUsers,
+              messages: messages,
+              messageOptions: MessageOptions(
+                timeFormat: DateFormat('HH:MM AA'),
+              ),
             ),
           ),
         ],

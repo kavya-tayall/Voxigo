@@ -14,8 +14,7 @@ import 'child_provider.dart';
 
 import '../child_pages/home_page.dart';
 import 'buttons.dart';
-
-
+import 'package:path/path.dart' as path; // Import the path package
 
 class EditBar extends StatelessWidget {
   final dynamic data;
@@ -38,12 +37,10 @@ class EditBar extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class AddButton extends StatefulWidget {
   final Map<String, dynamic> data;
-
 
   AddButton({required this.data});
 
@@ -67,12 +64,14 @@ class AddButtonState extends State<AddButton> {
   }
 
   Future<void> loadData() async {
-    String jsonString = await rootBundle.loadString('assets/board_info/pictograms.json');
+    String jsonString =
+    await rootBundle.loadString('assets/board_info/pictograms.json');
     List<dynamic> data = jsonDecode(jsonString);
     setState(() {
       pictogramsData = data;
     });
   }
+
   void addVisibleButtons(FirstButton button) {
     final dataWidget = DataWidget.of(context);
     final pathWidget = PathWidget.of(context);
@@ -91,68 +90,47 @@ class AddButtonState extends State<AddButton> {
         nestedData.add(newButton);
 
         dataWidget.onDataChange(dataWidget.data);
-        context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
+        context
+            .findAncestorStateOfType<HomePageState>()
+            ?.saveUpdatedData(dataWidget.data);
         context.findAncestorStateOfType<HomePageState>()?.updateGrid();
       });
-
-
-
     } else {
       print('DataWidget is null');
     }
   }
 
-  Future<void> uploadImageToFirebase(File imageFile) async {
-    try {
-      String fileName = imageFile.path.split('\\').last;
-      Reference firebaseStorageRef = FirebaseStorage.instance.ref('initial_board_images/$fileName');
-      SettableMetadata imageMetadata = SettableMetadata(
-        contentType: 'image/png',
-      );
-
-      await firebaseStorageRef.putFile(imageFile, imageMetadata);
-
-    } catch (e) {
-      print("Error uploading image to firebase: $e");
-    }
-  }
-  Future<void> saveImageLocally(File imageFile) async {
-    try {
-      final Directory appDir = await getApplicationDocumentsDirectory();
-      String fileName = imageFile.path.split('\\').last;
-      final String localPath = '${appDir.path}\\board_images\\$fileName';
-      await imageFile.copy(localPath);
-    } catch (e) {
-      print("Error saving image locally: $e");
-    }
-  }
-
-  Future<void> downloadImageFromNetworkToLocalAndFirebase(String imageUrl) async {
+  // Function to download an image and save it locally and to Firebase
+  Future<void> downloadImageFromNetworkToLocalAndFirebase(
+      String imageUrl) async {
     try {
       final http.Response response = await http.get(Uri.parse(imageUrl));
-
       if (response.statusCode == 200) {
         final Directory appDir = await getApplicationDocumentsDirectory();
-
-        String fileName = imageUrl.split('/').last;
-
-        final String localPath = '${appDir.path}\\board_images\\$fileName';
+        String fileName = path.basename(imageUrl); // Extract the file name
+        final String localPath =
+        path.join(appDir.path, 'board_images', fileName);
 
         File imageFile = File(localPath);
-        await imageFile.writeAsBytes(response.bodyBytes);
+        await imageFile
+            .writeAsBytes(response.bodyBytes); // Save the file locally
 
-        Reference firebaseStorageRef = FirebaseStorage.instance.ref('initial_board_images/$fileName');
-        SettableMetadata imageMetadata = SettableMetadata(
-          contentType: 'image/png',
-        );
+        print('Image downloaded and saved locally at $localPath');
+
+        // Upload the file to Firebase Storage
+        Reference firebaseStorageRef =
+        FirebaseStorage.instance.ref('initial_board_images/$fileName');
+        SettableMetadata imageMetadata =
+        SettableMetadata(contentType: 'image/png');
         await firebaseStorageRef.putFile(imageFile, imageMetadata);
+
+        print('Image uploaded to Firebase at initial_board_images/$fileName');
       } else {
         print('Error downloading image: ${response.statusCode}');
       }
     } catch (e) {
       print("Error downloading image: $e");
     }
-
   }
 
   void addFolder(String folderName) {
@@ -167,7 +145,6 @@ class AddButtonState extends State<AddButton> {
           nestedData = nestedData[folder];
         }
 
-
         final folderId = Uuid().v4();
         final newFolder = {
           "id": folderId,
@@ -177,15 +154,13 @@ class AddButtonState extends State<AddButton> {
           "buttons": [],
         };
 
-
         nestedData.add(newFolder);
-
 
         dataWidget.onDataChange(dataWidget.data);
 
-
-        context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
-
+        context
+            .findAncestorStateOfType<HomePageState>()
+            ?.saveUpdatedData(dataWidget.data);
 
         context.findAncestorStateOfType<HomePageState>()?.updateGrid();
       });
@@ -194,22 +169,85 @@ class AddButtonState extends State<AddButton> {
     }
   }
 
+  // Function to pick, upload, and save a custom image
   Future<void> addCustomImageButton(String enteredText) async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
-    if (image != null) {
-      await uploadImageToFirebase(File(image.path));
-      await saveImageLocally(File(image.path));
-      FirstButton button = FirstButton(
-        id: Uuid().v4(),
-        imagePath: image.path.split('\\').last,
-        text: enteredText,
-        size: 60.0,
-        onPressed: () {
+      if (image != null) {
+        final File imageFile = File(image.path);
 
-        },
+        // Upload the image to Firebase
+        await uploadImageToFirebase(imageFile);
+
+        // Save the image locally
+        await saveImageLocally(imageFile);
+
+        // Create a button and add it to the UI
+        FirstButton button = FirstButton(
+          id: Uuid().v4(),
+          imagePath: path.basename(imageFile.path), // Use the file name
+          text: enteredText,
+          size: 60.0,
+          onPressed: () {},
+        );
+        addVisibleButtons(button);
+
+        print('Image successfully added with label: $enteredText');
+      } else {
+        print('No image selected.');
+      }
+    } catch (e) {
+      print("Error in addCustomImageButton: $e");
+    }
+  }
+
+  // Function to upload an image to Firebase Storage
+  Future<void> uploadImageToFirebase(File imageFile) async {
+    try {
+      String fileName = path.basename(imageFile.path); // Extract file name
+      Reference firebaseStorageRef = FirebaseStorage.instance
+          .ref()
+          .child('initial_board_images/$fileName');
+
+      // Detect MIME type dynamically
+      String mimeType = 'image/${path.extension(fileName).replaceAll('.', '')}';
+
+      SettableMetadata imageMetadata = SettableMetadata(
+        contentType: mimeType,
       );
-      addVisibleButtons(button);
+
+      // Upload file
+      UploadTask uploadTask =
+      firebaseStorageRef.putFile(imageFile, imageMetadata);
+      await uploadTask;
+
+      print('Image uploaded to Firebase at: initial_board_images/$fileName');
+    } catch (e) {
+      print("Error uploading image to Firebase: $e");
+    }
+  }
+
+  // Function to save an image locally
+  Future<void> saveImageLocally(File imageFile) async {
+    try {
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      final String boardImagesDir = path.join(appDir.path, 'board_images');
+
+      // Ensure directory exists
+      final Directory directory = Directory(boardImagesDir);
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+        print('Created directory: $boardImagesDir');
+      }
+
+      // Save file locally
+      String fileName = path.basename(imageFile.path); // Extract file name
+      final String localPath = path.join(boardImagesDir, fileName);
+      await File(localPath).writeAsBytes(await imageFile.readAsBytes());
+      print('Image saved locally at: $localPath');
+    } catch (e) {
+      print("Error saving image locally: $e");
     }
   }
 
@@ -218,8 +256,8 @@ class AddButtonState extends State<AddButton> {
     return SizedBox(
       width: buttonSize,
       height: buttonSize,
-      child: Stack(
-        children: [SpeedDial(
+      child: Stack(children: [
+        SpeedDial(
           icon: Icons.add,
           activeIcon: Icons.close,
           backgroundColor: buttonColor,
@@ -233,27 +271,33 @@ class AddButtonState extends State<AddButton> {
               onTap: () async {
                 bool? choosePictogram = await _showChoiceDialog(context);
                 if (choosePictogram == true) {
-                  String? enteredText = await _showTextInputDialog(context, "Enter pictogram keyword:");
+                  String? enteredText = await _showTextInputDialog(
+                      context, "Enter pictogram keyword:");
                   if (enteredText != null) {
-                    dynamic buttonData = searchButtonData(pictogramsData, enteredText);
+                    dynamic buttonData =
+                    searchButtonData(pictogramsData, enteredText);
                     if (buttonData != null) {
                       setState(() {
                         _isUploading = true;
                       });
-                      FirstButton button = await _createFirstButtonFromData(buttonData, enteredText);
+                      FirstButton button = await _createFirstButtonFromData(
+                          buttonData, enteredText);
                       addVisibleButtons(button);
                       setState(() {
                         _isUploading = false;
                       });
                     } else {
-                      bool? useCustomImage = await _showConfirmationDialog(context, "Pictogram not found. Would you like to upload a custom image?");
+                      bool? useCustomImage = await _showConfirmationDialog(
+                          context,
+                          "Pictogram not found. Would you like to upload a custom image?");
                       if (useCustomImage == true) {
                         await addCustomImageButton(enteredText);
                       }
                     }
                   }
                 } else {
-                  String? enteredText = await _showTextInputDialog(context, "Enter button label:");
+                  String? enteredText = await _showTextInputDialog(
+                      context, "Enter button label:");
                   if (enteredText != null) {
                     await addCustomImageButton(enteredText);
                   }
@@ -265,22 +309,21 @@ class AddButtonState extends State<AddButton> {
               backgroundColor: buttonColor,
               label: 'Add Folder',
               onTap: () async {
-                String? folderName = await _showTextInputDialog(context, "Enter folder name:");
+                String? folderName =
+                await _showTextInputDialog(context, "Enter folder name:");
                 if (folderName != null) {
                   addFolder(folderName);
                 }
               },
             ),
-
           ],
           elevation: 0,
         ),
-          if (_isUploading)
-            Center(
-              child: CircularProgressIndicator(),
-            ),
-      ]
-    ),
+        if (_isUploading)
+          Center(
+            child: CircularProgressIndicator(),
+          ),
+      ]),
     );
   }
 
@@ -290,7 +333,8 @@ class AddButtonState extends State<AddButton> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Choose Image Type'),
-          content: Text('Would you like to search for a pictogram or upload a custom image?'),
+          content: Text(
+              'Would you like to search for a pictogram or upload a custom image?'),
           actions: <Widget>[
             TextButton(
               child: Text('Pictogram'),
@@ -326,10 +370,10 @@ class AddButtonState extends State<AddButton> {
     return null;
   }
 
-
-
-  Future<FirstButton> _createFirstButtonFromData(Map<String, dynamic> data, String enteredText) async {
-    String imageUrl = "https://static.arasaac.org/pictograms/${data['_id']}/${data['_id']}_2500.png";
+  Future<FirstButton> _createFirstButtonFromData(
+      Map<String, dynamic> data, String enteredText) async {
+    String imageUrl =
+        "https://static.arasaac.org/pictograms/${data['_id']}/${data['_id']}_2500.png";
     String label = enteredText;
 
     await downloadImageFromNetworkToLocalAndFirebase(imageUrl);
@@ -339,13 +383,12 @@ class AddButtonState extends State<AddButton> {
       imagePath: imageUrl.split('/').last,
       text: label,
       size: 60.0,
-      onPressed: () {
-
-      },
+      onPressed: () {},
     );
   }
 
-  Future<String?> _showTextInputDialog(BuildContext context, String hintText) async {
+  Future<String?> _showTextInputDialog(
+      BuildContext context, String hintText) async {
     TextEditingController controller = TextEditingController();
 
     return showDialog<String>(
@@ -376,7 +419,8 @@ class AddButtonState extends State<AddButton> {
     );
   }
 
-  Future<bool?> _showConfirmationDialog(BuildContext context, String message) async {
+  Future<bool?> _showConfirmationDialog(
+      BuildContext context, String message) async {
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -403,7 +447,6 @@ class AddButtonState extends State<AddButton> {
   }
 }
 
-
 class RemoveButton extends StatefulWidget {
   @override
   State<RemoveButton> createState() => RemoveButtonState();
@@ -412,11 +455,9 @@ class RemoveButton extends StatefulWidget {
 class RemoveButtonState extends State<RemoveButton> {
   bool isRemovalMode = false;
 
-
   final Color buttonColor = Colors.lightBlue;
   final Color iconColor = Colors.white;
   final double buttonSize = 70.0;
-
 
   void addFolder(String folderName) {
     final dataWidget = DataWidget.of(context);
@@ -430,7 +471,6 @@ class RemoveButtonState extends State<RemoveButton> {
           nestedData = nestedData[folder];
         }
 
-
         final folderId = Uuid().v4();
         final newFolder = {
           "id": folderId,
@@ -442,12 +482,11 @@ class RemoveButtonState extends State<RemoveButton> {
 
         nestedData.add(newFolder);
 
-
         dataWidget.onDataChange(dataWidget.data);
 
-
-        context.findAncestorStateOfType<HomePageState>()?.saveUpdatedData(dataWidget.data);
-
+        context
+            .findAncestorStateOfType<HomePageState>()
+            ?.saveUpdatedData(dataWidget.data);
 
         context.findAncestorStateOfType<HomePageState>()?.updateGrid();
       });
@@ -455,6 +494,7 @@ class RemoveButtonState extends State<RemoveButton> {
       print('DataWidget is null');
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -468,12 +508,16 @@ class RemoveButtonState extends State<RemoveButton> {
           minimumSize: Size(buttonSize, buttonSize),
         ),
         onPressed: () {
-          context.findAncestorStateOfType<HomePageState>()?.changeRemovalState();
+          context
+              .findAncestorStateOfType<HomePageState>()
+              ?.changeRemovalState();
           setState(() {
             isRemovalMode = !isRemovalMode;
           });
         },
-        child: Center(child: Icon(isRemovalMode ? Icons.check : Icons.delete, color: iconColor)),
+        child: Center(
+            child: Icon(isRemovalMode ? Icons.check : Icons.delete,
+                color: iconColor)),
       ),
     );
   }

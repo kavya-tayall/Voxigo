@@ -25,20 +25,20 @@ class _ColoringHomeState extends State<ColoringHome> {
               alignment: Alignment.center,
               width: double.infinity,
               decoration: BoxDecoration(
-                border: Border(
-                    bottom: BorderSide(
-                        color: Colors.black,
-                        width: 5,
-                        style: BorderStyle.solid))),
-            child: Padding(
-                padding: EdgeInsets.only(bottom: 10, top: 10),
-                child: Text(
-                  "Coloring",
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                )),
-          ),
-        )),
+                  border: Border(
+                      bottom: BorderSide(
+                          color: Colors.black,
+                          width: 5,
+                          style: BorderStyle.solid))),
+              child: Padding(
+                  padding: EdgeInsets.only(bottom: 10, top: 10),
+                  child: Text(
+                    "Coloring",
+                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  )),
+            ),
+            )),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: Padding(
           padding: EdgeInsets.symmetric(horizontal: 10),
@@ -49,139 +49,139 @@ class _ColoringHomeState extends State<ColoringHome> {
               border: Border.all(style: BorderStyle.solid, color: Colors.black, width: 1),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                TextButton(
-                  onPressed: (){notifier.clear();},
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(2)
-                    )
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: (){notifier.clear();},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2)
+                        )
+                    ),
+                    child: Icon(Icons.clear),
                   ),
-                  child: Icon(Icons.clear),
-                ),
-                TextButton(
-                  onPressed: (){notifier.undo();},
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2)
-                      )
+                  TextButton(
+                    onPressed: (){notifier.undo();},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2)
+                        )
+                    ),
+                    child: Icon(Icons.undo),
                   ),
-                  child: Icon(Icons.undo),
-                ),
-                TextButton(
-                  onPressed: (){notifier.redo();},
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2)
-                      )
+                  TextButton(
+                    onPressed: (){notifier.redo();},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2)
+                        )
+                    ),
+                    child: Icon(Icons.redo),
                   ),
-                  child: Icon(Icons.redo),
-                ),
-                TextButton(
-                  onPressed: (){notifier.setEraser();},
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2)
-                      )
+                  TextButton(
+                    onPressed: (){notifier.setEraser();},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2)
+                        )
+                    ),
+                    child: Icon(Icons.cleaning_services),
                   ),
-                  child: Icon(Icons.cleaning_services),
-                ),
-                TextButton(
-                  onPressed: (){notifier.setColor(Colors.black);},
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2)
-                      )
+                  TextButton(
+                    onPressed: (){notifier.setColor(Colors.black);},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2)
+                        )
+                    ),
+                    child: Icon(Icons.square, color: Colors.black),
                   ),
-                  child: Icon(Icons.square, color: Colors.black),
-                ),
-                TextButton(
-                  onPressed: (){notifier.setColor(Colors.white);},
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2)
-                      )
+                  TextButton(
+                    onPressed: (){notifier.setColor(Colors.white);},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2)
+                        )
+                    ),
+                    child: Icon(Icons.square_outlined, color: Colors.black),
                   ),
-                  child: Icon(Icons.square_outlined, color: Colors.black),
-                ),
-                TextButton(
-                  onPressed: (){notifier.setColor(Colors.red);},
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2)
-                      )
+                  TextButton(
+                    onPressed: (){notifier.setColor(Colors.red);},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2)
+                        )
+                    ),
+                    child: Icon(Icons.square, color: Colors.red),
                   ),
-                  child: Icon(Icons.square, color: Colors.red),
-                ),
-                TextButton(
-                  onPressed: (){notifier.setColor(Colors.orange);},
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2)
-                      )
+                  TextButton(
+                    onPressed: (){notifier.setColor(Colors.orange);},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2)
+                        )
+                    ),
+                    child: Icon(Icons.square, color: Colors.orange),
                   ),
-                  child: Icon(Icons.square, color: Colors.orange),
-                ),
-                TextButton(
-                  onPressed: (){notifier.setColor(Colors.yellow);},
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2)
-                      )
+                  TextButton(
+                    onPressed: (){notifier.setColor(Colors.yellow);},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2)
+                        )
+                    ),
+                    child: Icon(Icons.square, color: Colors.yellow),
                   ),
-                  child: Icon(Icons.square, color: Colors.yellow),
-                ),
-                TextButton(
-                  onPressed: (){notifier.setColor(Colors.green);},
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2)
-                      )
+                  TextButton(
+                    onPressed: (){notifier.setColor(Colors.green);},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2)
+                        )
+                    ),
+                    child: Icon(Icons.square, color: Colors.green),
                   ),
-                  child: Icon(Icons.square, color: Colors.green),
-                ),
-                TextButton(
-                  onPressed: (){notifier.setColor(Colors.blue);},
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2)
-                      )
+                  TextButton(
+                    onPressed: (){notifier.setColor(Colors.blue);},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2)
+                        )
+                    ),
+                    child: Icon(Icons.square, color: Colors.blue),
                   ),
-                  child: Icon(Icons.square, color: Colors.blue),
-                ),
-                TextButton(
-                  onPressed: (){notifier.setColor(Colors.purple);},
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2)
-                      )
+                  TextButton(
+                    onPressed: (){notifier.setColor(Colors.purple);},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2)
+                        )
+                    ),
+                    child: Icon(Icons.square, color: Colors.purple),
                   ),
-                  child: Icon(Icons.square, color: Colors.purple),
-                ),
-                TextButton(
-                  onPressed: (){notifier.setColor(Colors.pink);},
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2)
-                      )
+                  TextButton(
+                    onPressed: (){notifier.setColor(Colors.pink);},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2)
+                        )
+                    ),
+                    child: Icon(Icons.square, color: Colors.pink),
                   ),
-                  child: Icon(Icons.square, color: Colors.pink),
-                ),
-            ]),
+                ]),
           ),
         ),
         body: Column(children: [
