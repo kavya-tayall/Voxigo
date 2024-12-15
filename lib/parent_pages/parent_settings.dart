@@ -26,6 +26,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
   bool useSentenceHelper = true;
   bool canUseGridControls = true;
   bool canUseEmotionHandling = true;
+  bool canUseAudioPage = true;
 
 
   @override
@@ -82,6 +83,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
               canUseGridControls = childrenSettingsData[_selectedOption]?['settings']['grid editing'];
               canUseEmotionHandling = childrenSettingsData[_selectedOption]?['settings']['emotion handling'];
               useSentenceHelper = childrenSettingsData[_selectedOption]?['settings']['sentence helper'];
+              canUseAudioPage = childrenSettingsData[_selectedOption]?['settings']['audio page'];
             }
           });
         } else {
@@ -292,7 +294,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                 ),
                 SettingsTile.switchTile(
                   leading: Icon(Icons.settings, color: Colors.black),
-                  title: Text('Can use emotion handling'),
+                  title: Text('Emotion handling page'),
                   initialValue: canUseEmotionHandling,
                   onToggle: (bool value) async {
                     String currentChildId = childrenSettingsData[_selectedOption]?['ID'];
@@ -303,6 +305,23 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                     setState((){
                       print(value);
                       canUseEmotionHandling = value;
+                    });
+                  },
+                ),
+                SettingsTile.switchTile(
+                  leading:
+                  Icon(Icons.grid_on_rounded, color: Colors.black),
+                  title: Text('Music & stories page'),
+                  initialValue: canUseGridControls,
+                  onToggle: (bool value) async {
+                    String currentChildId = childrenSettingsData[_selectedOption]?['ID'];
+                    DocumentReference docRef = FirebaseFirestore.instance.collection('children').doc(currentChildId);
+                    await docRef.update({
+                      FieldPath(['settings', 'audio page']): value
+                    });
+                    setState((){
+                      print(value);
+                      canUseAudioPage = value;
                     });
                   },
                 ),
