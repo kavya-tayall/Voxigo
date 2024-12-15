@@ -38,7 +38,7 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
             _rotationSpeed += _friction;
             if (_rotationSpeed > 0){
               _rotationSpeed = 0;
-            };
+            }
           }
         }
         print(_rotationSpeed);

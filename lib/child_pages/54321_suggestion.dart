@@ -23,8 +23,8 @@ class _FiveCalmDownHomeState extends State<FiveCalmDownHome> {
 
   void _calmingCheck() {
     if (_isChecked1 & _isChecked2 & _isChecked3 & _isChecked4 & _isChecked5) {
-      this._isVisible = false;
-      this._animate = true;
+      _isVisible = false;
+      _animate = true;
     }
     print(_isVisible);
   }

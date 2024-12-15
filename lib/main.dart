@@ -144,28 +144,87 @@ class BasePageState extends State<BasePage> {
         .changeGridJson(newData);
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     Widget page;
-    switch (selectedIndex) {
-      case 0:
-        page = DataWidget(
-            data: data,
-            onDataChange: (Map<String, List> newData) async {
-              modifyData;
-            },
-            child: PathWidget(
-                onPathChange: updatePathOfBoard,
-                pathOfBoard: pathOfBoard,
-                child: HomePage(key: homePageKey)));
-      case 1:
-        page = FeelingsPage();
-      case 2:
-        page = MusicPage();
-      case 3:
-        page = CustomSettings();
-      default:
-        throw UnimplementedError('no widget for $selectedIndex');
+    if (Provider.of<ChildProvider>(context, listen: false).childData?['settings']['emotion handling'] == false && Provider.of<ChildProvider>(context, listen: false).childData?['settings']['audio page'] == false){
+      switch (selectedIndex) {
+        case 0:
+          page = DataWidget(
+              data: data,
+              onDataChange: (Map<String, List> newData) async {
+                modifyData;
+              },
+              child: PathWidget(
+                  onPathChange: updatePathOfBoard,
+                  pathOfBoard: pathOfBoard,
+                  child: HomePage(key: homePageKey)));
+        case 1:
+          page = CustomSettings();
+        default:
+          throw UnimplementedError('no widget for $selectedIndex');
+      }
+    } else if(Provider.of<ChildProvider>(context, listen: false).childData?['settings']['emotion handling'] == true && Provider.of<ChildProvider>(context, listen: false).childData?['settings']['audio page'] == false){
+      switch (selectedIndex) {
+        case 0:
+          page = DataWidget(
+              data: data,
+              onDataChange: (Map<String, List> newData) async {
+                modifyData;
+              },
+              child: PathWidget(
+                  onPathChange: updatePathOfBoard,
+                  pathOfBoard: pathOfBoard,
+                  child: HomePage(key: homePageKey)));
+        case 1:
+          page = FeelingsPage();
+        case 2:
+          page = CustomSettings();
+        default:
+          throw UnimplementedError('no widget for $selectedIndex');
+      }
+    } else if (Provider.of<ChildProvider>(context, listen: false).childData?['settings']['emotion handling'] == false && Provider.of<ChildProvider>(context, listen: false).childData?['settings']['audio page'] == true){
+      switch (selectedIndex) {
+        case 0:
+          page = DataWidget(
+              data: data,
+              onDataChange: (Map<String, List> newData) async {
+                modifyData;
+              },
+              child: PathWidget(
+                  onPathChange: updatePathOfBoard,
+                  pathOfBoard: pathOfBoard,
+                  child: HomePage(key: homePageKey)));
+        case 1:
+          page = MusicPage();
+        case 2:
+          page = CustomSettings();
+        default:
+          throw UnimplementedError('no widget for $selectedIndex');
+      }
+    } else{
+      switch (selectedIndex) {
+        case 0:
+          page = DataWidget(
+              data: data,
+              onDataChange: (Map<String, List> newData) async {
+                modifyData;
+              },
+              child: PathWidget(
+                  onPathChange: updatePathOfBoard,
+                  pathOfBoard: pathOfBoard,
+                  child: HomePage(key: homePageKey)));
+        case 1:
+          page = FeelingsPage();
+        case 2:
+          page = MusicPage();
+        case 3:
+          page = CustomSettings();
+        default:
+          throw UnimplementedError('no widget for $selectedIndex');
+      }
     }
 
     return Scaffold(

@@ -11,6 +11,25 @@ import 'package:test_app/child_pages/music_page.dart';
 class ChildProvider with ChangeNotifier {
   Map<String, dynamic>? childData;
   String? childId;
+ /* Future<Map<String, dynamic>> getChildSettings(String childId) async {
+    try {
+      DocumentSnapshot childSnapshot = await FirebaseFirestore.instance
+          .collection('children')
+          .doc(childId)
+          .get();
+
+      if (childSnapshot.exists) {
+        Map<String, dynamic>? childData = childSnapshot.data() as Map<String, dynamic>?;
+        print(childData);
+        return childData?['settings'];
+      } else{
+        throw Exception("dont work");
+      }
+    } catch (e) {
+      print('Error fetching selected buttons: $e');
+      return {};
+    }
+  } */
 
   void setChildData(String childId, Map<String, dynamic> data) {
     this.childId = childId;
@@ -81,8 +100,6 @@ class ChildProvider with ChangeNotifier {
     } catch (e) {
       print("Error uploading songs: $e");
     }
-
-
   }
 
   Future<void> changeGridJson(Map<String, List> info) async{

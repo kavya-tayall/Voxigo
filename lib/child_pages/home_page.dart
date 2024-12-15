@@ -439,26 +439,29 @@ class HomePageState extends State<HomePage> {
                           ),
                         ),
                       ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                          child: TextButton.icon(
-                            icon: GradientIcon(
-                                icon: Icon(Icons.assistant),
-                                gradient: LinearGradient(colors: [
-                                  Color(0xFFF64CD3),
-                                  Color(0xFFAF70FF)
-                                ])),
-                            onPressed: () => {_showFormDialog(context)},
-                            label: const GradientText('Helper',
-                                gradient: LinearGradient(colors: [
-                                  Color(0xFFAC70F8),
-                                  Color(0xFF7000FF)
-                                ])),
-                            style: TextButton.styleFrom(
-                              backgroundColor: Color(0xffdde8ff),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                      Visibility(
+                        visible: Provider.of<ChildProvider>(context, listen: false).childData?['settings']['sentence helper'],
+                        child: Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                            child: TextButton.icon(
+                              icon: GradientIcon(
+                                  icon: Icon(Icons.assistant),
+                                  gradient: LinearGradient(colors: [
+                                    Color(0xFFF64CD3),
+                                    Color(0xFFAF70FF)
+                                  ])),
+                              onPressed: () => {_showFormDialog(context)},
+                              label: const GradientText('Helper',
+                                  gradient: LinearGradient(colors: [
+                                    Color(0xFFAC70F8),
+                                    Color(0xFF7000FF)
+                                  ])),
+                              style: TextButton.styleFrom(
+                                backgroundColor: Color(0xffdde8ff),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
                               ),
                             ),
                           ),
@@ -512,8 +515,11 @@ class HomePageState extends State<HomePage> {
                 onDataChange: context
                     .findAncestorStateOfType<BasePageState>()!
                     .modifyData,
-                child: EditBar(
-                  data: context.findAncestorStateOfType<BasePageState>()?.data,
+                child: Visibility(
+                  visible: Provider.of<ChildProvider>(context, listen: false).childData?['settings']['grid editing'],
+                  child: EditBar(
+                    data: context.findAncestorStateOfType<BasePageState>()?.data,
+                  ),
                 ),
               ),
             ),

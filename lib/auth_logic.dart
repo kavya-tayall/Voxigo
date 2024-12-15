@@ -199,6 +199,7 @@ class UserService {
       'password': password,
       'parents': [parentId],
       'data': {'selectedButtons': [], 'selectedFeelings': []},
+      'settings': {'sentence helper': true, 'emotion handling': true, 'grid editing': false, 'audio page': true}
     });
 
     await _db.collection('parents').doc(parentId).update({
@@ -232,6 +233,8 @@ class UserService {
     } catch (e) {
       print(e);
     }
+
+
   }
 
   Future<bool> _checkUsernameExists(String username) async {

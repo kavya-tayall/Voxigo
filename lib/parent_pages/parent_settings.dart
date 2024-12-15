@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
 import '../auth_logic.dart';
@@ -22,12 +20,13 @@ class ParentSettingsPage extends StatefulWidget {
 
 class _ParentSettingsPageState extends State<ParentSettingsPage> {
   String _selectedOption = 'Select Child';
-  List<String> childrenNamesList = [];
+  Map<String, Map> childrenSettingsData = {};
   bool isLoading = true;
   bool enableNotifications = true;
   bool useSentenceHelper = true;
   bool canUseGridControls = true;
-  bool canUseSettings = true;
+  bool canUseEmotionHandling = true;
+
 
   @override
   void initState() {
@@ -63,14 +62,11 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                 .get();
 
             if (childSnapshot.exists) {
-              Map<String, dynamic>? childData =
-              childSnapshot.data() as Map<String, dynamic>?;
-              if (childData != null &&
-                  childData['first name'] != null &&
-                  childData['last name'] != null) {
-                String childName =
-                    childData['first name'] + ", " + childData['last name'];
-                childrenNamesList.add(childName);
+              Map<String, dynamic>? childData = childSnapshot.data() as Map<String, dynamic>?;
+              if (childData != null && childData['first name'] != null && childData['last name'] != null) {
+                String childName = childData['first name'] + ", " + childData['last name'];
+                childrenSettingsData[childName] = {'settings': childData['settings'], 'ID': childId};
+                print(childrenSettingsData);
               } else {
                 print("no data");
               }
@@ -81,8 +77,11 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
 
           setState(() {
             isLoading = false;
-            if (childrenNamesList.isNotEmpty) {
-              _selectedOption = childrenNamesList[0];
+            if (childrenSettingsData.isNotEmpty) {
+              _selectedOption = childrenSettingsData.keys.toList()[0];
+              canUseGridControls = childrenSettingsData[_selectedOption]?['settings']['grid editing'];
+              canUseEmotionHandling = childrenSettingsData[_selectedOption]?['settings']['emotion handling'];
+              useSentenceHelper = childrenSettingsData[_selectedOption]?['settings']['sentence helper'];
             }
           });
         } else {
@@ -246,7 +245,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                             _selectedOption = newValue!;
                           });
                         },
-                        items: childrenNamesList
+                        items: childrenSettingsData.keys.toList()
                             .map<DropdownMenuItem<String>>(
                                 (String value) {
                               return DropdownMenuItem<String>(
@@ -263,7 +262,12 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                   leading: Icon(Icons.assistant, color: Colors.black),
                   title: Text('Can use sentence helper'),
                   initialValue: useSentenceHelper,
-                  onToggle: (value) {
+                  onToggle: (value) async {
+                    String currentChildId = childrenSettingsData[_selectedOption]?['ID'];
+                    DocumentReference docRef = FirebaseFirestore.instance.collection('children').doc(currentChildId);
+                    await docRef.update({
+                      FieldPath(['settings', 'sentence helper']): value
+                    });
                     setState(() {
                       useSentenceHelper = value;
                     });
@@ -274,16 +278,32 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                   Icon(Icons.grid_on_rounded, color: Colors.black),
                   title: Text('Can use grid controls'),
                   initialValue: canUseGridControls,
-                  onToggle: (bool value) {
-                    canUseGridControls = value;
+                  onToggle: (bool value) async {
+                    String currentChildId = childrenSettingsData[_selectedOption]?['ID'];
+                    DocumentReference docRef = FirebaseFirestore.instance.collection('children').doc(currentChildId);
+                    await docRef.update({
+                      FieldPath(['settings', 'grid editing']): value
+                    });
+                    setState((){
+                      print(value);
+                      canUseGridControls = value;
+                    });
                   },
                 ),
                 SettingsTile.switchTile(
                   leading: Icon(Icons.settings, color: Colors.black),
-                  title: Text('Can use settings'),
-                  initialValue: canUseSettings,
-                  onToggle: (bool value) {
-                    canUseSettings = value;
+                  title: Text('Can use emotion handling'),
+                  initialValue: canUseEmotionHandling,
+                  onToggle: (bool value) async {
+                    String currentChildId = childrenSettingsData[_selectedOption]?['ID'];
+                    DocumentReference docRef = FirebaseFirestore.instance.collection('children').doc(currentChildId);
+                    await docRef.update({
+                      FieldPath(['settings', 'emotion handling']): value
+                    });
+                    setState((){
+                      print(value);
+                      canUseEmotionHandling = value;
+                    });
                   },
                 ),
                 SettingsTile.navigation(

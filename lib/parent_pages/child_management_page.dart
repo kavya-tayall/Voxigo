@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/parent_music_page.dart';
-import 'ai_chatbot.dart';
 import 'edit_child_grid.dart';
 
 class GradientText extends StatelessWidget {
