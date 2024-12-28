@@ -31,7 +31,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
-              'you can reconfigure this by running the FlutterFire CLI again.',
+          'you can reconfigure this by running the FlutterFire CLI again.',
         );
       default:
         throw UnsupportedError(
@@ -90,5 +90,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'aac-app-24.appspot.com',
     iosBundleId: 'com.example.mindbridgeBetaMain',
   );
-
 }

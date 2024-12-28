@@ -11,6 +11,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  encrypt: ^5.0.0
+  firebase_remote_config: ^4.0.0
+  flutter_secure_storage: ^5.0.2
+  pointycastle: ^3.9.1
+  bcrypt: ^1.1.3
+  firebase_app_installations: ^0.2.5+7
   http: ^1.2.2
   path_provider: ^2.0.11
   file_picker: ^5.1.0
@@ -46,6 +52,11 @@ dependencies:
   gradient_borders: ^1.0.0
   google_generative_ai: ^0.4.6
   dash_chat_2: ^0.0.21
+  google_sign_in: ^5.0.7
+  flutter_svg: ^1.0.3
+  jwt_decoder: ^2.0.1
+
+
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +67,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/asset_list.json
     - assets/imgs/Screenshot 2024-07-29 at 4.31.43 PM.png
     - assets/board_info/board.json
     - assets/imgs/OneDrive_Folder_Icon.png
@@ -73,10 +85,13 @@ flutter:
     - assets/imgs/logo_without_text_whitebg.jpg
     - assets/imgs/logo_with_text.png
     - assets/sound_effects/spinning-fidget-spinner-23292.mp3
-    - assets/songs/Twinkle, Twinkle, Little Star.mp3
-    - assets/songs/HumptyDumpty.mp3
-    - assets/songs/alphabet song.mp3
     - assets/songs/music.json
+    - assets/songs/twinkle-twinkle-cover-image.png
+    - assets/songs/Twinkle, Twinkle, Little Star.mp3
+    - assets/songs/big-egg.png
+    - assets/songs/HumptyDumpty.mp3
+    - assets/songs/abcs_cover_img.png
+    - assets/songs/alphabet song.mp3
     - assets/songs/Screenshot 2024-09-09 at 7.49.23 PM.png
     - assets/songs/Screenshot 2024-09-09 at 7.49.55 PM.png
     - assets/songs/Screenshot 2024-09-09 at 7.50.11 PM.png
@@ -91,6 +106,83 @@ flutter:
     - assets/songs/Rowgo.mp3
     - assets/songs/take-me-out-to-the-ballgame.mp3
     - assets/imgs/img.png
+    - assets/imgs/music.png
+    - assets/imgs/calmdown.png
+    - assets/imgs/fidgetspinner.png
+    - assets/imgs/musicandstories.png
+    - assets/imgs/coloring.png
+    - assets/imgs/deepbreathing.png
+    - assets/imgs/googleicon.svg
+    - assets/board_images/11228_2500.png
+    - assets/board_images/11348_2500.png
+    - assets/board_images/11399_2500.png
+    - assets/board_images/13026_2500.png
+    - assets/board_images/13080_2500.png
+    - assets/board_images/2314_2500.png
+    - assets/board_images/2374_2500.png
+    - assets/board_images/2387_2500.png
+    - assets/board_images/2422_2500.png
+    - assets/board_images/2423_2500.png
+    - assets/board_images/2440_2500.png
+    - assets/board_images/2457_2500.png
+    - assets/board_images/2458_2500.png
+    - assets/board_images/2475_2500.png
+    - assets/board_images/25704_2500.png
+    - assets/board_images/2606_2500.png
+    - assets/board_images/2608_2500.png
+    - assets/board_images/2719_2500.png
+    - assets/board_images/3082_2500.png
+    - assets/board_images/31146_2500.png
+    - assets/board_images/3245_2500.png
+    - assets/board_images/3345_2500.png
+    - assets/board_images/37160_2500.png
+    - assets/board_images/39090_2500.png
+    - assets/board_images/6480_2500.png
+    - assets/board_images/6488_2500.png
+    - assets/board_images/6498_2500.png
+    - assets/board_images/7028_2500.png
+    - assets/board_images/7032_2500.png
+    - assets/board_images/7041_2500.png
+    - assets/board_images/7074_2500.png
+    - assets/board_images/7181_2500.png
+    - assets/board_images/7185_2500.png
+    - assets/board_images/8486_2500.png
+    - assets/board_images/image_Apple.jpg
+    - assets/board_images/image_Bathroom.jpg
+    - assets/board_images/image_Bread.jpg
+    - assets/board_images/image_Drink.jpg
+    - assets/board_images/image_Eat.jpg
+    - assets/board_images/image_Go.jpg
+    - assets/board_images/image_Here.jpg
+    - assets/board_images/image_House.jpg
+    - assets/board_images/image_How.jpg
+    - assets/board_images/image_I.jpg
+    - assets/board_images/image_Juice.jpg
+    - assets/board_images/image_Listen.jpg
+    - assets/board_images/image_Look.jpg
+    - assets/board_images/image_Milk.jpg
+    - assets/board_images/image_More.jpg
+    - assets/board_images/image_No.jpg
+    - assets/board_images/image_Park.jpg
+    - assets/board_images/image_Pizza.jpg
+    - assets/board_images/image_Play.jpg
+    - assets/board_images/image_Sandwich.jpg
+    - assets/board_images/image_School.jpg
+    - assets/board_images/image_Sit.jpg
+    - assets/board_images/image_Sleep.jpg
+    - assets/board_images/image_Stop.jpg
+    - assets/board_images/image_Store.jpg
+    - assets/board_images/image_There.jpg
+    - assets/board_images/image_Walk.jpg
+    - assets/board_images/image_Want.jpg
+    - assets/board_images/image_Water.jpg
+    - assets/board_images/image_What.jpg
+    - assets/board_images/image_When.jpg
+    - assets/board_images/image_Where.jpg
+    - assets/board_images/image_Yes.jpg
+    - assets/board_images/image_Why.jpg
+    - assets/board_images/OneDrive_Folder_Icon.png
+    - assets/board_images/finish_copy.png
 
 
 

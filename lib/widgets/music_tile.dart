@@ -3,8 +3,11 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:provider/provider.dart';
 import 'package:test_app/auth_logic.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:test_app/widgets/child_provider.dart';
 import '../child_pages/music_page.dart';
 
 class MusicTile extends StatefulWidget {
@@ -33,10 +36,12 @@ class _MusicTileState extends State<MusicTile> {
   Duration _position = Duration.zero;
   Future<String>? _imagePathFuture;
 
-  void _togglePlayPause() async {
+  void _togglePlayPause(String childId) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
-      final audioPath = '${directory.path}/music_files/${widget.song.link}';
+      // Include childId in the directory structure
+      final audioPath = path.join(
+          directory.path, childId, 'music_info/mp3 files', widget.song.link);
 
       if (!mounted) return;
 
@@ -86,7 +91,7 @@ class _MusicTileState extends State<MusicTile> {
   void _onTapProgressBar(double tapPositionX, double totalWidth) {
     final double progress = tapPositionX / totalWidth;
     final newPosition =
-    Duration(milliseconds: (progress * _duration.inMilliseconds).toInt());
+        Duration(milliseconds: (progress * _duration.inMilliseconds).toInt());
     _audioPlayer.seek(newPosition);
   }
 
@@ -97,7 +102,8 @@ class _MusicTileState extends State<MusicTile> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirm Deletion'),
-          content: Text('Are you sure you want to delete this song?'),
+          content: Text(
+              'Are you sure you want to delete this music file? This action cannot be undone.'),
           actions: <Widget>[
             TextButton(
               child: Text('Cancel'),
@@ -106,7 +112,10 @@ class _MusicTileState extends State<MusicTile> {
               },
             ),
             TextButton(
-              child: Text('Delete'),
+              child: Text(
+                'Delete',
+                style: TextStyle(color: Colors.red),
+              ),
               onPressed: () {
                 widget.onDelete(widget.index);
                 Navigator.of(context).pop();
@@ -121,7 +130,13 @@ class _MusicTileState extends State<MusicTile> {
   @override
   void initState() {
     super.initState();
-    _imagePathFuture = _setImagePath();
+    ChildProvider childProvider =
+        Provider.of<ChildProvider>(context, listen: false);
+    if (childProvider.childId != null) {
+      _imagePathFuture = _setImagePath(childProvider.childId!);
+    } else {
+      _imagePathFuture = Future.value('');
+    }
 
     _audioPlayer.onDurationChanged.listen((Duration d) {
       if (mounted) {
@@ -140,11 +155,14 @@ class _MusicTileState extends State<MusicTile> {
     });
   }
 
-  Future<String> _setImagePath() async {
+  Future<String> _setImagePath(String childId) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
       String imageName = widget.song.image;
-      return '${directory.path}/music_files/$imageName';
+
+      // Add childId to the directory path
+      return path.join(
+          directory.path, childId, 'music_info/cover_images', imageName);
     } catch (e) {
       print('Error fetching image path: $e');
       return '';
@@ -157,27 +175,31 @@ class _MusicTileState extends State<MusicTile> {
     super.dispose();
   }
 
-  @override
   Widget build(BuildContext context) {
     double progress = _duration.inMilliseconds > 0
         ? _position.inMilliseconds / _duration.inMilliseconds
         : 0.0;
 
-    final isTablet = MediaQuery.of(context).size.width > 600;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth <= 500;
+
+    final theme = Theme.of(context);
 
     return Container(
-      margin:
-      EdgeInsets.symmetric(vertical: 15, horizontal: isTablet ? 40 : 20),
-      padding: EdgeInsets.all(20),
+      margin: EdgeInsets.symmetric(
+        vertical: 10,
+        horizontal: isSmallScreen ? 8 : 20, // Adjust for smaller screens
+      ),
+      padding: EdgeInsets.all(isSmallScreen ? 10 : 20),
       decoration: BoxDecoration(
-        color: Colors.blue[50],
-        borderRadius: BorderRadius.circular(20),
+        color: theme.primaryColorLight,
+        borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            blurRadius: 8,
-            spreadRadius: 3,
-            offset: Offset(0, 4),
+            color: theme.shadowColor.withOpacity(0.5),
+            blurRadius: 6,
+            spreadRadius: 2,
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -187,92 +209,58 @@ class _MusicTileState extends State<MusicTile> {
             future: _imagePathFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container(
-                  height: 80,
-                  width: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey[300],
-                  ),
-                  child: CircularProgressIndicator(),
-                );
+                return _buildLoadingImagePlaceholder();
               } else if (snapshot.hasError) {
-                return Container(
-                  height: 80,
-                  width: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey[300],
-                  ),
-                  child: Icon(Icons.error, size: 40, color: Colors.red),
-                );
+                return _buildErrorImagePlaceholder();
               } else if (snapshot.hasData &&
                   snapshot.data!.isNotEmpty &&
                   File(snapshot.data!).existsSync()) {
-                return Container(
-                  height: 80,
-                  width: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: FileImage(File(snapshot.data!)),
-                    ),
-                  ),
-                );
+                return _buildImage(File(snapshot.data!));
               } else {
-                return Container(
-                  height: 80,
-                  width: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey[300],
-                  ),
-                  child: Icon(Icons.image, size: 40, color: Colors.grey[600]),
-                );
+                return _buildDefaultImagePlaceholder();
               }
             },
           ),
-          SizedBox(width: 25),
+          SizedBox(width: isSmallScreen ? 8 : 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   widget.song.title,
-                  style: TextStyle(
-                    fontSize: isTablet ? 22 : 20,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontSize: isSmallScreen ? 14 : 18,
                     fontWeight: FontWeight.bold,
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
-                SizedBox(height: 12),
+                SizedBox(height: 8),
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTapDown: (details) {
                       final RenderBox box =
-                      context.findRenderObject() as RenderBox;
+                          context.findRenderObject() as RenderBox;
                       final totalWidth = box.size.width;
                       _onTapProgressBar(details.localPosition.dx, totalWidth);
                     },
                     child: Stack(
                       children: [
                         Container(
-                          height: 8,
+                          height: 6,
                           decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(8),
+                            color: theme.dividerColor,
+                            borderRadius: BorderRadius.circular(6),
                           ),
                         ),
                         FractionallySizedBox(
                           widthFactor: progress,
                           child: Container(
-                            height: 8,
+                            height: 6,
                             decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(8),
+                              color: theme.primaryColor,
+                              borderRadius: BorderRadius.circular(6),
                             ),
                           ),
                         ),
@@ -283,34 +271,84 @@ class _MusicTileState extends State<MusicTile> {
               ],
             ),
           ),
-          SizedBox(width: 25),
-          IconButton(
-            icon: Icon(Icons.replay_5),
-            iconSize: isTablet ? 40 : 35,
-            color: Colors.blue,
-            onPressed: _rewind,
+          SizedBox(width: isSmallScreen ? 8 : 20),
+          _buildIcon(theme, Icons.replay_5, _rewind, isSmallScreen),
+          _buildIcon(
+            theme,
+            _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+            () => _togglePlayPause(
+                Provider.of<ChildProvider>(context, listen: false).childId!),
+            isSmallScreen,
+            isPrimary: true,
           ),
-          IconButton(
-            icon: Icon(_isPlaying
-                ? Icons.pause_circle_filled
-                : Icons.play_circle_filled),
-            iconSize: isTablet ? 60 : 55,
-            color: Colors.blue,
-            onPressed: _togglePlayPause,
-          ),
-          IconButton(
-            icon: Icon(Icons.forward_5),
-            iconSize: isTablet ? 40 : 35,
-            color: Colors.blue,
-            onPressed: _fastForward,
-          ),
-          IconButton(
-            icon: Icon(Icons.delete, color: Colors.red),
-            iconSize: isTablet ? 40 : 35,
-            onPressed: _showDeleteConfirmationDialog,
-          ),
+          _buildIcon(theme, Icons.forward_5, _fastForward, isSmallScreen),
+          _buildIcon(
+              theme, Icons.delete, _showDeleteConfirmationDialog, isSmallScreen,
+              isDelete: true),
         ],
       ),
+    );
+  }
+
+  Widget _buildIcon(ThemeData theme, IconData icon, VoidCallback onPressed,
+      bool isSmallScreen,
+      {bool isPrimary = false, bool isDelete = false}) {
+    return IconButton(
+      icon: Icon(icon, color: isDelete ? Colors.red : theme.primaryColor),
+      iconSize: isSmallScreen
+          ? (isPrimary ? 35 : 25)
+          : (isPrimary ? 40 : 30), // Smaller size for smaller screens
+      onPressed: onPressed,
+    );
+  }
+
+  Widget _buildLoadingImagePlaceholder() {
+    return Container(
+      height: 60,
+      width: 60,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey[300],
+      ),
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget _buildErrorImagePlaceholder() {
+    return Container(
+      height: 60,
+      width: 60,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey[300],
+      ),
+      child: Icon(Icons.error, size: 30, color: Colors.red),
+    );
+  }
+
+  Widget _buildImage(File imageFile) {
+    return Container(
+      height: 60,
+      width: 60,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        image: DecorationImage(
+          fit: BoxFit.cover,
+          image: FileImage(imageFile),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDefaultImagePlaceholder() {
+    return Container(
+      height: 60,
+      width: 60,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey[300],
+      ),
+      child: Icon(Icons.image, size: 30, color: Colors.grey[600]),
     );
   }
 }

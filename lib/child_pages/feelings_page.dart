@@ -9,22 +9,18 @@ Map<String, Map<String, Widget>> suggestions = {
   "Bored": {},
   "Nervous": {},
 };
-
 class FeelingsPage extends StatelessWidget {
   const FeelingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Access the current theme
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final isMobile = screenWidth < 600;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Feelings'),
-        backgroundColor: Colors.blueAccent,
-        elevation: 0,
-      ),
+    
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(
           vertical: screenHeight * 0.05,
@@ -38,15 +34,14 @@ class FeelingsPage extends StatelessWidget {
             Text(
               'How do you feel?',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: isMobile ? 24 : 36,
-                color: Colors.blueAccent,
                 shadows: [
                   Shadow(
                     offset: const Offset(2, 2),
                     blurRadius: 4,
-                    color: Colors.grey.withOpacity(0.5),
+                    color: theme.shadowColor.withOpacity(0.5),
                   ),
                 ],
               ),
@@ -96,9 +91,9 @@ class FeelingsPage extends StatelessWidget {
             // Footer Text
             Text(
               "Tap on a feeling to explore suggestions!",
-              style: TextStyle(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: isMobile ? 16 : 18,
-                color: Colors.grey[700],
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -108,3 +103,4 @@ class FeelingsPage extends StatelessWidget {
     );
   }
 }
+

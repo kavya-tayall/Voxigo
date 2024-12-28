@@ -2,12 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>We need access to your photo library to upload images.</string>
-    <key>NSCameraUsageDescription</key>
-    <string>We need access to your camera to take pictures.</string>
-    <key>NSDocumentsFolderUsageDescription</key>
-    <string>We need access to your documents folder to manage files.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -28,11 +22,36 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>NSHumanReadableCopyright</key>
 	<string>$(PRODUCT_COPYRIGHT)</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+
+	<!-- Application Category -->
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.education</string> <!-- Replace with a category suitable for your app -->
+
+	<!-- User Permissions -->
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>This app needs access to your Documents folder to play audio files.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>This app needs access to your Downloads folder for user data management.</string>
+	<key>NSMusicUsageDescription</key>
+	<string>This app needs access to your music files for audio playback.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs access to the microphone for recording audio (if applicable).</string>
+
+	<!-- Additional Privacy and Security Keys -->
+	<key>NSFileProviderDomainUsageDescription</key>
+	<string>This app needs access to certain files for user experience enhancement.</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>This app may need access to Apple Events for integration with system functions.</string>
 </dict>
 </plist>

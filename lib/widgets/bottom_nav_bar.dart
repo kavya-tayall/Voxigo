@@ -15,33 +15,38 @@ class CustomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+
     return BottomNavigationBar(
-      selectedItemColor: Colors.blueAccent,
-      unselectedItemColor: Colors.grey,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      selectedItemColor: theme.primaryColor,
+      unselectedItemColor: theme.disabledColor,
       type: BottomNavigationBarType.fixed,
       currentIndex: selectedIndex,
       onTap: onItemTapped,
       items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
+          icon: Icon(Icons.home, color: theme.iconTheme.color),
           label: 'Home',
         ),
         if (Provider.of<ChildProvider>(context, listen: false)
-                .childData?['settings']['emotion handling'] ==
+                .childPermission
+                ?.emotionHandling ==
             true)
           BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_emotions),
+            icon: Icon(Icons.emoji_emotions,color: theme.iconTheme.color),
             label: 'Feelings',
           ),
         if (Provider.of<ChildProvider>(context, listen: false)
-                .childData?['settings']['audio page'] ==
+                .childPermission
+                ?.audioPage ==
             true)
           BottomNavigationBarItem(
-            icon: Icon(Icons.audiotrack),
+            icon: Icon(Icons.audiotrack,color: theme.iconTheme.color),
             label: 'Music & Stories',
           ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.settings),
+          icon: Icon(Icons.settings,color: theme.iconTheme.color),
           label: 'Settings',
         ),
       ],

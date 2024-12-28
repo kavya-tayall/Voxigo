@@ -12,122 +12,126 @@ class ButtonsTable extends StatelessWidget {
     required this.selectedButtons,
     required this.isLoading,
   });
+@override
+Widget build(BuildContext context) {
+  final theme = Theme.of(context);
 
-  @override
-  Widget build(BuildContext context) {
-    if (isLoading) {
-      return Center(child: CircularProgressIndicator());
+  if (isLoading) {
+    return Center(child: CircularProgressIndicator());
+  }
+
+  if (selectedButtons.isEmpty) {
+    return Center(
+      child: Text(
+        'No buttons selected yet',
+        style: theme.textTheme.bodyLarge,
+      ),
+    );
+  }
+
+  Map<String, int> buttonCounts = {};
+  for (var button in selectedButtons) {
+    String text = button['text'];
+    if (buttonCounts.containsKey(text)) {
+      buttonCounts[text] = buttonCounts[text]! + 1;
+    } else {
+      buttonCounts[text] = 1;
     }
+  }
 
-    if (selectedButtons.isEmpty) {
-      return Center(child: Text('No buttons selected yet'));
-    }
+  List<MapEntry<String, int>> sortedButtons = buttonCounts.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
 
-    Map<String, int> buttonCounts = {};
-    for (var button in selectedButtons) {
-      String text = button['text'];
-      if (buttonCounts.containsKey(text)) {
-        buttonCounts[text] = buttonCounts[text]! + 1;
-      } else {
-        buttonCounts[text] = 1;
-      }
-    }
+  sortedButtons = sortedButtons
+      .where((entry) =>
+          entry.key.toLowerCase().contains(searchText.toLowerCase()))
+      .toList();
 
-    List<MapEntry<String, int>> sortedButtons = buttonCounts.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+  return ListView.builder(
+    itemCount: sortedButtons.length,
+    itemBuilder: (context, index) {
+      String text = sortedButtons[index].key;
+      int quantity = sortedButtons[index].value;
 
-    sortedButtons = sortedButtons
-        .where((entry) =>
-        entry.key.toLowerCase().contains(searchText.toLowerCase()))
-        .toList();
-
-    return ListView.builder(
-      itemCount: sortedButtons.length,
-      itemBuilder: (context, index) {
-        String text = sortedButtons[index].key;
-        int quantity = sortedButtons[index].value;
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Color(0xffdde8ff),
-              borderRadius: BorderRadius.circular(8.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Container(
+          padding: EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: theme.cardTheme.color,
+            borderRadius: BorderRadius.circular(8.0),
+            boxShadow: [
+              BoxShadow(
+                color: theme.shadowColor.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: SizedBox(
+            height: 80,
+            child: Stack(
+              children: [
+                Positioned(
+                  bottom: 8,
+                  left: 0,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.textTheme.titleMedium! .color ,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ButtonDetailsScreen(
+                            buttonText: text,
+                            buttonInstances: selectedButtons
+                                .where((button) => button['text'] == text)
+                                .toList(),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Text('See More'),
+                    
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Text(
+                    text,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Quantity',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      SizedBox(height: 4.0),
+                      Text(
+                        '$quantity',
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          color: theme.colorScheme.secondary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            child: SizedBox(
-              height: 80,
-              child: Stack(
-                children: [
-                  Positioned(
-                    bottom: 8,
-                    left: 0,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ButtonDetailsScreen(
-                              buttonText: text,
-                              buttonInstances: selectedButtons
-                                  .where((button) => button['text'] == text)
-                                  .toList(),
-                            ),
-                          ),
-                        );
-                      },
-                      child: Text('See More'),
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Text(
-                      text,
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Quantity',
-                          style: TextStyle(
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 4.0),
-                        Text(
-                          '$quantity',
-                          style: TextStyle(
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
+
 }

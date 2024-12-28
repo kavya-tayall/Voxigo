@@ -16,10 +16,10 @@ import '../widgets/suggestionWidget.dart';
 
 class GradientText extends StatelessWidget {
   const GradientText(
-      this.text, {
-        required this.gradient,
-        this.style,
-      });
+    this.text, {
+    required this.gradient,
+    this.style,
+  });
 
   final String text;
   final TextStyle? style;
@@ -99,7 +99,8 @@ class PathWidget extends InheritedWidget {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  final bool isLoading;
+  const HomePage({Key? key, required this.isLoading}) : super(key: key);
 
   @override
   State<HomePage> createState() => HomePageState();
@@ -215,19 +216,25 @@ class HomePageState extends State<HomePage> {
     bool? confirmed = await showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
+        final theme = Theme.of(dialogContext);
+
         return AlertDialog(
           title: const Text("Delete Folder"),
           content: const Text(
               "Are you sure you want to delete this folder and all its contents?"),
           actions: [
             TextButton(
-              child: const Text("Cancel"),
+              child: Text(
+                "Cancel",
+              ),
               onPressed: () {
                 Navigator.of(dialogContext).pop(false);
               },
             ),
             TextButton(
-              child: const Text("Delete"),
+              child: Text(
+                "Delete",
+              ),
               onPressed: () {
                 Navigator.of(dialogContext).pop(true);
               },
@@ -313,220 +320,241 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (context.findAncestorStateOfType<BasePageState>()!.isLoading) {
-      return Center(child: CircularProgressIndicator());
-    } else {
-      return Stack(
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              Container(
-                height: 190,
-                color: Colors.white,
-                padding: EdgeInsets.all(8),
-                child: HomeTopBar(clickedButtons: selectedButtons),
-              ),
-              Container(
-                color: Colors.white,
-                padding: EdgeInsetsDirectional.symmetric(horizontal: 10),
-                child: Divider(
-                  thickness: 2,
-                  color: Colors.grey,
+    final isLoading =
+        context.findAncestorStateOfType<BasePageState>()!.isLoading;
+
+    return Scaffold(
+      body: isLoading
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16.0),
+                const Text(
+                  "Please wait, loading data...",
+                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
                 ),
-              ),
-              Container(
-                color: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 3, horizontal: 6),
-                child: SizedBox(
-                  height: 50,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      PathWidget(
-                        onPathChange: context
-                            .findAncestorStateOfType<BasePageState>()!
-                            .updatePathOfBoard,
-                        pathOfBoard: context
-                            .findAncestorStateOfType<BasePageState>()!
-                            .pathOfBoard,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                          child: TextButton.icon(
-                            icon: Icon(Icons.arrow_back_rounded),
-                            onPressed: () => context
-                                .findAncestorStateOfType<BasePageState>()
-                                ?.goBack(),
-                            label: const Text('Back'),
-                            style: TextButton.styleFrom(
-                              backgroundColor: Color(0xffdde8ff),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+              ],
+            )
+          : Stack(
+              children: <Widget>[
+                Column(
+                  children: <Widget>[
+                    // Top bar
+                    Container(
+                      height: 190,
+                      color: Colors.white,
+                      padding: const EdgeInsets.all(8),
+                      child: HomeTopBar(clickedButtons: selectedButtons),
+                    ),
+                    const Divider(thickness: 2, color: Colors.grey),
+                    // Buttons and Path bar
+                    Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 3,
+                        horizontal: 6,
+                      ),
+                      child: SizedBox(
+                        height: 50,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildButton(
+                              context: context,
+                              label: "Back",
+                              icon: Icons.arrow_back_rounded,
+                              onPressed: isLoading
+                                  ? null
+                                  : () => context
+                                      .findAncestorStateOfType<BasePageState>()
+                                      ?.goBack(),
+                            ),
+                            _buildButton(
+                              context: context,
+                              label: "Backspace",
+                              icon: Icons.backspace,
+                              onPressed:
+                                  isLoading ? null : backspaceSelectedButtons,
+                            ),
+                            _buildButton(
+                              context: context,
+                              label: "Clear",
+                              icon: Icons.clear,
+                              onPressed:
+                                  isLoading ? null : clearSelectedButtons,
+                            ),
+                            _buildButton(
+                              context: context,
+                              label: "Play",
+                              icon: Icons.play_arrow,
+                              onPressed: isLoading
+                                  ? null
+                                  : () async {
+                                      String fullPhrase = _selectedButtons
+                                          .map((button) => button.text)
+                                          .join(' ');
+                                      await flutterTts.speak(fullPhrase);
+                                      await addPhraseToPlay(fullPhrase);
+                                    },
+                            ),
+                            _buildButton(
+                              context: context,
+                              label: "Stop",
+                              icon: Icons.stop,
+                              onPressed: isLoading ? null : flutterTts.stop,
+                            ),
+                            Visibility(
+                              visible: Provider.of<ChildProvider>(context,
+                                      listen: false)
+                                  .childPermission!
+                                  .sentenceHelper!,
+                              child: _buildGradientButton(
+                                label: "Helper",
+                                icon: Icons.assistant,
+                                gradient: const LinearGradient(colors: [
+                                  Color(0xFFAC70F8),
+                                  Color(0xFF7000FF),
+                                ]),
+                                onPressed: isLoading
+                                    ? null
+                                    : () => _showFormDialog(context),
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                          child: TextButton.icon(
-                            icon: Icon(Icons.backspace),
-                            onPressed: backspaceSelectedButtons,
-                            label: const Text('Backspace'),
-                            style: TextButton.styleFrom(
-                              backgroundColor: Color(0xffdde8ff),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                          child: TextButton.icon(
-                            icon: Icon(Icons.clear),
-                            onPressed: clearSelectedButtons,
-                            label: const Text('Clear'),
-                            style: TextButton.styleFrom(
-                              backgroundColor:
-                              Color.fromARGB(255, 97, 120, 171),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                          child: TextButton.icon(
-                            icon: Icon(Icons.play_arrow),
-                            onPressed: () async {
-                              String fullPhrase = _selectedButtons
-                                  .map((button) => button.text)
-                                  .join(' ');
-                              print(fullPhrase);
-                              await flutterTts.speak(fullPhrase);
-                              await addPhraseToPlay(fullPhrase);
-                            },
-                            label: const Text('Play'),
-                            style: TextButton.styleFrom(
-                              backgroundColor: Color(0xffdde8ff),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                          child: TextButton.icon(
-                            icon: Icon(Icons.stop),
-                            onPressed: () => flutterTts.stop(),
-                            label: const Text('Stop'),
-                            style: TextButton.styleFrom(
-                              backgroundColor: Color(0xffdde8ff),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Visibility(
-                        visible: Provider.of<ChildProvider>(context, listen: false).childData?['settings']['sentence helper'],
-                        child: Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                            child: TextButton.icon(
-                              icon: GradientIcon(
-                                  icon: Icon(Icons.assistant),
-                                  gradient: LinearGradient(colors: [
-                                    Color(0xFFF64CD3),
-                                    Color(0xFFAF70FF)
-                                  ])),
-                              onPressed: () => {_showFormDialog(context)},
-                              label: const GradientText('Helper',
-                                  gradient: LinearGradient(colors: [
-                                    Color(0xFFAC70F8),
-                                    Color(0xFF7000FF)
-                                  ])),
-                              style: TextButton.styleFrom(
-                                backgroundColor: Color(0xffdde8ff),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                    ),
+                    // Grid Section
+
+                    Expanded(
+                      child: Container(
+                        color: Colors.white,
+                        child: Center(
+                          child: PathWidget(
+                            onPathChange: context
+                                .findAncestorStateOfType<BasePageState>()!
+                                .updatePathOfBoard,
+                            pathOfBoard: context
+                                .findAncestorStateOfType<BasePageState>()!
+                                .pathOfBoard,
+                            child: DataWidget(
+                              onDataChange: context
+                                  .findAncestorStateOfType<BasePageState>()!
+                                  .modifyData,
+                              data: context
+                                  .findAncestorStateOfType<BasePageState>()!
+                                  .data,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Grid(
+                                  onButtonPressed: selectOnPressedFunction(),
+                                  childId: Provider.of<ChildProvider>(context,
+                                          listen: false)
+                                      .childId!,
                                 ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ),
-              Expanded(
-                child: Container(
-                  color: Colors.white,
-                  child: Center(
-                    child: PathWidget(
-                      onPathChange: context
+                // Positioned EditBar
+                Positioned(
+                  bottom: 16.0,
+                  right: 16.0,
+                  child: PathWidget(
+                    onPathChange: context
+                        .findAncestorStateOfType<BasePageState>()!
+                        .updatePathOfBoard,
+                    pathOfBoard: context
+                        .findAncestorStateOfType<BasePageState>()!
+                        .pathOfBoard,
+                    child: DataWidget(
+                      data: context
                           .findAncestorStateOfType<BasePageState>()!
-                          .updatePathOfBoard,
-                      pathOfBoard: context
+                          .data,
+                      onDataChange: context
                           .findAncestorStateOfType<BasePageState>()!
-                          .pathOfBoard,
-                      child: DataWidget(
-                        onDataChange: context
-                            .findAncestorStateOfType<BasePageState>()!
-                            .modifyData,
-                        data: context
-                            .findAncestorStateOfType<BasePageState>()!
-                            .data,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child:
-                          Grid(onButtonPressed: selectOnPressedFunction()),
+                          .modifyData,
+                      child: Visibility(
+                        visible:
+                            Provider.of<ChildProvider>(context, listen: false)
+                                .childPermission!
+                                .gridEditing!,
+                        child: EditBar(
+                          data: context
+                              .findAncestorStateOfType<BasePageState>()
+                              ?.data,
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
+    );
+  }
+
+// Helper to create buttons
+  Widget _buildButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback? onPressed,
+    required BuildContext context,
+  }) {
+    final theme = Theme.of(context);
+
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 3.0),
+        child: TextButton.icon(
+          icon: Icon(
+            icon,
           ),
-          Positioned(
-            bottom: 16.0,
-            right: 16.0,
-            child: PathWidget(
-              onPathChange: context
-                  .findAncestorStateOfType<BasePageState>()!
-                  .updatePathOfBoard,
-              pathOfBoard:
-              context.findAncestorStateOfType<BasePageState>()!.pathOfBoard,
-              child: DataWidget(
-                data: context.findAncestorStateOfType<BasePageState>()!.data,
-                onDataChange: context
-                    .findAncestorStateOfType<BasePageState>()!
-                    .modifyData,
-                child: Visibility(
-                  visible: Provider.of<ChildProvider>(context, listen: false).childData?['settings']['grid editing'],
-                  child: EditBar(
-                    data: context.findAncestorStateOfType<BasePageState>()?.data,
-                  ),
-                ),
-              ),
+          onPressed: onPressed,
+          label: Text(
+            label,
+          ),
+          style: TextButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
-        ],
-      );
-    }
+        ),
+      ),
+    );
+  }
+
+// Helper to create gradient buttons
+  Widget _buildGradientButton({
+    required String label,
+    required IconData icon,
+    required Gradient gradient,
+    required VoidCallback? onPressed,
+  }) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 3.0),
+        child: TextButton.icon(
+          icon: GradientIcon(
+            icon: Icon(icon),
+            gradient: gradient,
+          ),
+          onPressed: onPressed,
+          label: GradientText(label, gradient: gradient),
+          style: TextButton.styleFrom(
+            backgroundColor:
+                onPressed != null ? const Color(0xffdde8ff) : Colors.grey[300],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _showFormDialog(BuildContext context) {
@@ -536,7 +564,7 @@ class HomePageState extends State<HomePage> {
       builder: (BuildContext context) {
         return AISuggestionDialog(
           currentPhrase:
-          _selectedButtons.map((button) => button.text).join(' '),
+              _selectedButtons.map((button) => button.text).join(' '),
           homePageKey: basePageState!.homePageKey,
         );
       },

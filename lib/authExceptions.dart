@@ -1,4 +1,3 @@
-
 class UsernameAlreadyExistsException implements Exception {
   final String message;
 
@@ -9,6 +8,7 @@ class UsernameAlreadyExistsException implements Exception {
     return "CustomException: $message";
   }
 }
+
 class UserNotParentException implements Exception {
   final String message;
 
@@ -19,6 +19,7 @@ class UserNotParentException implements Exception {
     return "CustomException: $message";
   }
 }
+
 class ParentDoesNotExistException implements Exception {
   final String message;
 
@@ -30,6 +31,7 @@ class ParentDoesNotExistException implements Exception {
     return "CustomException: $message";
   }
 }
+
 class ChildDoesNotExistException implements Exception {
   final String message;
 
@@ -41,11 +43,22 @@ class ChildDoesNotExistException implements Exception {
     return "CustomException: $message";
   }
 }
+
 class OtherError implements Exception {
   final String message;
 
-  OtherError(
-      [this.message = 'Other error']);
+  OtherError([this.message = 'Other error']);
+
+  @override
+  String toString() {
+    return "CustomException: $message";
+  }
+}
+
+class PasswordRequiredException implements Exception {
+  final String message;
+
+  PasswordRequiredException([this.message = 'Password is required']);
 
   @override
   String toString() {

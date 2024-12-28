@@ -1,11 +1,8 @@
 plugins {
     id "com.android.application"
-    // START: FlutterFire Configuration
-    id 'com.google.gms.google-services'
-    // END: FlutterFire Configuration
     id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id "dev.flutter.flutter-gradle-plugin"
+    id 'com.google.gms.google-services' version '4.3.15' apply false
+    id "dev.flutter.flutter-gradle-plugin" // Flutter Gradle Plugin
 }
 
 def localProperties = new Properties()
@@ -16,42 +13,44 @@ if (localPropertiesFile.exists()) {
     }
 }
 
-def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
-if (flutterVersionCode == null) {
-    flutterVersionCode = "1"
-}
-
-def flutterVersionName = localProperties.getProperty("flutter.versionName")
-if (flutterVersionName == null) {
-    flutterVersionName = "1.0"
-}
+def flutterVersionCode = localProperties.getProperty("flutter.versionCode", "2").toInteger()
+def flutterVersionName = localProperties.getProperty("flutter.versionName", "1.1")
 
 android {
-    namespace = "com.example.testt"
+    namespace = "com.mindbridge.appcore"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17 // Set to Java 17 for compatibility
+        targetCompatibility = JavaVersion.VERSION_17 // Set to Java 17 for compatibility
+    }
+
+    kotlinOptions {
+        jvmTarget = "17" // Ensure Kotlin JVM target matches Java compatibility
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.testt"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+        applicationId = "com.mindbridge.appcore" // Use your unique Application ID
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutterVersionCode.toInteger()
+        versionCode = flutterVersionCode
         versionName = flutterVersionName
     }
 
+    signingConfigs {
+    release {
+        storeFile file("keystore/mindbridge-key.keystore") // Path to your keystore file
+        storePassword "Idhant@123.." // Replace with your actual store password
+        keyAlias "my-key-alias" // Replace with your actual key alias
+        keyPassword "Idhant@123.." // Replace with your actual key password
+    }
+}
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            // Add your release signing configuration here
+            signingConfig signingConfigs.release // For now, using debug keys for release
         }
     }
 }
@@ -60,12 +59,13 @@ flutter {
     source = "../.."
 }
 
-
 dependencies {
-    // Add your dependencies here
     implementation platform('com.google.firebase:firebase-bom:32.0.0')
     implementation 'com.google.firebase:firebase-auth'
-    // Add other Firebase products you need
+    implementation 'com.facebook.android:facebook-android-sdk:latest.release'
+    implementation 'com.facebook.android:facebook-login:15.3.0'
+    // Add any other Firebase products or dependencies you need
 }
 
+// Apply the Google Services plugin for Firebase
 apply plugin: 'com.google.gms.google-services'

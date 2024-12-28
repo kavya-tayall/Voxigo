@@ -1,7 +1,12 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test_app/getauthtokenandkey.dart';
 import 'package:test_app/parent_pages/ai_chatbot.dart';
+import 'package:test_app/widgets/parent_provider.dart';
 import 'package:test_app/parent_pages/stats_page.dart';
 import 'firebase_options.dart';
 import 'package:test_app/parent_pages/child_management_page.dart';
@@ -22,11 +27,30 @@ import 'child_pages/suggestions_page.dart';
 import 'child_pages/coloring_suggestion.dart';
 import 'child_pages/breathing_suggestion.dart';
 import 'child_pages/54321_suggestion.dart';
+import 'widgets/globals.dart';
+import 'cache_utility.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:test_app/getauthtokenandkey.dart'; // Add this line
+import 'widgets/theme_provider.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:test_app/auth_logic.dart';
 
 typedef VoidCallBack = void Function();
+final GlobalKey<BasePageState> basePageKey1 = GlobalKey<BasePageState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize ThemeProvider with a default theme
+  final themeProvider = ThemeProvider(
+    ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(seedColor: Color(0xffdde8ff)),
+    ),
+    'default',
+  );
+
+  await themeProvider.loadTheme(); // Load the theme from Firebase
 
   try {
     // Attempt to initialize Firebase only if no instance exists
@@ -38,50 +62,145 @@ void main() async {
   }
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ChildProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ChildProvider()),
+        ChangeNotifierProvider(create: (_) => themeProvider),
+        ChangeNotifierProvider(create: (context) => ParentProvider()),
+      ],
       child: const MyApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late Future<String> _initialRouteFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialRouteFuture = getInitialRoute(context); // Call the method once
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
-      child: MaterialApp(
-        title: 'Namer App',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Color(0xffdde8ff)),
-        ),
-        initialRoute: '/child_login',
-        routes: {
-          '/parent_login': (_) => ParentLoginPage(),
-          '/child_login': (_) => ChildLoginPage(),
-          '/base': (_) => BasePage(),
-          '/feelings': (_) => FeelingsPage(),
-          '/music': (_) => MusicPage(),
-          '/suggestions': (_) => SuggestionsPage(),
-          '/fidget': (_) => FidgetSpinnerHome(),
-          '/coloring': (_) => ColoringHome(),
-          '/breathing': (_) => BreathingHome(),
-          '/54321': (_) => FiveCalmDownHome(),
-          '/parent_base': (_) => ParentBasePage(),
-        },
-      ),
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return FutureBuilder<String>(
+      future: _initialRouteFuture, // Use the cached future
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+              child: CircularProgressIndicator()); // Loading state
+        }
+
+        final initialRoute = snapshot.data ?? '/child_login'; // Default route
+
+        return ChangeNotifierProvider(
+          create: (context) => MyAppState(),
+          child: MaterialApp(
+            title: 'Namer App',
+            debugShowCheckedModeBanner: false,
+            theme: themeProvider.themeData,
+            initialRoute: initialRoute,
+            routes: {
+              '/parent_login': (_) => ParentLoginPage(),
+              '/child_login': (_) => ChildLoginPage(),
+              '/base': (_) => BasePage(key: basePageKey1),
+              '/feelings': (_) => FeelingsPage(),
+              '/music': (_) => MusicPage(),
+              '/suggestions': (_) => SuggestionsPage(),
+              '/fidget': (_) => FidgetSpinnerHome(),
+              '/coloring': (_) => ColoringHome(),
+              '/breathing': (_) => BreathingHome(),
+              '/54321': (_) => FiveCalmDownHome(),
+              '/parent_base': (_) => ParentBasePage(),
+            },
+          ),
+        );
+      },
     );
+  }
+}
+
+Future<String> getInitialRoute(BuildContext context) async {
+  try {
+    final AuthService _auth = AuthService();
+
+    print('Getting initial route');
+    final prefs = await SharedPreferences.getInstance();
+
+    // Retrieve login type and username from shared preferences
+    final loginType = prefs.getString('loginType');
+    final loginUsername = prefs.getString('loginUser');
+
+    if (loginType == 'parent') {
+      // Validate Firebase parent authentication
+      if (await validateParentLogin()) {
+        return '/parent_base'; // Parent Home Page
+      } else {
+        return '/parent_login'; // Default to parent login
+      }
+    } else if (loginType == 'child') {
+      if (loginUsername != null && await validateChildToken()) {
+        // Validate child token and sign in
+        await _auth.signInChild(loginUsername!, '', context, alreadyAuth: true);
+        print('Valid child token');
+        return '/base';
+      } else {
+        // Remove invalid child token
+        prefs.remove('childToken');
+        print('Invalid child token');
+      }
+    }
+
+    // Default to child login if no valid login found
+    return '/child_login';
+  } catch (e, stackTrace) {
+    // Log the error and return default login route
+    print('Error in getInitialRoute: $e');
+    print('Stack trace: $stackTrace');
+    return '/child_login'; // Default to child login
+  }
+}
+
+Future<bool> validateParentLogin() async {
+  // Check if a user is logged in with Firebase
+  final user = FirebaseAuth.instance.currentUser;
+  return user != null;
+}
+
+Future<bool> validateChildToken() async {
+  final token = await getChildTokenFromStorage();
+  return token != null && await isTokenValid(token);
+}
+
+Future<String?> getChildTokenFromStorage() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString('childToken');
+}
+
+Future<bool> isTokenValid(String token) async {
+  try {
+    // Decode and check expiration
+    return !JwtDecoder.isExpired(token);
+  } catch (e) {
+    print('Invalid Token: $e');
+    return false;
   }
 }
 
 class MyAppState extends ChangeNotifier {}
 
 class BasePage extends StatefulWidget {
-  const BasePage({super.key});
+  const BasePage({Key? key}) : super(key: key);
 
   @override
   State<BasePage> createState() => BasePageState();
@@ -97,26 +216,57 @@ class BasePageState extends State<BasePage> {
   @override
   void initState() {
     super.initState();
-    _loadJsonData();
+    print(
+        "BasePage initialized with key: ${widget.key}"); // Confirm key assignment
+    // Fetch login child data and set loading state
+    fetchLoginChildData(context, false).then((_) {
+      setState(() {
+        isLoading = false;
+      });
+    });
+
+    loadJsonData();
   }
 
   void onItemTapped(int index) {
     setState(() {
       selectedIndex = index;
+
+      // Call the desired method when index 0 is selected
+      if (index == 0) {
+        onHomePageVisible();
+      }
     });
   }
 
-  Future<void> _loadJsonData() async {
+  /// Method to perform actions when HomePage (case 0) becomes visible
+  void onHomePageVisible() {
+    if (isLoading) return;
+    print("HomePage (case 0) is now visible.");
+
+    final childProvider = Provider.of<ChildProvider>(context, listen: false);
+    String? childUsername = childProvider.childData?['username'];
+    String? childId = childProvider.childId;
+    print('childUsername: $childUsername');
+
+    refreshGridFromLatestBoard(context, childUsername!, childId!, false);
+  }
+
+  Future<void> loadJsonData() async {
+    final childProvider = Provider.of<ChildProvider>(context, listen: false);
+    String? childId = childProvider.childId;
+
     String? jsonString =
-    await Provider.of<ChildProvider>(context, listen: false)
-        .fetchJson('board.json');
+        await Provider.of<ChildProvider>(context, listen: false)
+            .fetchJson('board.json', childId!);
 
-    final jsonData = jsonDecode(jsonString!);
+    if (jsonString != null) {
+      final jsonData = jsonDecode(jsonString);
 
-    setState(() {
-      data = Map.from(jsonData);
-      isLoading = false;
-    });
+      setState(() {
+        data = Map.from(jsonData);
+      });
+    }
   }
 
   void updatePathOfBoard(List<dynamic> newPath) {
@@ -136,101 +286,77 @@ class BasePageState extends State<BasePage> {
     });
   }
 
-  Future<void> modifyData(Map<String, List> newData) async {
+  Future<void> modifyData(Map<String, List> newData,
+      {bool isUpload = false}) async {
     setState(() {
       data = Map.from(newData);
     });
+    String childId =
+        Provider.of<ChildProvider>(context, listen: false).childId!;
     await Provider.of<ChildProvider>(context, listen: false)
-        .changeGridJson(newData);
+        .changeGridJson(newData, childId);
   }
-
-
 
   @override
   Widget build(BuildContext context) {
-    Widget page;
-    if (Provider.of<ChildProvider>(context, listen: false).childData?['settings']['emotion handling'] == false && Provider.of<ChildProvider>(context, listen: false).childData?['settings']['audio page'] == false){
+    // Show loading indicator if data is being fetched
+    if (isLoading) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              const Text("Please wait, loading data..."),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Permission settings from the Provider
+    final childPermission =
+        Provider.of<ChildProvider>(context, listen: false).childPermission;
+    final canUseEmotionHandling = childPermission?.emotionHandling ?? false;
+    final canUseAudioPage = childPermission?.audioPage ?? false;
+
+    // Get the appropriate page based on permissions and selectedIndex
+    Widget _getPage() {
       switch (selectedIndex) {
         case 0:
-          page = DataWidget(
-              data: data,
-              onDataChange: (Map<String, List> newData) async {
-                modifyData;
-              },
-              child: PathWidget(
-                  onPathChange: updatePathOfBoard,
-                  pathOfBoard: pathOfBoard,
-                  child: HomePage(key: homePageKey)));
+          return DataWidget(
+            data: data,
+            onDataChange: (Map<String, List> newData) async {
+              await modifyData(newData); // Fixed to await the async function
+            },
+            child: PathWidget(
+              onPathChange: (newPath) => setState(() {
+                pathOfBoard =
+                    List.from(newPath); // Preserves original functionality
+              }),
+              pathOfBoard: pathOfBoard,
+              child: HomePage(
+                key: homePageKey,
+                isLoading: isLoading,
+              ),
+            ),
+          );
         case 1:
-          page = CustomSettings();
-        default:
-          throw UnimplementedError('no widget for $selectedIndex');
-      }
-    } else if(Provider.of<ChildProvider>(context, listen: false).childData?['settings']['emotion handling'] == true && Provider.of<ChildProvider>(context, listen: false).childData?['settings']['audio page'] == false){
-      switch (selectedIndex) {
-        case 0:
-          page = DataWidget(
-              data: data,
-              onDataChange: (Map<String, List> newData) async {
-                modifyData;
-              },
-              child: PathWidget(
-                  onPathChange: updatePathOfBoard,
-                  pathOfBoard: pathOfBoard,
-                  child: HomePage(key: homePageKey)));
-        case 1:
-          page = FeelingsPage();
+          return canUseEmotionHandling ? FeelingsPage() : CustomSettings();
         case 2:
-          page = CustomSettings();
-        default:
-          throw UnimplementedError('no widget for $selectedIndex');
-      }
-    } else if (Provider.of<ChildProvider>(context, listen: false).childData?['settings']['emotion handling'] == false && Provider.of<ChildProvider>(context, listen: false).childData?['settings']['audio page'] == true){
-      switch (selectedIndex) {
-        case 0:
-          page = DataWidget(
-              data: data,
-              onDataChange: (Map<String, List> newData) async {
-                modifyData;
-              },
-              child: PathWidget(
-                  onPathChange: updatePathOfBoard,
-                  pathOfBoard: pathOfBoard,
-                  child: HomePage(key: homePageKey)));
-        case 1:
-          page = MusicPage();
-        case 2:
-          page = CustomSettings();
-        default:
-          throw UnimplementedError('no widget for $selectedIndex');
-      }
-    } else{
-      switch (selectedIndex) {
-        case 0:
-          page = DataWidget(
-              data: data,
-              onDataChange: (Map<String, List> newData) async {
-                modifyData;
-              },
-              child: PathWidget(
-                  onPathChange: updatePathOfBoard,
-                  pathOfBoard: pathOfBoard,
-                  child: HomePage(key: homePageKey)));
-        case 1:
-          page = FeelingsPage();
-        case 2:
-          page = MusicPage();
+          return canUseAudioPage ? MusicPage() : CustomSettings();
         case 3:
-          page = CustomSettings();
+          return CustomSettings();
         default:
-          throw UnimplementedError('no widget for $selectedIndex');
+          throw UnimplementedError('No widget for $selectedIndex');
       }
     }
 
     return Scaffold(
       body: Column(
         children: <Widget>[
-          Expanded(child: page),
+          Expanded(child: _getPage()),
           CustomNavigationBar(
             selectedIndex: selectedIndex,
             onItemTapped: onItemTapped,
@@ -259,6 +385,7 @@ class ParentBasePageState extends State<ParentBasePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     List<Widget> _widgetOptions = <Widget>[
       ChildManagementPage(
         onNavigate: (int index) {
@@ -275,27 +402,28 @@ class ParentBasePageState extends State<ParentBasePage> {
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        backgroundColor: theme.scaffoldBackgroundColor,
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.people),
+            icon: Icon(Icons.people, color: theme.iconTheme.color),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
+            icon: Icon(Icons.bar_chart, color: theme.iconTheme.color),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
+            icon: Icon(Icons.chat, color: theme.iconTheme.color),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
+            icon: Icon(Icons.settings, color: theme.iconTheme.color),
             label: '',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blueAccent,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: theme.primaryColorDark,
+        unselectedItemColor: theme.primaryColorLight,
         selectedIconTheme: IconThemeData(
           size: 30,
         ),
@@ -305,7 +433,6 @@ class ParentBasePageState extends State<ParentBasePage> {
         onTap: _onItemTapped,
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        backgroundColor: Colors.white,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
         iconSize: 20,

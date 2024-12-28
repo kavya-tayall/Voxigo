@@ -20,8 +20,8 @@ class _BreathingHomeState extends State<BreathingHome>
   void initState() {
     super.initState();
     _controller = AnimationController(
-        vsync: this,
-        duration: Duration(seconds: 5)
+      vsync: this,
+      duration: Duration(seconds: 5)
     )..addListener(() {
       setState(() {});
     });

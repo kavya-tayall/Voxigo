@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "testt" "\0"
+            VALUE "CompanyName", "com.mindbridge" "\0"
+            VALUE "FileDescription", "mindbridge" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "testt" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "testt.exe" "\0"
-            VALUE "ProductName", "testt" "\0"
+            VALUE "InternalName", "mindbridge" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 com.mindbridge. All rights reserved." "\0"
+            VALUE "OriginalFilename", "mindbridge.exe" "\0"
+            VALUE "ProductName", "Voxigo" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

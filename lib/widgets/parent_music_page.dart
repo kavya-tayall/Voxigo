@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -7,11 +8,16 @@ import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:test_app/cache_utility.dart';
+import 'package:test_app/getauthtokenandkey.dart';
+import 'package:test_app/widgets/child_provider.dart';
+import '../fileUploadandDownLoad.dart';
 
 class ParentMusicPage extends StatefulWidget {
   final String username;
+  final String childId;
 
-  ParentMusicPage({required this.username});
+  ParentMusicPage({required this.username, required this.childId});
 
   @override
   _ParentMusicPageState createState() => _ParentMusicPageState();
@@ -32,7 +38,7 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
   @override
   void initState() {
     super.initState();
-    loadMusicData(widget.username);
+    loadMusicData(widget.username, widget.childId);
     audioPlayer.onDurationChanged.listen((duration) {
       setState(() {
         totalDuration = duration;
@@ -52,9 +58,9 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
     });
   }
 
-  Future<void> loadMusicData(String username) async {
+  Future<void> loadMusicData(String username, String childId) async {
     try {
-      String path = 'user_folders/$username/music.json';
+      String path = 'user_folders/$childId/music.json';
 
       Reference storageRef = FirebaseStorage.instance.ref().child(path);
       String downloadUrl = await storageRef.getDownloadURL();
@@ -66,8 +72,10 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
           musicData = data.cast<Map<String, dynamic>>();
           isLoading = false;
         });
+        refreshMp3andCoverImages(childId, response.body, true);
+
         for (var item in musicData) {
-          fetchImageAndAudioUrls(item['image'], item['link']);
+          fetchImageAndAudioUrls(item['image'], item['link'], childId);
         }
       } else {
         print("Error: Could not fetch data");
@@ -80,10 +88,48 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
     }
   }
 
+  Future<void> refreshMp3andCoverImages(
+      String childId, String musicJsonString, bool forChild) async {
+    final record = ChildCollectionWithKeys.instance.getRecord(childId);
+    final String username = record?.username ?? 'defaultUsername';
+
+    print(
+        'Inside refreshMp3andCoverImages in parent login for child $username');
+
+    // Fetch app installations for the user with MP3 parameter enabled
+    QuerySnapshot<Object?>? appInstallationsSnapshot =
+        await getAppInstallationsForUser(username, mp3: true);
+
+    if (appInstallationsSnapshot == null) {
+      print(
+          'No app installation record found for this child and installation ID. Performing full  Mp3 refresh to create a new record.');
+
+      // Copy music assets to local holder
+      await copyMusicToLocalHolderFromAsset(childId);
+
+      if (musicJsonString.isNotEmpty) {
+        final List<dynamic> musicData = json.decode(musicJsonString);
+        await downloadMp3FilesConcurrently(musicData, childId, username, true);
+        return;
+      } else {
+        print('Failed to fetch or decode musicJsonString.');
+      }
+      return;
+    }
+
+    // Retrieve the timestamp from the first app installation document
+    Timestamp appInstallationTimestamp =
+        appInstallationsSnapshot.docs.first['timestamp'];
+
+    // Process MP3 logs based on the retrieved timestamp
+    processMP3Logs(username, childId, appInstallationTimestamp, forChild);
+  }
+
   Future<void> fetchImageAndAudioUrls(
-      String imageName, String audioName) async {
-    final imageUrl = await fetchImageFromStorage(imageName);
-    final audioUrl = await fetchAudioFromStorage(audioName);
+      String imageName, String audioName, String childId) async {
+    final imageUrl =
+        await fetchMP3CoverImageFromStorage(imageName, childId, true);
+    final audioUrl = await fetchAudioFromStorage(audioName, childId, true);
 
     print("Image URL: $imageUrl");
     print("Audio URL: $audioUrl");
@@ -92,70 +138,6 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
       imageUrlCache[imageName] = imageUrl;
       audioUrlCache[audioName] = audioUrl;
     });
-  }
-
-  Future<String> fetchImageFromStorage(String imageName) async {
-    try {
-      Directory appDocDir = await getApplicationDocumentsDirectory();
-      String localImagePath =
-          '${appDocDir.path}${Platform.pathSeparator}music_files${Platform.pathSeparator}$imageName';
-
-      File localFile = File(localImagePath);
-      if (await localFile.exists()) {
-        print("Loading image from local storage: $localImagePath");
-        return localFile.path;
-      } else {
-        print("Image not found locally, downloading from Firebase...");
-        String storagePath = 'music_info/cover_images/$imageName';
-        Reference storageRef =
-        FirebaseStorage.instance.ref().child(storagePath);
-        String downloadUrl = await storageRef.getDownloadURL();
-
-        var httpClient = HttpClient();
-        var request = await httpClient.getUrl(Uri.parse(downloadUrl));
-        var response = await request.close();
-        var bytes = await consolidateHttpClientResponseBytes(response);
-
-        await localFile.writeAsBytes(bytes);
-
-        return localFile.path;
-      }
-    } catch (e) {
-      print("Error loading image for $imageName: $e");
-      return '';
-    }
-  }
-
-  Future<String> fetchAudioFromStorage(String audioName) async {
-    try {
-      Directory appDocDir = await getApplicationDocumentsDirectory();
-      String localAudioPath =
-          '${appDocDir.path}${Platform.pathSeparator}music_files${Platform.pathSeparator}$audioName';
-
-      File localFile = File(localAudioPath);
-      if (await localFile.exists()) {
-        print("Loading audio from local storage: $localAudioPath");
-        return localFile.path;
-      } else {
-        print("Audio not found locally, downloading from Firebase...");
-        String storagePath = 'music_info/mp3 files/$audioName';
-        Reference storageRef =
-        FirebaseStorage.instance.ref().child(storagePath);
-        String downloadUrl = await storageRef.getDownloadURL();
-
-        var httpClient = HttpClient();
-        var request = await httpClient.getUrl(Uri.parse(downloadUrl));
-        var response = await request.close();
-        var bytes = await consolidateHttpClientResponseBytes(response);
-
-        await localFile.writeAsBytes(bytes);
-
-        return localFile.path;
-      }
-    } catch (e) {
-      print("Error loading audio for $audioName: $e");
-      return '';
-    }
   }
 
   Future<void> playAudio(String audioUrl) async {
@@ -215,17 +197,17 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
   }
 
   bool isUploading = false;
-
-  Future<void> addMusic() async {
-    TextEditingController titleController = TextEditingController();
+  Future<void> addMusic(String childId) async {
+    final TextEditingController titleController = TextEditingController();
+    final FocusNode textFieldFocusNode = FocusNode();
     PlatformFile? selectedImage;
     PlatformFile? selectedAudio;
+    bool isFilePickerActive = false;
 
-    BuildContext dialogContext = context;
-
+    // Show the dialog
     await showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
@@ -235,93 +217,158 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
                 children: [
                   TextField(
                     controller: titleController,
-                    decoration: InputDecoration(hintText: 'Enter Music Title'),
+                    focusNode: textFieldFocusNode,
+                    decoration: InputDecoration(
+                      hintText: 'Enter Music Title',
+                      labelText: 'Music Title',
+                      border: OutlineInputBorder(),
+                    ),
+                    autofocus: true,
                   ),
                   SizedBox(height: 10),
                   ElevatedButton(
-                    onPressed: () async {
-                      FilePickerResult? imageResult = await FilePicker.platform
-                          .pickFiles(type: FileType.image);
-                      if (imageResult != null) {
-                        setDialogState(() {
-                          selectedImage = imageResult.files.first;
-                        });
-                      }
-                    },
+                    onPressed: isFilePickerActive
+                        ? null
+                        : () async {
+                            if (titleController.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "Please enter the music title before selecting a cover image.",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  backgroundColor: Colors.redAccent,
+                                ),
+                              );
+                              return;
+                            }
+
+                            textFieldFocusNode.unfocus();
+                            isFilePickerActive = true;
+
+                            FilePickerResult? imageResult = await FilePicker
+                                .platform
+                                .pickFiles(type: FileType.image);
+
+                            if (imageResult != null) {
+                              setDialogState(() {
+                                selectedImage = imageResult.files.first;
+                              });
+                            }
+
+                            isFilePickerActive = false;
+                          },
                     child: Text('Select Cover Image'),
                   ),
                   if (selectedImage != null)
-                    Text('Image Selected: ${selectedImage!.name}',
-                        style: TextStyle(color: Colors.green)),
+                    Text(
+                      'Image Selected: ${selectedImage!.name}',
+                      style: TextStyle(color: Colors.green),
+                    ),
                   SizedBox(height: 10),
                   ElevatedButton(
-                    onPressed: () async {
-                      FilePickerResult? audioResult =
-                      await FilePicker.platform.pickFiles(
-                        type: FileType.custom,
-                        allowedExtensions: ['mp3', 'wav'],
-                      );
-                      if (audioResult != null) {
-                        setDialogState(() {
-                          selectedAudio = audioResult.files.first;
-                        });
-                      }
-                    },
+                    onPressed: isFilePickerActive
+                        ? null
+                        : () async {
+                            if (titleController.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "Please enter the music title before selecting an audio file.",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  backgroundColor: Colors.redAccent,
+                                ),
+                              );
+                              return;
+                            }
+
+                            textFieldFocusNode.unfocus();
+                            isFilePickerActive = true;
+
+                            FilePickerResult? audioResult =
+                                await FilePicker.platform.pickFiles(
+                              type: FileType.custom,
+                              allowedExtensions: ['mp3', 'wav'],
+                            );
+
+                            if (audioResult != null) {
+                              setDialogState(() {
+                                selectedAudio = audioResult.files.first;
+                              });
+                            }
+
+                            isFilePickerActive = false;
+                          },
                     child: Text('Select Audio File'),
                   ),
                   if (selectedAudio != null)
-                    Text('Audio Selected: ${selectedAudio!.name}',
-                        style: TextStyle(color: Colors.green)),
+                    Text(
+                      'Audio Selected: ${selectedAudio!.name}',
+                      style: TextStyle(color: Colors.green),
+                    ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: () {
+                    // Ensure keyboard is dismissed
+                    textFieldFocusNode.unfocus();
                     Navigator.of(dialogContext).pop();
                   },
                   child: Text('Cancel'),
                 ),
                 TextButton(
-                  onPressed: () async {
-                    if (titleController.text.isNotEmpty &&
-                        selectedImage != null &&
-                        selectedAudio != null) {
-                      setState(() {
-                        isUploading = true;
-                      });
-                      Navigator.of(dialogContext).pop();
+                  onPressed: () {
+                    // Ensure keyboard is dismissed
+                    textFieldFocusNode.unfocus();
 
-                      await Future.microtask(() async {
-                        String imagePath =
-                            'music_info/cover_images/${selectedImage!.name}';
-                        String audioPath =
-                            'music_info/mp3 files/${selectedAudio!.name}';
-
-                        await uploadFile(selectedImage!, imagePath);
-                        await uploadFile(selectedAudio!, audioPath);
-
-                        final imageUrl =
-                        await fetchImageFromStorage(selectedImage!.name);
-                        final audioUrl =
-                        await fetchAudioFromStorage(selectedAudio!.name);
-
-                        setState(() {
-                          imageUrlCache[selectedImage!.name] = imageUrl;
-                          audioUrlCache[selectedAudio!.name] = audioUrl;
-                          musicData.add({
-                            'title': titleController.text.trim(),
-                            'emotion': [],
-                            'keywords': [],
-                            'link': selectedAudio!.name,
-                            'image': selectedImage!.name,
-                          });
-                          isUploading = false;
-                        });
-                        await updateMusicJson();
-                      });
-                    } else {
-                      print("Error: Missing title, image, or audio file");
+                    if (titleController.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            "Please provide a title for the music before submitting.",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          backgroundColor: Colors.redAccent,
+                        ),
+                      );
+                      return;
                     }
+
+                    if (selectedImage == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            "Please select a cover image to proceed.",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          backgroundColor: Colors.redAccent,
+                        ),
+                      );
+                      return;
+                    }
+
+                    if (selectedAudio == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            "Please select an audio file to proceed.",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          backgroundColor: Colors.redAccent,
+                        ),
+                      );
+                      return;
+                    }
+
+                    Navigator.of(dialogContext).pop();
+                    uploadMusic(
+                      childId,
+                      titleController.text.trim(),
+                      selectedImage!,
+                      selectedAudio!,
+                    );
                   },
                   child: Text('Add Song'),
                 ),
@@ -331,66 +378,136 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
         );
       },
     );
+
+    // Cleanup: Ensure keyboard is dismissed after dialog closes
+    textFieldFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
   }
 
-  Future<void> uploadFile(PlatformFile file, String path) async {
+  Future<void> uploadMusic(
+    String childId,
+    String title,
+    PlatformFile imageFile,
+    PlatformFile audioFile,
+  ) async {
+    setState(() {
+      isUploading = true;
+    });
+
     try {
-      print("Debug: Attempting to upload to path: $path");
+      String imagePath =
+          'user_folders/$childId/music_info/cover_images/${imageFile.name}';
+      String audioPath =
+          'user_folders/$childId/music_info/mp3 files/${audioFile.name}';
 
-      Reference ref = FirebaseStorage.instance.ref().child(path);
+      await parentUploadMp3orCoverImageFileToFirebase(
+          imageFile, imagePath, childId, true);
+      await parentUploadMp3orCoverImageFileToFirebase(
+          audioFile, audioPath, childId, true);
 
-      if (file.bytes != null) {
-        print("Debug: Uploading file from memory: ${file.name}");
+      logMp3Download(audioFile.name, imageFile.name, widget.username);
 
-        await ref.putData(file.bytes!).then((taskSnapshot) {
-          print("Debug: Upload completed: ${taskSnapshot.state}");
+      final imageUrl =
+          await fetchMP3CoverImageFromStorage(imageFile.name, childId, true);
+      final audioUrl =
+          await fetchAudioFromStorage(audioFile.name, childId, true);
+
+      setState(() {
+        imageUrlCache[imageFile.name] = imageUrl;
+        audioUrlCache[audioFile.name] = audioUrl;
+        musicData.add({
+          'title': title,
+          'emotion': [],
+          'keywords': [],
+          'link': audioFile.name,
+          'image': imageFile.name,
         });
-      } else if (file.path != null) {
-        final fileToUpload = File(file.path!);
+      });
 
-        bool fileExists = await fileToUpload.exists();
-        if (fileExists) {
-          print("Debug: Uploading file from path: ${file.path}");
+      await updateMusicJson();
 
-          await ref.putFile(fileToUpload).then((taskSnapshot) {
-            print("Debug: Upload completed: ${taskSnapshot.state}");
-          });
-        } else {
-          print("Error: File does not exist at path: ${file.path}");
-          return;
-        }
-      } else {
-        print("Error: No valid file source found for ${file.name}");
-        return;
-      }
-
-      print("Success: File uploaded successfully to path: $path");
-    } on FirebaseException catch (e) {
-      print("Firebase Error: ${e.message}");
-      print("Error Code: ${e.code}");
-    } catch (e, stackTrace) {
-      print("General Error: $e");
-      print("Stack Trace: $stackTrace");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Music added successfully')),
+      );
+    } catch (e) {
+      print("Error during upload: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add music')),
+      );
+    } finally {
+      setState(() {
+        isUploading = false;
+      });
     }
   }
 
   Future<void> updateMusicJson() async {
-    String path = 'user_folders/${widget.username}/music.json';
+    String path = 'user_folders/${widget.childId}/music.json';
     Reference ref = FirebaseStorage.instance.ref().child(path);
     await ref.putString(jsonEncode(musicData));
   }
 
-  Future<void> deleteMusic(int index) async {
+  Future<void> deleteMusic(int index, String childId) async {
     var musicItem = musicData[index];
     String imageName = musicItem['image'];
     String audioName = musicItem['link'];
 
-    await deleteFile('music_info/cover_images/$imageName');
-    await deleteFile('music_info/mp3 files/$audioName');
+    // Show a confirmation dialog before deleting
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('Confirm Deletion'),
+          content: Text(
+              'Are you sure you want to delete this music file? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false); // Do not delete
+              },
+            ),
+            TextButton(
+              child: Text(
+                'Delete',
+                style: TextStyle(color: Colors.red),
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true); // Confirm delete
+              },
+            ),
+          ],
+        );
+      },
+    );
 
-    musicData.removeAt(index);
-    await updateMusicJson();
-    setState(() {});
+    // Proceed only if user confirms deletion
+    if (shouldDelete == true) {
+      try {
+        // Deleting the files
+        await deleteFile(
+            'user_folders/$childId/music_info/cover_images/$imageName');
+        await deleteFile(
+            'user_folders/$childId/music_info/mp3 files/$audioName');
+
+        // Removing the item from the music data list
+        musicData.removeAt(index);
+
+        // Updating the music JSON
+        await updateMusicJson();
+
+        setState(() {});
+
+        // Notify the user of successful deletion
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Music file deleted successfully!')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete Music file: $e')),
+        );
+      }
+    }
   }
 
   Future<void> deleteFile(String path) async {
@@ -404,96 +521,118 @@ class _ParentMusicPageState extends State<ParentMusicPage> {
 
   @override
   Widget build(BuildContext context) {
+    FocusScope.of(context).unfocus();
     return Scaffold(
       appBar: AppBar(
         title: Text('Music List'),
         actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: addMusic,
+          Tooltip(
+            message: isLoading
+                ? 'Preparing your list'
+                : isUploading
+                    ? 'Uploading in progress'
+                    : 'Add Music',
+            child: IconButton(
+              icon: Icon(Icons.add),
+              onPressed: (isLoading || isUploading)
+                  ? null
+                  : () => addMusic(widget.childId),
+            ),
           ),
         ],
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-        itemCount: musicData.length,
-        itemBuilder: (context, index) {
-          final item = musicData[index];
-          final imageUrl = imageUrlCache[item['image']] ?? '';
-          final audioUrl = audioUrlCache[item['link']] ?? '';
+      body: Stack(
+        children: [
+          if (!isLoading)
+            ListView.builder(
+              itemCount: musicData.length,
+              itemBuilder: (context, index) {
+                final item = musicData[index];
+                final imageUrl = imageUrlCache[item['image']] ?? '';
+                final audioUrl = audioUrlCache[item['link']] ?? '';
 
-          final isCurrentPlaying = currentAudioUrl == audioUrl;
+                final isCurrentPlaying = currentAudioUrl == audioUrl;
 
-          return Card(
-            child: ListTile(
-              leading: imageUrl.isNotEmpty
-                  ? (imageUrl.startsWith('http') ||
-                  imageUrl.startsWith('https'))
-                  ? Image.network(imageUrl, width: 50, height: 50)
-                  : Image.file(File(imageUrl), width: 50, height: 50)
-                  : Icon(Icons.music_note),
-              title: Text(item['title']),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: Icon(isCurrentPlaying && isPlaying
-                        ? Icons.pause
-                        : Icons.play_arrow),
-                    onPressed: () => playAudio(audioUrl),
+                return Card(
+                  child: ListTile(
+                    leading: imageUrl.isNotEmpty
+                        ? (imageUrl.startsWith('http') ||
+                                imageUrl.startsWith('https'))
+                            ? Image.network(imageUrl, width: 50, height: 50)
+                            : Image.file(File(imageUrl), width: 50, height: 50)
+                        : Icon(Icons.music_note),
+                    title: Text(item['title']),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(isCurrentPlaying && isPlaying
+                              ? Icons.pause
+                              : Icons.play_arrow),
+                          onPressed: () => playAudio(audioUrl),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.stop),
+                          onPressed: stopAudio,
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () => deleteMusic(index, widget.childId),
+                        ),
+                      ],
+                    ),
+                    subtitle: isCurrentPlaying
+                        ? Column(
+                            children: [
+                              Slider(
+                                value: currentPosition.inSeconds.toDouble(),
+                                max: totalDuration.inSeconds.toDouble(),
+                                onChanged: (value) {
+                                  seekAudio(Duration(seconds: value.toInt()));
+                                },
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "${currentPosition.inMinutes}:${currentPosition.inSeconds.remainder(60).toString().padLeft(2, '0')}",
+                                  ),
+                                  Text(
+                                    "${totalDuration.inMinutes}:${totalDuration.inSeconds.remainder(60).toString().padLeft(2, '0')}",
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.replay_10),
+                                    onPressed: rewindAudio,
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.forward_10),
+                                    onPressed: fastForwardAudio,
+                                  ),
+                                ],
+                              )
+                            ],
+                          )
+                        : null,
                   ),
-                  IconButton(
-                    icon: Icon(Icons.stop),
-                    onPressed: stopAudio,
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () => deleteMusic(index),
-                  ),
-                ],
+                );
+              },
+            )
+          else
+            Center(child: CircularProgressIndicator()),
+          if (isUploading)
+            Container(
+              color: Colors.black54,
+              child: Center(
+                child: CircularProgressIndicator(),
               ),
-              subtitle: isCurrentPlaying
-                  ? Column(
-                children: [
-                  Slider(
-                    value: currentPosition.inSeconds.toDouble(),
-                    max: totalDuration.inSeconds.toDouble(),
-                    onChanged: (value) {
-                      seekAudio(Duration(seconds: value.toInt()));
-                    },
-                  ),
-                  Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "${currentPosition.inMinutes}:${currentPosition.inSeconds.remainder(60).toString().padLeft(2, '0')}",
-                      ),
-                      Text(
-                        "${totalDuration.inMinutes}:${totalDuration.inSeconds.remainder(60).toString().padLeft(2, '0')}",
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.replay_10),
-                        onPressed: rewindAudio,
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.forward_10),
-                        onPressed: fastForwardAudio,
-                      ),
-                    ],
-                  )
-                ],
-              )
-                  : null,
             ),
-          );
-        },
+        ],
       ),
     );
   }

@@ -1,4 +1,4 @@
-package com.example.testt
+package com.mindbridge.appcore
 
 import io.flutter.embedding.android.FlutterActivity
 

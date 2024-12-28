@@ -39,6 +39,7 @@ class _FirstButtonState extends State<FirstButton> {
       child: ElevatedButton(
         onPressed: widget.onPressed,
         style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
           padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(0),
@@ -54,7 +55,7 @@ class _FirstButtonState extends State<FirstButton> {
             Text(
               widget.text,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12),
+              style: const TextStyle(fontSize: 12, color: Colors.black),
             ),
           ],
         ),
@@ -72,7 +73,7 @@ class _FirstButtonState extends State<FirstButton> {
         imageUrl: imagePath,
         fit: BoxFit.contain,
         placeholder: (context, url) =>
-        const Center(child: CircularProgressIndicator()),
+            const Center(child: CircularProgressIndicator()),
         errorWidget: (context, url, error) {
           print("Failed to load image from URL: $imagePath");
           return const Icon(Icons.broken_image);
@@ -115,6 +116,7 @@ class FolderButton extends StatelessWidget {
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero,
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(0),
           ),
@@ -129,7 +131,7 @@ class FolderButton extends StatelessWidget {
             Text(
               text,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12),
+              style: const TextStyle(fontSize: 12, color: Colors.black),
             ),
           ],
         ),
