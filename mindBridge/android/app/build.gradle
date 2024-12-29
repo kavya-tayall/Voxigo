@@ -1,0 +1,71 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id 'com.google.gms.google-services' version '4.3.15' apply false
+    id "dev.flutter.flutter-gradle-plugin" // Flutter Gradle Plugin
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader("UTF-8") { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty("flutter.versionCode", "3").toInteger()
+def flutterVersionName = localProperties.getProperty("flutter.versionName", "1.1")
+
+android {
+    namespace = "com.VoxigoAAC.appcore"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17 // Set to Java 17 for compatibility
+        targetCompatibility = JavaVersion.VERSION_17 // Set to Java 17 for compatibility
+    }
+
+    kotlinOptions {
+        jvmTarget = "17" // Ensure Kotlin JVM target matches Java compatibility
+    }
+
+    defaultConfig {
+        applicationId = "com.VoxigoAAC.appcore" // Use your unique Application ID
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutterVersionCode
+        versionName = flutterVersionName
+    }
+
+    signingConfigs {
+    release {
+        storeFile file("keystore/mindbridge-key.keystore") // Path to your keystore file
+        storePassword "Idhant@123.." // Replace with your actual store password
+        keyAlias "my-key-alias" // Replace with your actual key alias
+        keyPassword "Idhant@123.." // Replace with your actual key password
+    }
+}
+
+    buildTypes {
+        release {
+            // Add your release signing configuration here
+            signingConfig signingConfigs.release // For now, using debug keys for release
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+dependencies {
+    implementation platform('com.google.firebase:firebase-bom:32.0.0')
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.facebook.android:facebook-android-sdk:latest.release'
+    implementation 'com.facebook.android:facebook-login:15.3.0'
+    // Add any other Firebase products or dependencies you need
+}
+
+// Apply the Google Services plugin for Firebase
+apply plugin: 'com.google.gms.google-services'

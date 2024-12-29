@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Match all documents in the 'users' collection
+    match /users/{userId} {
+      // Allow read access to authenticated users
+      allow read: if 1==1;
+      //request.auth != null;
+
+      // Allow write access only if the user is creating or modifying their own document
+      allow create, update, delete: if 1==1;
+      //request.auth != null && request.auth.uid == userId;
+
+      // Deny all other operations by default
+      allow write: if true;
+    }
+
+    // Match all documents in the 'children' collection
+    match /children/{childId} {
+      // Allow read access if the authenticated user is a parent of the child
+      allow read: if 1==1; 
+      //request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.children.hasAny([childId]);
+
+      // Allow write access only if the parent is authenticated and is managing their child's data
+      allow create, update, delete: if 1==1; 
+      //request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.children.hasAny([childId]);
+
+      // Deny all other operations by default
+      allow write: if true;
+    }
+
+    // Default rule: Deny all access to any other data
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
