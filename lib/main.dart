@@ -144,7 +144,20 @@ Future<String> getInitialRoute(BuildContext context) async {
     if (loginType == 'parent') {
       // Validate Firebase parent authentication
       if (await validateParentLogin()) {
-        return '/parent_base'; // Parent Home Page
+        User? user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          print("ParentLoginPage: _authUser: ${user.email}");
+
+          await _auth.postParentLogin(user);
+
+          ParentProvider parentProvider =
+              Provider.of<ParentProvider>(context, listen: false);
+          print('user.uid: ${user.uid}');
+          await parentProvider.fetchParentData(user.uid);
+          return '/parent_base'; // Parent Home Page
+        } else {
+          return '/parent_login'; // Default to parent login
+        }
       } else {
         return '/parent_login'; // Default to parent login
       }

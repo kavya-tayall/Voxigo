@@ -62,8 +62,9 @@ class ParentLoginPage extends StatelessWidget {
       print("ParentLoginPage: _signUp:");
       await _auth.registerParent(
         data.additionalSignupData!["username"]!,
-        "${data.additionalSignupData!["First name"]!} ${data.additionalSignupData!["Last name"]!}",
-        data.name!,
+        data.additionalSignupData!["First name"]!,
+        data.additionalSignupData!["Last name"]!,
+        data.name!, //for email address
         data.password!,
         true,
       );
@@ -272,10 +273,11 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
   String? _lastName;
   String? _username;
 
-  Future<String> _registerParentforProviderLogin(
-      String email, String? name, String? username) async {
+  Future<String> _registerParentforProviderLogin(String email,
+      String? firstname, String? lastname, String? username) async {
     try {
-      await widget.auth.registerParent(username!, name!, email, null, false);
+      await widget.auth
+          .registerParent(username!, firstname!, lastname!, email, null, false);
       return "Additional information saved successfully";
     } on UsernameAlreadyExistsException {
       return "Username already exists";
@@ -326,13 +328,15 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
                       widget.user.uid,
                       _username!,
                       widget.user.email!,
-                      '${_firstName ?? ''} ${_lastName ?? ''}',
+                      _firstName ?? '',
+                      _lastName ?? '',
                     );
 
                     // Save additional information to the database
                     String result = await _registerParentforProviderLogin(
                       widget.user.email!,
-                      encryptedParentInfo['name'] ?? '',
+                      encryptedParentInfo['firstname'] ?? '',
+                      encryptedParentInfo['lastname'] ?? '',
                       encryptedParentInfo['username'] ?? '',
                     );
 

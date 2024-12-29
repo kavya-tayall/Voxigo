@@ -4,14 +4,14 @@
     "emotion": ["nervous", "sad", "angry"],
     "keywords": ["children", "bedtime", "soothing", "nursery rhyme"],
     "link": "Twinkle, Twinkle, Little Star.mp3",
-    "image": "twinkle twinkle cover image.png"
+    "image": "twinkle-twinkle-cover-image.png"
   },
   {
     "title": "Humpty Dumpty",
     "emotion": ["bored", "angry", "tired"],
     "keywords": ["children", "falling", "classic", "nursery rhyme"],
     "link": "HumptyDumpty.mp3",
-    "image": "big egg.png"
+    "image": "big-egg.png"
   },
   {
     "title": "ABCs",

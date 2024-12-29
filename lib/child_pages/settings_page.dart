@@ -3,6 +3,7 @@ import 'package:settings_ui/settings_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test_app/auth_logic.dart';
 import '../widgets/child_provider.dart';
 import '../widgets/theme_provider.dart';
 
@@ -113,13 +114,8 @@ class CustomSettings extends StatelessWidget {
                 ),
                 trailing: Icon(Icons.chevron_right, color: Colors.red),
                 onPressed: (context) async {
-                  final childProvider =
-                      Provider.of<ChildProvider>(context, listen: false);
-                  childProvider.logout();
-                  await FirebaseAuth.instance.signOut();
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.clear(); // Clears all data
-                  Navigator.of(context).pushReplacementNamed('/parent_login');
+                  logOutUser(context);
+                  Navigator.of(context).pushReplacementNamed('/child_login');
                 },
               ),
             ],

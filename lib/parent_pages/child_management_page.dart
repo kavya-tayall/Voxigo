@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:test_app/cache_utility.dart';
-import 'package:test_app/getauthtokenandkey.dart';
 import 'package:test_app/widgets/child_provider.dart';
 import '../widgets/parent_music_page.dart';
-import 'ai_chatbot.dart';
 import 'edit_child_grid.dart';
-import 'package:test_app/auth_logic.dart';
 
 class GradientText extends StatelessWidget {
   const GradientText(

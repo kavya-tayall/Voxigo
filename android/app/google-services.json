@@ -8,6 +8,42 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:662430635566:android:25d44adb8f5b38d25771bf",
+        "android_client_info": {
+          "package_name": "com.VoxigoAAC.appcore"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "662430635566-23knp70fd48nn009nfe3g5r4tc386rpd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdbQv3GYIjQ1IXsyz2Hfgff0vrc21ZlOw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "662430635566-23knp70fd48nn009nfe3g5r4tc386rpd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "662430635566-q79n5397mh6jhi3riql693mf4v43mqmh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.testt"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:662430635566:android:41e9dfda73ba0dae5771bf",
         "android_client_info": {
           "package_name": "com.autismhelper.autismaid"

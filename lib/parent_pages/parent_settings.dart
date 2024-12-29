@@ -1,26 +1,22 @@
-import 'dart:math';
 import 'dart:typed_data';
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_app/cache_utility.dart';
-import 'package:test_app/getauthtokenandkey.dart';
 import '../auth_logic.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
-import 'package:test_app/authExceptions.dart';
 import 'package:test_app/security.dart';
-
+import '../parent_pages/parent_reset_password.dart';
+import '../parent_pages/parent_profile.dart';
+import '../parent_pages/child_profile_edit.dart';
+import '../parent_pages/child_delete_account.dart';
+import '../parent_pages/child_add_newchild.dart';
+import '../parent_pages/child_change_password.dart';
 import '../child_pages/home_page.dart';
 import '../widgets/child_provider.dart';
+import '../widgets/parent_provider.dart';
 import '../widgets/theme_provider.dart';
 
 extension StringExtension on String {
@@ -53,6 +49,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
 
   @override
   void initState() {
+    super.initState();
     fetchChildrenData();
   }
 
@@ -69,12 +66,11 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
       canUseEmotionHandling = true;
       canUseAudioPage = true;
     });
-    print('resetToInitialState');
     // Re-fetch data if needed
     fetchChildrenData();
   }
 
-  Future<void> _showFormDialog(BuildContext context) async {
+  Future<void> _showAddChildDialog(BuildContext context) async {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -88,6 +84,81 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return const DeleteChildDialog(); // Your custom dialog widget
+      },
+    );
+  }
+
+  Future<void> _showChangePasswordDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const ResetPasswordDialog(); // Your custom dialog widget
+      },
+    );
+  }
+
+  Future<void> _showViewProfileDialog(
+      BuildContext context, bool isEditMode) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        ParentProvider parentProvider =
+            Provider.of<ParentProvider>(context, listen: false);
+        ParentRecord parentRecord = parentProvider.parentData;
+        return EditProfileDialog(
+          userid: parentRecord.parentUid!,
+          username: parentRecord.username!,
+          firstName: parentRecord.firstname!,
+          lastName: parentRecord.lastname!,
+          email: parentRecord.email!,
+          isEditMode: isEditMode, // View mode
+        );
+      },
+    );
+  }
+
+  Future<void> _showChildProfileDialog(
+      BuildContext context, bool isEditMode, String childId) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        ChildCollectionWithKeys childCollection =
+            ChildCollectionWithKeys.instance;
+        ChildRecord childRecord =
+            childCollection.getRecord(childId) as ChildRecord;
+        String parentId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+        return EditChildProfileDialog(
+          parentId: parentId,
+          childId: childRecord.childuid,
+          username: childRecord.username!,
+          firstName: childRecord.firstName!,
+          lastName: childRecord.lastName!,
+          isEditMode: isEditMode,
+        );
+      },
+    );
+  }
+
+  Future<void> _showChangeChildPasswordDialog(
+      BuildContext context, String childId) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // Assuming ChildCollectionWithKeys and ChildRecord are similar structures
+        ChildCollectionWithKeys childCollection =
+            ChildCollectionWithKeys.instance;
+        ChildRecord childRecord =
+            childCollection.getRecord(childId) as ChildRecord;
+        String parentId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+        return ChangeChildPasswordDialog(
+          parentId: parentId,
+          childId: childRecord.childuid,
+          username: childRecord.username!,
+          firstName: childRecord.firstName!,
+          lastName: childRecord.lastName!,
+        );
       },
     );
   }
@@ -310,15 +381,8 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           context,
                           listen: false,
                         );
-                        ApiService.instance.dispose();
-                        UserSession.instance.dispose();
-                        ChildCollectionWithKeys.instance.dispose();
-                        print('All singleton classes disposed during logout');
-                        childProvider.logout();
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.clear();
-                        await FirebaseAuth.instance.signOut();
-                        themeProvider.setdefaultTheme();
+                        logOutUser(context);
+
                         Navigator.of(context)
                             .pushReplacementNamed('/parent_login');
                       },
@@ -328,26 +392,33 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
 
                 // Account Settings Section
                 SettingsSection(
-                  title: Text('Account'),
+                  title: Text('Parent Account'),
                   tiles: <SettingsTile>[
                     SettingsTile.navigation(
                       leading: Icon(Icons.person, color: theme.iconTheme.color),
                       title: Text('Profile'),
-                      trailing: Text(""),
-                      onPressed: (context) {},
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => _showViewProfileDialog(context, true),
+                      ),
+                      onPressed: (context) {
+                        _showViewProfileDialog(context, false);
+                      },
                     ),
                     SettingsTile.navigation(
                       leading: Icon(Icons.lock, color: theme.iconTheme.color),
                       trailing: Text(""),
                       title: Text('Change Password'),
-                      onPressed: (context) {},
+                      onPressed: (context) async {
+                        await _showChangePasswordDialog(context);
+                      },
                     ),
                     SettingsTile.navigation(
                       leading: Icon(Icons.add, color: theme.iconTheme.color),
                       trailing: Text(""),
                       title: Text('Add Child'),
                       onPressed: (context) async {
-                        await _showFormDialog(context);
+                        await _showAddChildDialog(context);
                         fetchChildrenData();
                       },
                     ),
@@ -419,6 +490,74 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           ),
                         ),
                       ),
+                    ),
+                    SettingsTile.navigation(
+                      leading:
+                          Icon(Icons.child_care, color: theme.iconTheme.color),
+                      title: Text('Manage Child Profile'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () async {
+                          if (_selectedOption.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Please select a child first."),
+                              ),
+                            );
+                            return; // Avoid unnecessary calls if no child is selected
+                          }
+                          await _showChildProfileDialog(
+                              context, true, _selectedOption);
+                          fetchChildrenData();
+                        },
+                      ),
+                      onPressed: (context) async {
+                        if (_selectedOption.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Please select a child first."),
+                            ),
+                          );
+                          return;
+                        }
+                        await _showChildProfileDialog(
+                            context, false, _selectedOption!);
+                        fetchChildrenData();
+                      },
+                    ),
+                    SettingsTile.navigation(
+                      leading:
+                          Icon(Icons.password, color: theme.iconTheme.color),
+                      title: Text('Change Child Password'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () async {
+                          if (_selectedOption.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Please select a child first."),
+                              ),
+                            );
+                            return; // Avoid unnecessary calls if no child is selected
+                          }
+                          await _showChangeChildPasswordDialog(
+                              context, _selectedOption);
+                          fetchChildrenData();
+                        },
+                      ),
+                      onPressed: (context) async {
+                        if (_selectedOption.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Please select a child first."),
+                            ),
+                          );
+                          return;
+                        }
+                        await _showChangeChildPasswordDialog(
+                            context, _selectedOption!);
+                        fetchChildrenData();
+                      },
                     ),
                     SettingsTile.switchTile(
                       leading:
@@ -530,357 +669,6 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                 ),
               ],
             ),
-    );
-  }
-}
-
-class RegisterChildForm extends StatefulWidget {
-  const RegisterChildForm({super.key});
-
-  @override
-  State<RegisterChildForm> createState() => _RegisterChildFormState();
-}
-
-class _RegisterChildFormState extends State<RegisterChildForm> {
-  final UserService _user = UserService();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Username Field
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: TextFormField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Username',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Username is required';
-                } else if (value.length < 3) {
-                  return 'Username must be at least 3 characters long';
-                }
-                return null;
-              },
-            ),
-          ),
-          // First Name Field
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: TextFormField(
-              controller: _firstNameController,
-              decoration: const InputDecoration(
-                labelText: 'First Name',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'First Name is required';
-                }
-                return null;
-              },
-            ),
-          ),
-          // Last Name Field
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: TextFormField(
-              controller: _lastNameController,
-              decoration: const InputDecoration(
-                labelText: 'Last Name',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Last Name is required';
-                }
-                return null;
-              },
-            ),
-          ),
-          // Password Field
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: TextFormField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Password is required';
-                } else if (value.length < 6) {
-                  return 'Password must be at least 6 characters long';
-                }
-                return null;
-              },
-            ),
-          ),
-          // Submit Button
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        _showLoadingDialog(context);
-                        try {
-                          User? user = FirebaseAuth.instance.currentUser;
-                          String newChildId =
-                              await _user.encryptChildDataAndRegister(
-                            user!.uid,
-                            _firstNameController.text.trim(),
-                            _lastNameController.text.trim(),
-                            _usernameController.text.trim(),
-                            _passwordController.text.trim(),
-                          );
-                          print('New child ID: $newChildId');
-                          // Success Handling
-                          Navigator.pop(context); // Close loading dialog
-                          Navigator.pop(context); // Close form dialog
-                          showTopSnackBar(
-                            Overlay.of(context),
-                            CustomSnackBar.success(
-                              backgroundColor: Colors.green,
-                              message: "Child has been added",
-                            ),
-                            displayDuration: const Duration(seconds: 3),
-                          );
-                        } on UsernameAlreadyExistsException {
-                          // Error Handling
-                          Navigator.pop(context); // Close loading dialog
-                          showTopSnackBar(
-                            Overlay.of(context),
-                            CustomSnackBar.error(
-                              backgroundColor: Colors.red.shade900,
-                              message: "Username already exists",
-                            ),
-                            displayDuration: const Duration(seconds: 3),
-                          );
-                        }
-                      }
-                    },
-                    child: const Text("Register Child"),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLoadingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
-  }
-}
-
-class RegisterChildDialog extends StatelessWidget {
-  const RegisterChildDialog({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      content: Container(
-          width: 500,
-          constraints: BoxConstraints(
-            minHeight: 300,
-            maxHeight: MediaQuery.of(context).size.height * 0.9,
-          ),
-          child: IntrinsicHeight(child: RegisterChildForm())),
-      title: Text("Add a child"),
-    );
-  }
-}
-
-class DeleteChildForm extends StatefulWidget {
-  const DeleteChildForm({super.key});
-
-  @override
-  State<DeleteChildForm> createState() => _DeleteChildFormState();
-}
-
-class _DeleteChildFormState extends State<DeleteChildForm> {
-  final UserService _user = UserService();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  final TextEditingController _usernameController = TextEditingController();
-
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Username Field
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: TextFormField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Child Username',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Username is required';
-                }
-                return null;
-              },
-            ),
-          ),
-          // Submit Button
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        _showLoadingDialog(context);
-                        try {
-                          final username = _usernameController.text.trim();
-
-                          // Confirm deletion
-                          bool confirm = await _showConfirmationDialog(context);
-                          if (!confirm) {
-                            Navigator.pop(context); // Close loading dialog
-                            return;
-                          }
-
-                          // Perform deletion
-                          await _user.deleteChildByUsername(username);
-
-                          // Success Handling
-                          Navigator.pop(context); // Close loading dialog
-                          Navigator.pop(context); // Close form dialog
-                          showTopSnackBar(
-                            Overlay.of(context),
-                            CustomSnackBar.success(
-                              backgroundColor: Colors.green,
-                              message: "Child has been deleted",
-                            ),
-                            displayDuration: const Duration(seconds: 3),
-                          );
-                        } catch (e) {
-                          // Error Handling
-                          Navigator.pop(context); // Close loading dialog
-                          showTopSnackBar(
-                            Overlay.of(context),
-                            CustomSnackBar.error(
-                              backgroundColor: Colors.red.shade900,
-                              message: "Error deleting child: $e",
-                            ),
-                            displayDuration: const Duration(seconds: 3),
-                          );
-                        }
-                      }
-                    },
-                    child: const Text("Delete Child"),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<bool> _showConfirmationDialog(BuildContext context) async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text("Confirm Deletion"),
-              content: const Text(
-                  "Are you sure you want to delete this child? This action cannot be undone."),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text("Cancel"),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text("Delete"),
-                ),
-              ],
-            );
-          },
-        ) ??
-        false;
-  }
-
-  void _showLoadingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
-  }
-}
-
-class DeleteChildDialog extends StatelessWidget {
-  const DeleteChildDialog({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      content: Container(
-        width: 500,
-        constraints: BoxConstraints(
-          minHeight: 150,
-          maxHeight: MediaQuery.of(context).size.height * 0.9,
-        ),
-        child: IntrinsicHeight(child: DeleteChildForm()),
-      ),
-      title: Text("Delete a child"),
     );
   }
 }

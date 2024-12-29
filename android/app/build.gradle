@@ -13,11 +13,11 @@ if (localPropertiesFile.exists()) {
     }
 }
 
-def flutterVersionCode = localProperties.getProperty("flutter.versionCode", "2").toInteger()
+def flutterVersionCode = localProperties.getProperty("flutter.versionCode", "3").toInteger()
 def flutterVersionName = localProperties.getProperty("flutter.versionName", "1.1")
 
 android {
-    namespace = "com.mindbridge.appcore"
+    namespace = "com.VoxigoAAC.appcore"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -31,7 +31,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.mindbridge.appcore" // Use your unique Application ID
+        applicationId = "com.VoxigoAAC.appcore" // Use your unique Application ID
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode

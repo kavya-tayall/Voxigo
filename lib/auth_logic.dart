@@ -31,13 +31,60 @@ class InvalidCredentialsException implements Exception {
   String toString() => message;
 }
 
+Future<bool> validateParentPassword(String email, String password) async {
+  try {
+    // Get the current user
+    User? user = FirebaseAuth.instance.currentUser;
+    String? email = user?.email;
+
+    if (user == null) {
+      throw Exception('No user is currently logged in.');
+    }
+
+    // Create a credential object with the user's email and password
+    AuthCredential credential = EmailAuthProvider.credential(
+      email: email!,
+      password: password,
+    );
+
+    // Reauthenticate the user with the credentials
+    await user.reauthenticateWithCredential(credential);
+
+    // If reauthentication is successful, return true
+    return true;
+  } catch (e) {
+    // If reauthentication fails, handle the error and return false
+    print('Reauthentication failed: $e');
+    return false;
+  }
+}
+
+Future<void> logOutUser(BuildContext context) async {
+  try {
+    ApiService.instance.dispose();
+    UserSession.instance.dispose();
+    ChildCollectionWithKeys.instance.dispose();
+    print('All singleton classes disposed during logout');
+    final childProvider = Provider.of<ChildProvider>(context, listen: false);
+    childProvider.logout();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    await FirebaseAuth.instance.signOut();
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    themeProvider.setdefaultTheme();
+  } catch (e) {
+    print("Error logging out: $e");
+  }
+}
+
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Future<User?> registerParent(
     String username,
-    String name,
+    String firstname,
+    String lastname,
     String email, [
     String? password,
     bool createUserOrNot = true,
@@ -81,14 +128,15 @@ class AuthService {
       print("Now creating parent in table with uid ${parent!.uid}");
       print("username $username");
       print("email $email");
-      print("name $name");
+      print("firstname $firstname");
+      print("lastname $lastname");
 
       await ApiService.initialize();
 
       await setLoginUserKeys(parent, UserType.parent);
 
-      final encryptedParentInfo =
-          await encryptParentInfoWithIV(parent.uid, username, email, name);
+      final encryptedParentInfo = await encryptParentInfoWithIV(
+          parent.uid, username, email, firstname, lastname);
       print("encryptedParentInfo $encryptedParentInfo");
 
       if (parent != null) {
@@ -96,7 +144,8 @@ class AuthService {
         await _db.collection('parents').doc(parent.uid).set({
           'email': encryptedParentInfo['email'],
           'username': encryptedParentInfo['username'],
-          'name': '${encryptedParentInfo['name']}',
+          'firstname': '${encryptedParentInfo['firstname']}',
+          'lastname': '${encryptedParentInfo['lastname']}',
           'role': 'parent',
           'children': [],
           'iv': encryptedParentInfo['iv'],
@@ -124,7 +173,7 @@ class AuthService {
     }
 
     // Check if name or username fields are missing or empty
-    String? name = parentData.name;
+    String? name = parentData.firstname;
     String? savedUsername = parentData.username;
 
     if (name == null ||
@@ -202,6 +251,10 @@ class AuthService {
 
     final encryptionKey =
         await apiService.getEncryptionKeyfromVault(requestBodyForKey);
+
+    print("Encryption Key: ${base64Encode(encryptionKey)}");
+    print("User Type: $userType");
+    print("User UID: ${user.uid}");
 
     UserSession.instance.initialize(
       uid: user.uid,
@@ -367,11 +420,12 @@ class UserService {
 
       // Generate a unique ID for the child
       final String childId = generateFirebaseId();
+      print('Now doing encyrption for registering child with id $childId');
 
       // Encrypt the child data
       final Map<String, dynamic> encryptedData = await encryptChildInfoWithIV(
-          parentId, childId, username, firstName, lastName);
-
+          parentId, childId, username, firstName, lastName, 'add');
+      print('after encyrption registering child with id $childId');
       // Register the child with the encrypted data
       await registerChild(
         childId,
