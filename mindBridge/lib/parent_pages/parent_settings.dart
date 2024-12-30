@@ -14,6 +14,7 @@ import '../parent_pages/child_profile_edit.dart';
 import '../parent_pages/child_delete_account.dart';
 import '../parent_pages/child_add_newchild.dart';
 import '../parent_pages/child_change_password.dart';
+import '../parent_pages/delete_account.dart';
 import '../child_pages/home_page.dart';
 import '../widgets/child_provider.dart';
 import '../widgets/parent_provider.dart';
@@ -159,6 +160,18 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
           firstName: childRecord.firstName!,
           lastName: childRecord.lastName!,
         );
+      },
+    );
+  }
+
+  Future<void> _deleteParentAccountDialogue(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        User? currentUser = FirebaseAuth.instance.currentUser;
+        String parentId = currentUser?.uid ?? '';
+        return DeleteAccountDialog(
+            parentId: parentId); // Your custom dialog widget
       },
     );
   }
@@ -670,8 +683,10 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                     SettingsTile.navigation(
                       leading: Icon(Icons.rule, color: theme.iconTheme.color),
                       trailing: Text(""),
-                      title: Text('Term and Conditions'),
-                      onPressed: (context) {},
+                      title: Text('Term of Use'),
+                      onPressed: (context) {
+                        Navigator.pushNamed(context, '/terms_of_use');
+                      },
                     ),
                     SettingsTile.navigation(
                       leading: Icon(Icons.contact_support,
@@ -690,7 +705,12 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           color: Color(0xFFff1744)), // Red 500
                       trailing: Text(""),
                       title: Text('Delete Parent Account'),
-                      onPressed: (context) {},
+                      onPressed: (context) async {
+                        await _deleteParentAccountDialogue(context);
+                        logOutUser(context);
+                        Navigator.of(context)
+                            .pushReplacementNamed('/parent_login');
+                      },
                     ),
                   ],
                 ),

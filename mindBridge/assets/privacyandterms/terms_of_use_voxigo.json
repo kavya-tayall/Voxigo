@@ -1,0 +1,81 @@
+{
+    "terms_of_use": {
+      "welcome_message": "Welcome to the Voxigo app. By accessing or using our app, you agree to comply with these Terms and Conditions. Please read them carefully before using the app.",
+      "acceptance_of_terms": {
+        "statement": "By using Voxigo, you agree to these Terms of Use and our Privacy Policy. If you do not agree, please do not use the app.",
+        "age_requirement": "You must be at least 18 years old or have the consent of a parent or legal guardian to use this app."
+      },
+      "user_responsibilities": {
+        "general_use": "You are responsible for ensuring that all content you upload, share, or interact with on the app complies with applicable laws and does not infringe the rights of others. Misuse of the app, such as unauthorized access, disrupting its services, or engaging in prohibited activities, is strictly forbidden.",
+        "responsibilities_for_minors": {
+          "statement": "If you are a parent, caregiver, or administrator, you bear full responsibility for:",
+          "details": [
+            "Reviewing and approving the content uploaded by child users you create.",
+            "Ensuring that child users under your supervision comply with these Terms of Use.",
+            "Actively monitoring and managing how the app is used by users you authorize or create."
+          ]
+        }
+      },
+      "disclaimer": {
+        "statement": "Voxigo is designed as an assistive tool for communication and does not substitute professional medical, educational, or therapeutic advice.",
+        "accuracy_and_reliability": "While we aim for reliable and accurate functionality, we do not guarantee that the app is error-free, complete, or suitable for your specific needs.",
+        "third_party_services": "Voxigo may integrate with third-party services. We are not responsible for their content or actions.",
+        "liability": "You agree to use Voxigo at your own risk and acknowledge that we are not liable for direct, indirect, or consequential damages arising from its use."
+      },
+      "limitation_of_liability": {
+        "statement": "Voxigo is provided 'as is' without warranties of any kind, either express or implied. This includes, but is not limited to, implied warranties of merchantability, fitness for a particular purpose, and non-infringement.",
+        "details": [
+          "Loss of data, profits, revenue, or business opportunities.",
+          "Damage caused by app usage, delays, interruptions, technical issues, or inability to access or use its features.",
+          "Errors, inaccuracies, or omissions in the app's content or functionality.",
+          "Any unauthorized access to or use of your personal data stored within the app."
+        ],
+        "acknowledgment": "By using the app, you acknowledge that technical issues, performance variations, and factors beyond our control may impact your experience. You agree to use the app at your own risk.",
+        "additional_terms": {
+          "free_application": "As Voxigo is a free application, we bear no liability if it is removed from iOS or Android platforms.",
+          "developer_rights": "Furthermore, the Voxigo developers reserve the full right to regulate data upload or download activities and may restrict or terminate app usage at their sole discretion, without prior notice."
+        }
+      },
+      "privacy_and_data_protection": {
+        "statement": "Your privacy is important to us. Please review our Privacy Policy to understand how we collect, use, and protect your data. By using Voxigo, you consent to the practices outlined in the Privacy Policy."
+      },
+      "data_upload_and_intellectual_property": {
+        "user_responsibilities": [
+          "Ensure that all uploads comply with applicable laws and regulations, including intellectual property and copyright laws.",
+          "Avoid uploading any content that violates third-party rights or local laws."
+        ],
+        "prohibited_content": "You should not upload or share any content deemed illegal under U.S. law or the local laws applicable in your jurisdiction under any circumstances.",
+        "liability_statement": "Voxigo developers and its operators are not responsible for any legal claims related to intellectual property, copyright violations, or illegal content arising from user-uploaded material, including any content uploaded by users."
+      },
+      "attribution": {
+        "acknowledgment": "Voxigo gratefully acknowledges the use of third-party services and resources:",
+        "third_party_services": [
+          "Alphabet Inc. Gemini API: Used for enhancing the app's chatbot and sentence prediction functionality.",
+          "ARASAAC: The pictographic symbols used are the property of the Government of Aragón and have been created by Sergio Palao for ARASAAC (http://www.arasaac.org), that distributes them under Creative Commons License BY-NC-SA.",
+          "Nancy Stewart Music: All songs on this website have been written and copyrighted/published by Nancy Stewart, except when noted as being traditional. Copyright information can be found on Sheet music and or lyrics page."
+        ],
+        "agreement": "By using Voxigo, you agree to comply with the terms of use for these third-party services where applicable."
+      },
+      "revisions_and_updates": {
+        "statement": "Voxigo reserves the right to update its features, functionality, or materials at any time without prior notice.",
+        "encouragement": "While we strive to maintain accuracy, users are encouraged to verify critical information independently."
+      },
+      "compliance_with_laws": {
+        "statement": "By using the Voxigo app, you agree to use it in compliance with all applicable laws and regulations in your location."
+      },
+      "termination_of_service": {
+        "statement": "We reserve the right to suspend or terminate your access to the app if:",
+        "conditions": [
+          "You violate these Terms of Use.",
+          "Your actions pose a risk to the app, its functionality, or its users."
+        ],
+        "notice": "Termination may occur with or without prior notice at our discretion."
+      },
+      "contact_information": {
+        "email": "VoxigoAAC@gmail.com"
+      },
+      "effective_date": "January 1st, 2025",
+      "acceptance_statement": "Continued use of Voxigo signifies your acceptance of these Terms."
+    }
+  }
+  

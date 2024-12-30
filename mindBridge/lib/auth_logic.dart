@@ -546,6 +546,39 @@ class UserService {
     }
   }
 
+  Future<void> deleteParentAccount() async {
+    try {
+      // Fetch the parent ID from the current user
+      User? user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        throw Exception('No user is currently logged in.');
+      }
+      String parentId = user.uid;
+
+      // Delete all child accounts associated with the parent
+      final childAccounts = await _db
+          .collection('children')
+          .where('parentId', isEqualTo: parentId)
+          .get();
+
+      for (var doc in childAccounts.docs) {
+        print('Deleting child account: ${doc['username']}');
+        await deleteChildByUsername(doc['username']);
+      }
+
+      // Delete the parent document in Firestore
+      await _db.collection('parents').doc(parentId).delete();
+      print('Parent document deleted.');
+
+      // Delete the parent account from firebase auth
+      await user.delete();
+    } catch (e) {
+      print('Error deleting parent account: $e');
+      throw Exception('Failed to delete child. Please try again.');
+    }
+  }
+
 // Register Child (No Email Verification Added)
   Future<DocumentReference?> registerChild(
       String customDocIdForChild,

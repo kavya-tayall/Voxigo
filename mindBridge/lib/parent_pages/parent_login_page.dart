@@ -323,21 +323,21 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
-
+                    /*
                     final encryptedParentInfo = await encryptParentInfoWithIV(
                       widget.user.uid,
                       _username!,
                       widget.user.email!,
                       _firstName ?? '',
                       _lastName ?? '',
-                    );
+                    );*/
 
                     // Save additional information to the database
                     String result = await _registerParentforProviderLogin(
                       widget.user.email!,
-                      encryptedParentInfo['firstname'] ?? '',
-                      encryptedParentInfo['lastname'] ?? '',
-                      encryptedParentInfo['username'] ?? '',
+                      _firstName ?? '',
+                      _lastName ?? '',
+                      _username ?? '',
                     );
 
                     //        await widget.auth.postParentLogin(widget.user!);
