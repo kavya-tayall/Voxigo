@@ -21,6 +21,7 @@ import 'child_pages/settings_page.dart';
 import 'parent_pages/parent_login_page.dart';
 import 'child_pages/child_login_page.dart';
 import 'parent_pages/parent_settings.dart';
+import 'parent_pages/contact_us.dart';
 import 'child_pages/feelings_page.dart';
 import 'child_pages/fidget_spinner_suggestion.dart';
 import 'child_pages/suggestions_page.dart';
@@ -126,6 +127,7 @@ class _MyAppState extends State<MyApp> {
               '/parent_base': (_) => ParentBasePage(),
               '/privacy_policy': (_) => PrivacyPolicyPage(),
               '/terms_of_use': (_) => TermsOfUsePage(),
+              '/contact_us': (_) => ContactUsPage(),
             },
           ),
         );

@@ -693,7 +693,10 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           color: theme.iconTheme.color),
                       trailing: Text(""),
                       title: Text('Contact Us'),
-                      onPressed: (context) {},
+                      onPressed: (context) {
+                        Navigator.of(context)
+                            .pushReplacementNamed('/contact_us');
+                      },
                     ),
                   ],
                 ),
