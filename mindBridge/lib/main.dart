@@ -34,6 +34,7 @@ import 'package:test_app/getauthtokenandkey.dart'; // Add this line
 import 'widgets/theme_provider.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:test_app/auth_logic.dart';
+import 'package:test_app/parent_pages/privacy_policy.dart';
 
 typedef VoidCallBack = void Function();
 final GlobalKey<BasePageState> basePageKey1 = GlobalKey<BasePageState>();
@@ -122,6 +123,7 @@ class _MyAppState extends State<MyApp> {
               '/breathing': (_) => BreathingHome(),
               '/54321': (_) => FiveCalmDownHome(),
               '/parent_base': (_) => ParentBasePage(),
+              '/privacy_policy': (_) => PrivacyPolicyPage(),
             },
           ),
         );

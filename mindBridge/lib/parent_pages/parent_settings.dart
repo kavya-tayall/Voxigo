@@ -663,7 +663,9 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           Icon(Icons.privacy_tip, color: theme.iconTheme.color),
                       trailing: Text(""),
                       title: Text('Privacy Policy'),
-                      onPressed: (context) {},
+                      onPressed: (context) {
+                        Navigator.pushNamed(context, '/privacy_policy');
+                      },
                     ),
                     SettingsTile.navigation(
                       leading: Icon(Icons.rule, color: theme.iconTheme.color),
