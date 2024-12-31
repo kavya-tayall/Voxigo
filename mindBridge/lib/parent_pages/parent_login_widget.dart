@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 
 class VoxigoLoginWidget extends StatefulWidget {
   final Future<String?> Function(String email, String password) onLogin;
@@ -12,6 +13,8 @@ class VoxigoLoginWidget extends StatefulWidget {
   final String? footer;
   final LoginMessages messages;
   final LoginTheme theme;
+  final Widget privacyPolicy;
+  final Widget termsOfService;
 
   final String? Function(String? value)? userValidator;
   final String? Function(String? value)? passwordValidator;
@@ -42,6 +45,8 @@ class VoxigoLoginWidget extends StatefulWidget {
     this.redirectAfterSignup,
     this.redirectAfterRecoverPassword,
     required this.onGoogleSignIn,
+    required this.privacyPolicy,
+    required this.termsOfService,
   }) : super(key: key);
 
   @override
@@ -53,12 +58,10 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
-  final TextEditingController usernameController = TextEditingController();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
 
   bool isSignUpMode = false; // Tracks whether the user is in Signup mode
-  int signupStep = 1; // Tracks the current step in the signup process
   bool isRecoverPasswordMode = false;
   bool isPasswordVisible = false;
   bool isConfirmPasswordVisible = false;
@@ -147,15 +150,13 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
     setState(() {
       // Reset validation trigger for the new step
       isValidationTriggered = false;
-      signupStep = 2; // Move to step 2
     });
   }
 
   bool _validateFields() {
-    if (signupStep == 1) {
-      return !(emailController.text.isEmpty || passwordController.text.isEmpty);
-    } else if (signupStep == 2) {
-      return !(usernameController.text.isEmpty ||
+    if (isSignUpMode) {
+      return !(emailController.text.isEmpty ||
+          passwordController.text.isEmpty ||
           firstNameController.text.isEmpty ||
           lastNameController.text.isEmpty);
     }
@@ -167,14 +168,13 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
     if (_validateFields()) {
       final email = emailController.text.trim();
       final password = passwordController.text.trim();
-      final username = usernameController.text.trim();
+      final confirmPassword = confirmPasswordController.text.trim();
       final firstName = firstNameController.text.trim();
       final lastName = lastNameController.text.trim();
 
       // Field validations
       if (email.isEmpty ||
           password.isEmpty ||
-          username.isEmpty ||
           firstName.isEmpty ||
           lastName.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -182,10 +182,15 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
         );
         return;
       }
-
+      if (password != confirmPassword) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Passwords do not match.")),
+        );
+        return;
+      }
       // Prepare additional signup data
       final additionalData = {
-        "Username": username,
+        "Username": 'voxigo',
         "First name": firstName,
         "Last name": lastName,
       };
@@ -197,11 +202,10 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result)),
         );
-      } else if (widget.loginAfterSignUp) {
-        // await widget.onLogin(email, password);
       }
-
-      widget.redirectAfterSignup?.call();
+      if (result != null && !result.contains('Registration failed')) {
+        widget.redirectAfterSignup?.call();
+      }
     }
   }
 
@@ -251,74 +255,94 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
       color: const Color(0xFF56B1FB),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Title Section
-                    Text(
-                      widget.title,
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 48.0,
-                        fontWeight: FontWeight.w200,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final isMobile =
+                constraints.maxWidth < 600; // Define breakpoint for mobile
+            return Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isMobile
+                              ? 16.0
+                              : 40.0, // Adjust padding based on device
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Title Section
+                            Text(
+                              widget.title,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: isMobile
+                                    ? 32.0
+                                    : 48.0, // Responsive font size
+                                fontWeight: FontWeight.w200,
+                              ),
+                            ),
+                            const SizedBox(
+                                height: 20), // Space between title and card
+
+                            // Card Section
+                            Container(
+                              width: isMobile
+                                  ? double.infinity
+                                  : 450.0, // Adjust card width
+                              padding: const EdgeInsets.all(20.0),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).cardColor,
+                                borderRadius: BorderRadius.circular(24.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Data Entry Section
+                                  isRecoverPasswordMode
+                                      ? _buildRecoverPasswordSection()
+                                      : _buildDataEntrySection(),
+
+                                  const SizedBox(height: 20),
+
+                                  // Action Section
+                                  isRecoverPasswordMode
+                                      ? _buildRecoverPasswordActionSection()
+                                      : _buildActionSection(context),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 20), // Space between title and card
-
-                    // Card Section
-                    Container(
-                      width: 350.0,
-                      padding: const EdgeInsets.all(20.0),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(24.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Data Entry Section
-                          isRecoverPasswordMode
-                              ? _buildRecoverPasswordSection()
-                              : _buildDataEntrySection(),
-
-                          const SizedBox(height: 20),
-
-                          // Action Section
-                          isRecoverPasswordMode
-                              ? _buildRecoverPasswordActionSection()
-                              : _buildActionSection(context),
-                        ],
-                      ),
+                  ),
+                ),
+                // Footer Section
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 32.0),
+                  child: Text(
+                    widget.footer ?? "",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: isMobile ? 16.0 : 20.0, // Responsive font size
+                      fontWeight: FontWeight.w400,
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            // Footer Section
-            Padding(
-              padding: const EdgeInsets.only(bottom: 32.0),
-              child: Text(
-                widget.footer ?? "",
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );
@@ -392,16 +416,57 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (isSignUpMode && signupStep == 2) ...[
-          // Step 2: Collect additional details
-          CustomTextField(
-            controller: usernameController,
-            labelText: 'Username',
-            errorText: 'Username is required',
-            prefixIcon: const Icon(Icons.person),
-            showError: usernameController.text.isEmpty && isSignUpMode,
-            validationTriggered: isValidationTriggered,
-          ),
+        // Step 1: Email and password
+        CustomTextField(
+          controller: emailController,
+          labelText: 'Email',
+          errorText: emailValidator(emailController.text) ?? '',
+          prefixIcon: const Icon(Icons.email),
+          showError: emailController.text.isEmpty,
+          validationTriggered: isValidationTriggered,
+        ),
+        const SizedBox(height: 16),
+        StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              children: [
+                CustomTextField(
+                  controller: passwordController,
+                  labelText: 'Password',
+                  errorText: 'Password is required',
+                  prefixIcon: const Icon(Icons.lock),
+                  isPassword: true,
+                  isPasswordVisible: isPasswordVisible,
+                  showError: passwordController.text.isEmpty,
+                  validationTriggered: isValidationTriggered,
+                  onTogglePassword: () {
+                    setState(() {
+                      isPasswordVisible = !isPasswordVisible;
+                    });
+                  },
+                ),
+                if (isSignUpMode) const SizedBox(height: 16),
+                if (isSignUpMode)
+                  CustomTextField(
+                    controller: confirmPasswordController,
+                    labelText: 'Confirm Password',
+                    errorText: 'Confirm Password is required',
+                    prefixIcon: const Icon(Icons.lock),
+                    isPassword: true,
+                    isPasswordVisible: isConfirmPasswordVisible,
+                    validationTriggered: isValidationTriggered,
+                    showError: confirmPasswordController.text.isEmpty,
+                    onTogglePassword: () {
+                      setState(() {
+                        isConfirmPasswordVisible = !isConfirmPasswordVisible;
+                      });
+                    },
+                  ),
+              ],
+            );
+          },
+        ),
+        if (isSignUpMode) ...[
           const SizedBox(height: 16),
           CustomTextField(
             controller: firstNameController,
@@ -420,81 +485,81 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
             showError: lastNameController.text.isEmpty && isSignUpMode,
             validationTriggered: isValidationTriggered,
           ),
-        ] else ...[
-          // Step 1: Email and password
-          CustomTextField(
-            controller: emailController,
-            labelText: 'Email',
-            errorText: emailValidator(emailController.text) ?? '',
-            prefixIcon: const Icon(Icons.email),
-            showError: emailController.text.isEmpty,
-            validationTriggered: isValidationTriggered,
-          ),
-          const SizedBox(height: 16),
-          StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                children: [
-                  CustomTextField(
-                    controller: passwordController,
-                    labelText: 'Password',
-                    errorText: 'Password is required',
-                    prefixIcon: const Icon(Icons.lock),
-                    isPassword: true,
-                    isPasswordVisible: isPasswordVisible,
-                    showError: passwordController.text.isEmpty,
-                    validationTriggered: isValidationTriggered,
-                    onTogglePassword: () {
-                      setState(() {
-                        isPasswordVisible = !isPasswordVisible;
-                      });
-                    },
-                  ),
-                  if (isSignUpMode) const SizedBox(height: 16),
-                  if (isSignUpMode)
-                    CustomTextField(
-                      controller: confirmPasswordController,
-                      labelText: 'Confirm Password',
-                      errorText: 'Confirm Password is required',
-                      prefixIcon: const Icon(Icons.lock),
-                      isPassword: true,
-                      isPasswordVisible: isConfirmPasswordVisible,
-                      validationTriggered: isValidationTriggered,
-                      showError: confirmPasswordController.text.isEmpty,
-                      onTogglePassword: () {
-                        setState(() {
-                          isConfirmPasswordVisible = !isConfirmPasswordVisible;
-                        });
-                      },
-                    ),
-                ],
-              );
-            },
-          ),
-        ],
+        ]
       ],
     );
   }
 
   Widget _buildActionSection(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isCompact = screenWidth < 600; // Threshold for compact layout
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (isSignUpMode)
+          Column(
+            children: [
+              SizedBox(height: isCompact ? 8.0 : 16.0), // Dynamic spacing
+              Padding(
+                padding: EdgeInsets.only(bottom: isCompact ? 12.0 : 24.0),
+                child: Center(
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      text: "I have read and accepted Voxigo's ",
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize:
+                            isCompact ? 12.0 : 14.0, // Responsive font size
+                      ),
+                      children: [
+                        TextSpan(
+                          text: "Terms of Service",
+                          style: const TextStyle(
+                            color: Color(0xFF56B1FB),
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.pushNamed(context, '/terms_of_use');
+                            },
+                        ),
+                        const TextSpan(text: " and "),
+                        TextSpan(
+                          text: "Privacy Policy",
+                          style: const TextStyle(
+                            color: Color(0xFF56B1FB),
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.pushNamed(context, '/privacy_policy');
+                            },
+                        ),
+                        const TextSpan(text: "."),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ElevatedButton(
-          onPressed: isSignUpMode
-              ? (signupStep == 1 ? _goToNextSignupStep : _handleSignup)
-              : _handleLogin,
+          onPressed: isSignUpMode ? _handleSignup : _handleLogin,
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF56B1FB),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16.0),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            padding: EdgeInsets.symmetric(vertical: isCompact ? 12.0 : 16.0),
           ),
           child: Text(
-            isSignUpMode ? (signupStep == 1 ? 'NEXT' : 'SIGN UP') : 'LOGIN',
-            style: const TextStyle(
-              fontSize: 20.0,
+            isSignUpMode ? 'SIGN UP' : 'LOGIN',
+            style: TextStyle(
+              fontSize: isCompact ? 18.0 : 20.0,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
             ),
@@ -510,80 +575,67 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
                 });
               },
               style: TextButton.styleFrom(
-                backgroundColor: Colors.transparent, // No background
-                padding: const EdgeInsets.fromLTRB(
-                    8.0, 4.0, 0.0, 4.0), // Adjusted padding for spacing
-                minimumSize:
-                    const Size(0, 0), // Prevent minimum size enforcement
-                tapTargetSize: MaterialTapTargetSize
-                    .shrinkWrap, // Shrink clickable area to text size
+                backgroundColor: Colors.transparent,
+                padding: const EdgeInsets.fromLTRB(8.0, 4.0, 0.0, 4.0),
+                minimumSize: const Size(0, 0),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: Text(
                 'Forgot Password?',
                 style: TextStyle(
-                  color: const Color(0xFF56B1FB), // Hyperlink color
-                  fontSize: 16.0, // Accessibility-friendly font size
-                  fontWeight: FontWeight.w600, // Bold text
+                  color: const Color(0xFF56B1FB),
+                  fontSize: isCompact ? 14.0 : 16.0,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ),
-        if (isSignUpMode && signupStep == 2)
-          TextButton(
-            onPressed: () {
-              setState(() {
-                signupStep = 1; // Go back to step 1
-                isValidationTriggered = false; // Reset validation for step 1
-              });
-            },
-            child:
-                const Text('Back', style: TextStyle(color: Color(0xFF56B1FB))),
-          ),
-        const SizedBox(height: 16),
+        SizedBox(height: isCompact ? 8.0 : 16.0),
         Row(
           children: [
             Expanded(
               child: Divider(
                 color: Colors.grey[400],
-                thickness: 1.0,
+                thickness: isCompact ? 0.5 : 1.0,
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(isSignUpMode ? 'or signup with' : 'or login with'),
+              padding: EdgeInsets.symmetric(horizontal: isCompact ? 4.0 : 8.0),
+              child: Text(
+                isSignUpMode ? 'or signup with' : 'or login with',
+                style: TextStyle(fontSize: isCompact ? 12.0 : 14.0),
+              ),
             ),
             Expanded(
               child: Divider(
                 color: Colors.grey[400],
-                thickness: 1.0,
+                thickness: isCompact ? 0.5 : 1.0,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: isCompact ? 8.0 : 16.0),
         GestureDetector(
           onTap: _handleGoogleLogin,
           child: Image.asset(
             'assets/icon/google_icon.png',
-            width: 48.0,
-            height: 48.0,
+            width: isCompact ? 40.0 : 48.0,
+            height: isCompact ? 40.0 : 48.0,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: isCompact ? 8.0 : 16.0),
         TextButton(
           onPressed: () {
             setState(() {
               isSignUpMode = !isSignUpMode;
-              signupStep = 1; // Reset to first step when toggling
               isValidationTriggered = false;
             });
           },
           style: TextButton.styleFrom(
-            backgroundColor: Colors.transparent, // No background
-            padding: EdgeInsets.zero, // Keep padding minimal
-            minimumSize: const Size(0, 0), // Prevent unnecessary minimum size
-            tapTargetSize:
-                MaterialTapTargetSize.shrinkWrap, // Shrink the clickable area
+            backgroundColor: Colors.transparent,
+            padding: EdgeInsets.zero,
+            minimumSize: const Size(0, 0),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: Text(
             isSignUpMode
@@ -626,24 +678,79 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return TextField(
       controller: controller,
       obscureText: isPassword && !isPasswordVisible,
       decoration: InputDecoration(
         labelText: labelText,
+        labelStyle: TextStyle(
+          color: Colors.black,
+          fontSize: 18.0,
+          fontWeight: FontWeight.w200,
+        ),
         prefixIcon: prefixIcon,
+        prefixIconColor: theme.colorScheme.secondary,
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(
                   isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                  color: theme.colorScheme.secondary,
                 ),
                 onPressed: onTogglePassword,
+                tooltip: isPasswordVisible
+                    ? 'Hide password'
+                    : 'Show password', // Improves accessibility
               )
             : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16.0),
+          borderSide: BorderSide(
+            color: Color(0xFF56B1FB),
+            width: 2.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16.0),
+          borderSide: BorderSide(
+            color: Color(0xFF56B1FB).withOpacity(0.6),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16.0),
+          borderSide: BorderSide(
+            color: Color(0xFF56B1FB),
+            width: 2.5,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16.0),
+          borderSide: BorderSide(
+            color: theme.colorScheme.error,
+            width: 2.0,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16.0),
+          borderSide: BorderSide(
+            color: theme.colorScheme.error,
+            width: 2.5,
+          ),
         ),
         errorText: validationTriggered && showError ? errorText : null,
+        errorStyle: TextStyle(
+          color: theme.colorScheme.error,
+          fontSize: 14.0,
+          fontWeight: FontWeight.w600,
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 16.0, horizontal: 20.0),
+        filled: true,
+        fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.2),
+      ),
+      style: TextStyle(
+        color: theme.colorScheme.onSurface,
+        fontSize: 16.0,
       ),
     );
   }

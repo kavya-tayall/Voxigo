@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart'; // For Google sign-in
+import 'package:test_app/parent_pages/privacy_policy.dart';
+import 'package:test_app/parent_pages/terms_of_use.dart';
 import 'package:test_app/security.dart';
 
 import '../auth_logic.dart';
@@ -116,8 +118,7 @@ class ParentLoginPage extends StatelessWidget {
       if (e
           .toString()
           .contains('The email address is already in use by another account')) {
-        print("Email already exists");
-        return "The email address is already in use by another account";
+        return "Registration failed: The email address is already in use by another account";
       }
       print("Unexpected error: $e");
       return "Registration failed";
@@ -146,6 +147,8 @@ class ParentLoginPage extends StatelessWidget {
                 child: Stack(
                   children: [
                     VoxigoLoginWidget(
+                      privacyPolicy: PrivacyPolicyPage(),
+                      termsOfService: TermsOfUsePage(),
                       onLogin: (email, password) => _authUser(
                           LoginData(name: email, password: password), context),
                       onSignup: (email, password, additionalSignupData) async {
