@@ -60,8 +60,6 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
   bool isSignUpMode = false; // Tracks whether the user is in Signup mode
   int signupStep = 1; // Tracks the current step in the signup process
   bool isRecoverPasswordMode = false;
-  bool isPasswordVisible = false;
-  bool isConfirmPasswordVisible = false;
 
   @override
   void initState() {
@@ -71,31 +69,10 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
     isValidationTriggered = false;
   }
 
-  String? emailValidator(String? value) {
-    final emailRegex =
-        RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
-    if (value == null || value.isEmpty) {
-      print("Email is required");
-
-      return "Email is required";
-    } else if (!emailRegex.hasMatch(value)) {
-      return "Please enter a valid email address";
-    }
-    return null;
-  }
-
   Future<void> _handleLogin() async {
+    _triggerValidation();
     // Existing login logic
     final email = emailController.text.trim();
-    String emailvalidationresult = emailValidator(emailController.text) ?? '';
-    if (emailvalidationresult.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(emailvalidationresult)),
-      );
-      return;
-    }
-    _triggerValidation();
-
     final password = passwordController.text.trim();
 
     if (widget.userValidator != null && widget.userValidator!(email) != null) {
@@ -206,17 +183,7 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
   }
 
   Future<void> _handleRecoverPassword() async {
-    print('_handleRecoverPassword');
     final email = emailController.text.trim();
-    String validationresult = emailValidator(email) ?? '';
-
-    if (validationresult.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(validationresult)),
-      );
-      return;
-    }
-
     final result = await widget.onRecoverPassword(email);
     if (result != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -251,74 +218,55 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
       color: const Color(0xFF56B1FB),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Title Section
-                    Text(
-                      widget.title,
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 48.0,
-                        fontWeight: FontWeight.w200,
-                      ),
-                    ),
-                    const SizedBox(height: 20), // Space between title and card
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Title Section
+              Text(
+                widget.title,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 48.0,
+                  fontWeight: FontWeight.w200,
+                ),
+              ),
+              const SizedBox(height: 20), // Space between title and card
 
-                    // Card Section
-                    Container(
-                      width: 350.0,
-                      padding: const EdgeInsets.all(20.0),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(24.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Data Entry Section
-                          isRecoverPasswordMode
-                              ? _buildRecoverPasswordSection()
-                              : _buildDataEntrySection(),
-
-                          const SizedBox(height: 20),
-
-                          // Action Section
-                          isRecoverPasswordMode
-                              ? _buildRecoverPasswordActionSection()
-                              : _buildActionSection(context),
-                        ],
-                      ),
+              // Card Section
+              Container(
+                width: 350.0,
+                padding: const EdgeInsets.all(20.0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(24.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-              ),
-            ),
-            // Footer Section
-            Padding(
-              padding: const EdgeInsets.only(bottom: 32.0),
-              child: Text(
-                widget.footer ?? "",
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w400,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Data Entry Section
+                    isRecoverPasswordMode
+                        ? _buildRecoverPasswordSection()
+                        : _buildDataEntrySection(),
+
+                    const SizedBox(height: 20),
+
+                    // Action Section
+                    isRecoverPasswordMode
+                        ? _buildRecoverPasswordActionSection()
+                        : _buildActionSection(context),
+                  ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -336,7 +284,7 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
         CustomTextField(
           controller: emailController,
           labelText: 'Email',
-          errorText: emailValidator(emailController.text) ?? '',
+          errorText: 'Email is required',
           prefixIcon: const Icon(Icons.email),
           showError: emailController.text.isEmpty,
           validationTriggered: isValidationTriggered,
@@ -374,8 +322,8 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
         ),
         TextButton(
           onPressed: () {
+            _handleRecoverPassword();
             setState(() {
-              isValidationTriggered = false; // Reset validation
               isRecoverPasswordMode = false; // Go back to the login screen
             });
           },
@@ -425,7 +373,7 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
           CustomTextField(
             controller: emailController,
             labelText: 'Email',
-            errorText: emailValidator(emailController.text) ?? '',
+            errorText: 'Email is required',
             prefixIcon: const Icon(Icons.email),
             showError: emailController.text.isEmpty,
             validationTriggered: isValidationTriggered,
@@ -433,6 +381,7 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
           const SizedBox(height: 16),
           StatefulBuilder(
             builder: (context, setState) {
+              bool isPasswordVisible = false;
               return Column(
                 children: [
                   CustomTextField(
@@ -441,7 +390,6 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
                     errorText: 'Password is required',
                     prefixIcon: const Icon(Icons.lock),
                     isPassword: true,
-                    isPasswordVisible: isPasswordVisible,
                     showError: passwordController.text.isEmpty,
                     validationTriggered: isValidationTriggered,
                     onTogglePassword: () {
@@ -458,14 +406,8 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
                       errorText: 'Confirm Password is required',
                       prefixIcon: const Icon(Icons.lock),
                       isPassword: true,
-                      isPasswordVisible: isConfirmPasswordVisible,
                       validationTriggered: isValidationTriggered,
                       showError: confirmPasswordController.text.isEmpty,
-                      onTogglePassword: () {
-                        setState(() {
-                          isConfirmPasswordVisible = !isConfirmPasswordVisible;
-                        });
-                      },
                     ),
                 ],
               );
@@ -508,22 +450,11 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
                 setState(() {
                   isRecoverPasswordMode = true;
                 });
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.transparent, // No background
-                padding: const EdgeInsets.fromLTRB(
-                    8.0, 4.0, 0.0, 4.0), // Adjusted padding for spacing
-                minimumSize:
-                    const Size(0, 0), // Prevent minimum size enforcement
-                tapTargetSize: MaterialTapTargetSize
-                    .shrinkWrap, // Shrink clickable area to text size
-              ),
-              child: Text(
+              }, // Your forgot password logic
+              child: const Text(
                 'Forgot Password?',
                 style: TextStyle(
-                  color: const Color(0xFF56B1FB), // Hyperlink color
-                  fontSize: 16.0, // Accessibility-friendly font size
-                  fontWeight: FontWeight.w600, // Bold text
+                  color: Color(0xFF56B1FB), // Same color as your theme
                 ),
               ),
             ),
@@ -578,13 +509,6 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
               isValidationTriggered = false;
             });
           },
-          style: TextButton.styleFrom(
-            backgroundColor: Colors.transparent, // No background
-            padding: EdgeInsets.zero, // Keep padding minimal
-            minimumSize: const Size(0, 0), // Prevent unnecessary minimum size
-            tapTargetSize:
-                MaterialTapTargetSize.shrinkWrap, // Shrink the clickable area
-          ),
           child: Text(
             isSignUpMode
                 ? 'Already have an account? Login'
@@ -608,7 +532,6 @@ class CustomTextField extends StatelessWidget {
   final Icon prefixIcon;
   final bool showError;
   final bool validationTriggered;
-  final bool isPasswordVisible;
   final VoidCallback? onTogglePassword;
 
   const CustomTextField({
@@ -618,7 +541,6 @@ class CustomTextField extends StatelessWidget {
     required this.prefixIcon,
     required this.showError,
     this.isPassword = false,
-    this.isPasswordVisible = false,
     this.onTogglePassword,
     this.validationTriggered = false,
     Key? key,
@@ -628,14 +550,16 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      obscureText: isPassword && !isPasswordVisible,
+      obscureText: isPassword && (onTogglePassword != null),
       decoration: InputDecoration(
         labelText: labelText,
         prefixIcon: prefixIcon,
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(
-                  isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                  onTogglePassword != null
+                      ? Icons.visibility
+                      : Icons.visibility_off,
                 ),
                 onPressed: onTogglePassword,
               )

@@ -207,16 +207,32 @@ class AuthService {
 
       if (parent != null) {
         if (!parent.emailVerified) {
-          throw Exception(
-              "Email not verified. Please verify your email before signing in.");
+          throw EmailNotVerifiedException();
         }
         return await postParentLogin(parent!);
       } else {
         throw ParentDoesNotExistException();
       }
     } catch (e) {
-      print(e.toString());
-      throw e is Exception ? e : Exception("An error occurred");
+      print('hello');
+      if (e.toString().contains('firebase_auth/invalid-credential')) {
+        throw InvalidCredentialsException();
+      } else if (e is FirebaseAuthException) {
+        // Specific FirebaseAuthException handling
+        switch (e.code) {
+          case 'user-not-found':
+          case 'wrong-password':
+            throw InvalidCredentialsException();
+          case 'user-disabled':
+            throw Exception('User account has been disabled.');
+          default:
+            throw Exception('An unexpected error occurred.');
+        }
+      } else {
+        // Non-FirebaseAuthException handling
+        print(e.toString());
+        rethrow;
+      }
     } finally {
       print("Parent Login done");
     }
