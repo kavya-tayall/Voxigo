@@ -63,10 +63,12 @@ class ChildLoginPage extends StatelessWidget {
             },
             child: Text(
               "Parent Login",
-              style: TextStyle(fontSize: 18), // Smaller text for better fit
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.blueAccent), // Smaller text for better fit
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
+              backgroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

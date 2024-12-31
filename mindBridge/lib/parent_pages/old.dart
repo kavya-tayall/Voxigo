@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_login/flutter_login.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart'; // For Google sign-in
 import 'package:test_app/security.dart';
@@ -10,7 +11,6 @@ import '../main.dart';
 import 'package:test_app/authExceptions.dart';
 import 'package:test_app/widgets/parent_provider.dart'; // Adjust the path as necessary
 import 'package:provider/provider.dart'; // Add this line
-import 'package:test_app/parent_pages/parent_login_widget.dart';
 
 class ParentLoginPage extends StatelessWidget {
   ParentLoginPage({super.key});
@@ -26,16 +26,6 @@ class ParentLoginPage extends StatelessWidget {
       return 'User is not a parent';
     } on ParentDoesNotExistException {
       return 'Username or password is incorrect';
-    } on EmailNotVerifiedException {
-      return 'Email not verified. Please verify your email before signing in.';
-    } on FirebaseAuthException catch (e) {
-      if (e.toString().contains('The email address is badly formatted')) {
-        return 'Username or password is incorrect';
-      } else if (e.toString().contains('auth credential is incorrect')) {
-        return 'Username or password is incorrect';
-      }
-      print("Unexpected error: $e");
-      return e.toString();
     } catch (e) {
       if (e.toString().contains('The email address is badly formatted')) {
         return 'Username or password is incorrect';
@@ -52,7 +42,7 @@ class ParentLoginPage extends StatelessWidget {
   Future<String?> _recoverPassword(String email) async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      return 'Email sent. Please check your email to reset your password.';
+      return null;
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
         case 'user-not-found':
@@ -70,25 +60,11 @@ class ParentLoginPage extends StatelessWidget {
   Future<String?> _signUp(SignupData data) async {
     try {
       print("ParentLoginPage: _signUp:");
-      print("Email: ${data.name}");
-      print("Password: ${data.password}");
-      print("First Name: ${data.additionalSignupData?["First name"]}");
-      print("Last Name: ${data.additionalSignupData?["Last name"]}");
-      print("Username: ${data.additionalSignupData?["Username"]}");
-
-      // Validate required additional signup fields
-      if ((data.additionalSignupData?["First name"]?.isEmpty ?? true) ||
-          (data.additionalSignupData?["Last name"]?.isEmpty ?? true) ||
-          (data.additionalSignupData?["Username"]?.isEmpty ?? true)) {
-        return "All fields are required.";
-      }
-
-      // Call your registerParent method
       await _auth.registerParent(
-        data.additionalSignupData?["Username"] ?? '',
-        data.additionalSignupData?["First name"] ?? '',
-        data.additionalSignupData?["Last name"] ?? '',
-        data.name!, // For email address
+        data.additionalSignupData!["username"]!,
+        data.additionalSignupData!["First name"]!,
+        data.additionalSignupData!["Last name"]!,
+        data.name!, //for email address
         data.password!,
         true,
       );
@@ -106,7 +82,7 @@ class ParentLoginPage extends StatelessWidget {
       return "Registration failed";
     }
 
-    return 'Registration successful! Please check your email to activate your account'; // Registration successful
+    return null; // Registration successful
   }
 
   @override
@@ -114,159 +90,125 @@ class ParentLoginPage extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Container(
-      color:
-          Colors.lightBlue[50], // Light blue background for the entire screen
-      child: Stack(
-        children: [
-          Center(
-            child: VoxigoLoginWidget(
-              onLogin: (email, password) => _authUser(
-                  LoginData(name: email, password: password), context),
-              onSignup: (email, password, additionalSignupData) async {
-                // Ensure additionalSignupData is passed correctly
-                final signupResult = await _signUp(
-                  SignupData(
-                    name: email,
-                    password: password,
-                    additionalSignupData:
-                        additionalSignupData, // Pass additional fields
-                  ),
-                );
-                return signupResult;
-              },
-              onRecoverPassword: (email) async {
-                // Recover password logic
-                final recoverResult = await _recoverPassword(email);
-                return recoverResult;
-              },
-              footer: "Voxigo",
-              messages: LoginMessages(
-                recoverPasswordIntro:
-                    'Please enter the email address associated with your account.',
-                recoverPasswordDescription:
-                    'We will send you a link to reset your password.',
-              ),
-              savedEmail: '',
-              savedPassword: '',
-              additionalSignupFields: [
-                UserFormField(keyName: "First name"),
-                UserFormField(keyName: "Last name"),
-                UserFormField(keyName: "Username"),
-              ],
-              title: "Parent Login",
-              theme: LoginTheme(primaryColor: Color(0xFF56B1FB)),
-              userValidator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Username is required';
-                }
-                return null;
-              },
-              passwordValidator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Password is required';
-                }
-                return null;
-              },
-              loginAfterSignUp: true,
-              redirectAfterSignup: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => ParentLoginPage()),
-                );
-              },
-              redirectAfterRecoverPassword: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => ParentLoginPage()),
-                );
-              },
-              onGoogleSignIn: () async {
-                final googleSignInResult = await _googleSignIn(context);
-                return googleSignInResult;
-              },
-              onSubmitAnimationCompleted: () async {
-                User? user = FirebaseAuth.instance.currentUser;
-
-                if (user != null) {
-                  print("ParentLoginPage: _authUser: ${user.email}");
-
-                  if (user.emailVerified == false) {
-                    await user.sendEmailVerification();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            'Email verification sent. Please verify your email before signing in.'),
-                      ),
-                    );
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                          builder: (context) => ParentLoginPage()),
-                    );
-                    return;
-                  }
-
-                  await _auth.postParentLogin(user);
-
-                  ParentProvider parentProvider =
-                      Provider.of<ParentProvider>(context, listen: false);
-
-                  await parentProvider.fetchParentData(user.uid);
-
-                  bool checkAdditionalInfo = await _auth.checkAdditionalInfo(
-                      user.email!, user.uid, parentProvider.parentData);
-
-                  bool needsAdditionalInfo;
-
-                  if (checkAdditionalInfo == true) {
-                    needsAdditionalInfo = false;
-                  } else {
-                    needsAdditionalInfo = true;
-                  }
-
-                  if (needsAdditionalInfo) {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (context) =>
-                          AdditionalInfoScreen(user: user, auth: _auth),
-                    ));
-                  } else {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => ParentBasePage()),
-                    );
-                  }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content:
-                            Text('Authentication failed. Please try again.')),
-                  );
-                }
+    return Stack(
+      children: [
+        FlutterLogin(
+          onLogin: (loginData) => _authUser(loginData, context),
+          onRecoverPassword: _recoverPassword,
+          onSignup: _signUp,
+          footer: "Voxigo",
+          messages: LoginMessages(
+            recoverPasswordIntro:
+                'Please enter the email address associated with your account.',
+            recoverPasswordDescription:
+                'We will send you a link to reset your password.',
+          ),
+          savedEmail: '',
+          savedPassword: '',
+          loginProviders: <LoginProvider>[
+            LoginProvider(
+              icon: FontAwesomeIcons.google,
+              label: 'Google',
+              callback: () async {
+                print('Starting Google Sign-In...');
+                final result = await _googleSignIn(context);
+                return result;
               },
             ),
+          ],
+          additionalSignupFields: [
+            UserFormField(
+              keyName: "First name",
+              userType: LoginUserType.firstName,
+            ),
+            UserFormField(
+              keyName: "Last name",
+              userType: LoginUserType.lastName,
+            ),
+            UserFormField(
+              keyName: "username",
+              userType: LoginUserType.name,
+            ),
+          ],
+          title: "Parent Login",
+          userType: LoginUserType.email,
+          theme: LoginTheme(
+            primaryColor: Color(0xFF56B1FB),
           ),
-          Positioned(
-            top: screenHeight *
-                0.05, // Adjust dynamically based on screen height
-            right:
-                screenWidth * 0.05, // Adjust dynamically based on screen width
-            child: ElevatedButton(
-              onPressed: () {
-                _navigateToChildLogin(context);
-              },
-              child: Text(
-                "Child Login",
-                style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.blueAccent), // Smaller text for better fit
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+          userValidator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Username is required';
+            }
+            return null;
+          },
+          passwordValidator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Password is required';
+            }
+            return null;
+          },
+          loginAfterSignUp: false,
+          onSubmitAnimationCompleted: () async {
+            User? user = FirebaseAuth.instance.currentUser;
+            if (user != null) {
+              print("ParentLoginPage: _authUser: ${user.email}");
+
+              await _auth.postParentLogin(user);
+
+              ParentProvider parentProvider =
+                  Provider.of<ParentProvider>(context, listen: false);
+
+              await parentProvider.fetchParentData(user.uid);
+
+              bool checkAdditionalInfo = await _auth.checkAdditionalInfo(
+                  user.email!, user.uid, parentProvider.parentData);
+
+              bool needsAdditionalInfo;
+
+              if (checkAdditionalInfo == true) {
+                needsAdditionalInfo = false;
+              } else {
+                needsAdditionalInfo = true;
+              }
+
+              if (needsAdditionalInfo) {
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (context) =>
+                      AdditionalInfoScreen(user: user, auth: _auth),
+                ));
+              } else {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => ParentBasePage()),
+                );
+              }
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content: Text('Authentication failed. Please try again.')),
+              );
+            }
+          },
+        ),
+        Positioned(
+          top: screenHeight * 0.05, // Adjust dynamically based on screen height
+          right: screenWidth * 0.05, // Adjust dynamically based on screen width
+          child: ElevatedButton(
+            onPressed: () {
+              _navigateToChildLogin(context);
+            },
+            child: Text(
+              "Child Login",
+              style: TextStyle(fontSize: 18), // Smaller text for better fit
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -296,7 +238,7 @@ class ParentLoginPage extends StatelessWidget {
             await FirebaseAuth.instance.signInWithCredential(credential);
         print(
             "Google SignIn successful: ${userCredential.user!.email}"); // Debugging step
-        return "Google SignIn successful"; // Return null to indicate success
+        return null; // Return null to indicate success
       }
       print("Google Sign-In cancelled or failed");
       return "Google Sign-In cancelled or failed"; // Return error message if Google sign-in is canceled

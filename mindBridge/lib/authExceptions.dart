@@ -32,6 +32,19 @@ class ParentDoesNotExistException implements Exception {
   }
 }
 
+class EmailNotVerifiedException implements Exception {
+  final String message;
+
+  EmailNotVerifiedException(
+      [this.message =
+          ' "Email not verified. Please verify your email before signing in.")']);
+
+  @override
+  String toString() {
+    return "CustomException: $message";
+  }
+}
+
 class ChildDoesNotExistException implements Exception {
   final String message;
 
