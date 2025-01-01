@@ -15,6 +15,9 @@ class VoxigoLoginWidget extends StatefulWidget {
   final LoginTheme theme;
   final Widget privacyPolicy;
   final Widget termsOfService;
+  final bool hideForgotPasswordButton;
+  final bool hideSignupButton;
+  final String userType;
 
   final String? Function(String? value)? userValidator;
   final String? Function(String? value)? passwordValidator;
@@ -47,6 +50,9 @@ class VoxigoLoginWidget extends StatefulWidget {
     required this.onGoogleSignIn,
     required this.privacyPolicy,
     required this.termsOfService,
+    this.hideForgotPasswordButton = false,
+    this.hideSignupButton = false,
+    this.userType = 'parent',
   }) : super(key: key);
 
   @override
@@ -90,12 +96,15 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
   Future<void> _handleLogin() async {
     // Existing login logic
     final email = emailController.text.trim();
-    String emailvalidationresult = emailValidator(emailController.text) ?? '';
-    if (emailvalidationresult.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(emailvalidationresult)),
-      );
-      return;
+
+    if (widget.userType == 'parent') {
+      String emailvalidationresult = emailValidator(emailController.text) ?? '';
+      if (emailvalidationresult.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(emailvalidationresult)),
+        );
+        return;
+      }
     }
     _triggerValidation();
 
@@ -359,8 +368,10 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
         const SizedBox(height: 16),
         CustomTextField(
           controller: emailController,
-          labelText: 'Email',
-          errorText: emailValidator(emailController.text) ?? '',
+          labelText: widget.userType == 'parent' ? 'Email' : 'Username',
+          errorText: widget.userType == 'parent'
+              ? (emailValidator(emailController.text) ?? '')
+              : 'Username is required',
           prefixIcon: const Icon(Icons.email),
           showError: emailController.text.isEmpty,
           validationTriggered: isValidationTriggered,
@@ -419,9 +430,13 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
         // Step 1: Email and password
         CustomTextField(
           controller: emailController,
-          labelText: 'Email',
-          errorText: emailValidator(emailController.text) ?? '',
-          prefixIcon: const Icon(Icons.email),
+          labelText: widget.userType == 'parent' ? 'Email' : 'Username',
+          errorText: widget.userType == 'parent'
+              ? (emailValidator(emailController.text) ?? '')
+              : 'Username is required',
+          prefixIcon: widget.userType == 'parent'
+              ? const Icon(Icons.email)
+              : Icon(Icons.person_outline_rounded),
           showError: emailController.text.isEmpty,
           validationTriggered: isValidationTriggered,
         ),
@@ -497,7 +512,7 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (isSignUpMode)
+        if (isSignUpMode && !widget.hideSignupButton)
           Column(
             children: [
               SizedBox(height: isCompact ? 8.0 : 16.0), // Dynamic spacing
@@ -565,7 +580,7 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
             ),
           ),
         ),
-        if (!isSignUpMode)
+        if (!isSignUpMode && !widget.hideForgotPasswordButton)
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
@@ -590,63 +605,68 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
               ),
             ),
           ),
-        SizedBox(height: isCompact ? 8.0 : 16.0),
-        Row(
-          children: [
-            Expanded(
-              child: Divider(
-                color: Colors.grey[400],
-                thickness: isCompact ? 0.5 : 1.0,
+        if (widget.userType ==
+            'parent') // Show Google and toggle sections only for 'parent'
+          ...[
+          SizedBox(height: isCompact ? 8.0 : 16.0),
+          Row(
+            children: [
+              Expanded(
+                child: Divider(
+                  color: Colors.grey[400],
+                  thickness: isCompact ? 0.5 : 1.0,
+                ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: isCompact ? 4.0 : 8.0),
-              child: Text(
-                isSignUpMode ? 'or signup with' : 'or login with',
-                style: TextStyle(fontSize: isCompact ? 12.0 : 14.0),
+              Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: isCompact ? 4.0 : 8.0),
+                child: Text(
+                  isSignUpMode ? 'or signup with' : 'or login with',
+                  style: TextStyle(fontSize: isCompact ? 12.0 : 14.0),
+                ),
               ),
-            ),
-            Expanded(
-              child: Divider(
-                color: Colors.grey[400],
-                thickness: isCompact ? 0.5 : 1.0,
+              Expanded(
+                child: Divider(
+                  color: Colors.grey[400],
+                  thickness: isCompact ? 0.5 : 1.0,
+                ),
               ),
-            ),
-          ],
-        ),
-        SizedBox(height: isCompact ? 8.0 : 16.0),
-        GestureDetector(
-          onTap: _handleGoogleLogin,
-          child: Image.asset(
-            'assets/icon/google_icon.png',
-            width: isCompact ? 40.0 : 48.0,
-            height: isCompact ? 40.0 : 48.0,
+            ],
           ),
-        ),
-        SizedBox(height: isCompact ? 8.0 : 16.0),
-        TextButton(
-          onPressed: () {
-            setState(() {
-              isSignUpMode = !isSignUpMode;
-              isValidationTriggered = false;
-            });
-          },
-          style: TextButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            padding: EdgeInsets.zero,
-            minimumSize: const Size(0, 0),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          child: Text(
-            isSignUpMode
-                ? 'Already have an account? Login'
-                : 'Don’t have an account? Sign Up',
-            style: const TextStyle(
-              color: Color(0xFF56B1FB),
-              fontWeight: FontWeight.bold,
+          SizedBox(height: isCompact ? 8.0 : 16.0),
+          GestureDetector(
+            onTap: _handleGoogleLogin,
+            child: Image.asset(
+              'assets/icon/google_icon.png',
+              width: isCompact ? 40.0 : 48.0,
+              height: isCompact ? 40.0 : 48.0,
             ),
           ),
-        ),
+          SizedBox(height: isCompact ? 8.0 : 16.0),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                isSignUpMode = !isSignUpMode;
+                isValidationTriggered = false;
+              });
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(0, 0),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              isSignUpMode
+                  ? 'Already have an account? Login'
+                  : 'Don’t have an account? Sign Up',
+              style: const TextStyle(
+                color: Color(0xFF56B1FB),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

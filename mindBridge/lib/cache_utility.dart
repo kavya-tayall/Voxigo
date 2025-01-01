@@ -86,12 +86,14 @@ Future<String> fetchChildrenAnonDataforAI({
       for (var doc in feelingsSnapshot.docs) {
         selectedFeelings.add(doc.data() as Map<String, dynamic>);
       }
-
+      bool byChild = byParent ? false : true;
       // Decrypt the selected data for the child
-      List<dynamic> decryptedButtons =
-          await decryptSelectedDataForChild(childId, selectedButtons);
-      List<dynamic> decryptedFeelings =
-          await decryptSelectedDataForChild(childId, selectedFeelings);
+      List<dynamic> decryptedButtons = await decryptSelectedDataForChild(
+          childId, selectedButtons,
+          byChild: byChild);
+      List<dynamic> decryptedFeelings = await decryptSelectedDataForChild(
+          childId, selectedFeelings,
+          byChild: byChild);
 
       // Remove 'iv' from the decrypted data
       decryptedButtons.forEach((button) {
@@ -872,6 +874,21 @@ Future<void> copyMusicToLocalHolderFromAsset(String childId) async {
 Future<void> copyAllAssetsToAppFolder(String childId) async {
   // Get the application directory
   final directory = await getApplicationDocumentsDirectory();
+
+  final String localImagePath = '${directory.path}/fallback_image.png';
+
+  // Check if the file already exists
+  if (!File(localImagePath).existsSync()) {
+    // Read the image data from the asset bundle
+    final ByteData data =
+        await rootBundle.load('assets/imgs/fallback_image.png');
+    final buffer = data.buffer;
+
+    // Write the image data to the local file
+    await File(localImagePath).writeAsBytes(
+      buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+    );
+  }
 
   // Create the child-specific board_images directory
   final String childBoardDirectory =

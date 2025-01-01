@@ -694,8 +694,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                       trailing: Text(""),
                       title: Text('Contact Us'),
                       onPressed: (context) {
-                        Navigator.of(context)
-                            .pushReplacementNamed('/contact_us');
+                        Navigator.of(context).pushNamed('/contact_us');
                       },
                     ),
                   ],
@@ -710,9 +709,6 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                       title: Text('Delete Parent Account'),
                       onPressed: (context) async {
                         await _deleteParentAccountDialogue(context);
-                        logOutUser(context);
-                        Navigator.of(context)
-                            .pushReplacementNamed('/parent_login');
                       },
                     ),
                   ],

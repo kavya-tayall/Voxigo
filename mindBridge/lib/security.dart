@@ -417,12 +417,22 @@ Future<Map<String, String>?> decryptParentDetails(String userId) async {
 }
 
 Future<List<dynamic>> decryptSelectedDataForChild(
-    String childId, List<dynamic> encryptedButtons) async {
+    String childId, List<dynamic> encryptedButtons,
+    {bool byChild = false}) async {
   try {
+    Uint8List? childkey;
     // Fetch the encryption key
-    final childCollection = ChildCollectionWithKeys.instance;
-    print('childId: $childId');
-    Uint8List? key = childCollection.getkey(childId);
+    if (byChild) {
+      childkey = await getEncryptionKey(forChild: true, childId: childId);
+    } else {
+      final childCollection = ChildCollectionWithKeys.instance;
+      print('childId: $childId');
+
+      childkey = childCollection.getkey(childId);
+    }
+
+    Uint8List? key = childkey;
+
     if (key == null) {
       throw Exception('Encryption key not found for childId: $childId');
     }

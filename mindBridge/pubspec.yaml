@@ -74,6 +74,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icon/google_icon.png
+    - assets/imgs/fallback_image.png
     - assets/privacyandterms/terms_of_use_voxigo.json
     - assets/privacyandterms/privacy_policy_voxigo.json
     - assets/asset_list.json

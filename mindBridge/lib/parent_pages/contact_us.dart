@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContactUsPage extends StatelessWidget {
-  final String phoneNumber = "+1234567890"; // Replace with your phone number
+  final String phoneNumber = "+14259849084"; // Replace with your phone number
   final String emailAddress = "VoxigoAAC@gmail.com"; // Updated email address
 
   void _launchSMS(BuildContext context) async {

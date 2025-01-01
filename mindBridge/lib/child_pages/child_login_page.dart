@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_login/flutter_login.dart';
+import 'package:test_app/parent_pages/privacy_policy.dart';
 import '../main.dart';
 import 'package:test_app/parent_pages/parent_login_page.dart';
 import '../auth_logic.dart';
 import 'package:test_app/authExceptions.dart';
+import 'package:test_app/parent_pages/parent_login_widget.dart';
 
 class ChildLoginPage extends StatelessWidget {
   ChildLoginPage({super.key});
@@ -36,17 +37,25 @@ class ChildLoginPage extends StatelessWidget {
 
     return Stack(
       children: [
-        FlutterLogin(
-          onLogin: (loginData) => _authUser(context, loginData),
+        VoxigoLoginWidget(
+          onSignup: (email, password, additionalData) async {
+            // Implement your signup logic here
+            return 'not implemented';
+          },
+          onGoogleSignIn: () async => 'not implemented',
+          hideSignupButton: true,
           hideForgotPasswordButton: true,
+          userType: 'child',
+          privacyPolicy: PrivacyPolicyPage(),
+          termsOfService: PrivacyPolicyPage(),
+          onLogin: (email, password) =>
+              _authUser(context, LoginData(name: email, password: password)),
           onRecoverPassword: _recoverPassword,
           userValidator: checkUsername,
           title: "Child Login",
-          userType: LoginUserType.name,
           theme: LoginTheme(
             primaryColor: Color(0xFF56B1FB),
           ),
-          messages: LoginMessages(userHint: 'Username'),
           footer: "Voxigo",
           onSubmitAnimationCompleted: () {
             Navigator.of(context).pushReplacement(MaterialPageRoute(
@@ -61,17 +70,17 @@ class ChildLoginPage extends StatelessWidget {
             onPressed: () {
               _navigateToParentLogin(context);
             },
-            child: Text(
-              "Parent Login",
-              style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.blueAccent), // Smaller text for better fit
-            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+            ),
+            child: Text(
+              "Parent Login",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.blueAccent), // Smaller text for better fit
             ),
           ),
         ),

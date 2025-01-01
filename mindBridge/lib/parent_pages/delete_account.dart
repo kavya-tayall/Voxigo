@@ -69,6 +69,12 @@ class _DeleteAccountFormState extends State<DeleteAccountForm> {
     }
   }
 
+  void _logoutUser() {
+    logOutUser(context);
+    Navigator.of(context).pushReplacementNamed('/parent_login');
+    print("User logged out");
+  }
+
   Future<void> _deleteAccount() async {
     if (_confirmationController.text.toUpperCase() != 'AGREE') {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -83,10 +89,12 @@ class _DeleteAccountFormState extends State<DeleteAccountForm> {
       await _user.deleteParentAccount();
 
       Navigator.pop(context); // Close the loading dialog
+      Navigator.pop(context); // Close the form dialog
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Account deleted successfully!')),
       );
-      Navigator.pop(context); // Close the form dialog
+      _logoutUser();
     } catch (e) {
       Navigator.pop(context); // Close the loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
