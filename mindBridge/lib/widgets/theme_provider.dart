@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:test_app/cache_utility.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:test_app/widgets/child_provider.dart';
 
 class AppTheme {
   final String id;
@@ -57,6 +58,9 @@ class ThemeProvider extends ChangeNotifier {
 
   Future<void> setChildTheme(String themeName, String childId) async {
     try {
+      final ChildCollectionWithKeys childCollection =
+          ChildCollectionWithKeys.instance;
+      childCollection.updateChildTheme(childId, themeName);
       await setChildThemeToFirebase(themeName, childId);
     } catch (e) {
       // Log error or handle Firebase failure
@@ -124,12 +128,39 @@ final ThemeData defaultTheme = ThemeData(
       ),
     ),
   ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.blue, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      backgroundColor: Colors.transparent, // No background
+    ),
+  ),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.blue, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      side: BorderSide(color: Colors.transparent), // No border
+      backgroundColor: Colors.transparent, // No background
+    ),
+  ),
   appBarTheme: AppBarTheme(
-    backgroundColor: Colors.white,
-    foregroundColor: Colors.black,
+    backgroundColor: Colors.white, // Background color for the AppBar
+    foregroundColor: Colors.black, // Default color for text/icons
     titleTextStyle: TextStyle(
-        fontSize: 22.0, fontWeight: FontWeight.bold, color: Colors.black),
+      fontSize: 22.0,
+      fontWeight: FontWeight.bold,
+      color: Colors.black,
+    ),
     elevation: 2.0,
+    iconTheme: IconThemeData(
+      color: Colors.black, // Ensures the back arrow is visible
+      size: 22,
+    ),
+    actionsIconTheme: IconThemeData(
+      color: Colors.black, // Ensures action icons are visible
+    ),
   ),
   inputDecorationTheme: InputDecorationTheme(
     filled: true,
@@ -164,16 +195,6 @@ final ThemeData defaultTheme = ThemeData(
     color: Colors.blue, // Default icon color for high contrast
   ),
   disabledColor: Colors.grey.shade400, // Disabled state color for contrast
-  textButtonTheme: TextButtonThemeData(
-    style: TextButton.styleFrom(
-      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
-      backgroundColor: Colors.blue.withOpacity(0.1), // Active background
-      foregroundColor: Colors.blue, // Active text/icon color
-      disabledForegroundColor: Colors.grey.shade600, // Disabled text/icon color
-      disabledBackgroundColor:
-          Colors.grey.withOpacity(0.2), // Disabled background
-    ),
-  ),
   dialogTheme: DialogTheme(
     backgroundColor: Colors.white,
     shape: RoundedRectangleBorder(
@@ -195,7 +216,7 @@ final ThemeData defaultTheme = ThemeData(
   visualDensity:
       VisualDensity.adaptivePlatformDensity, // Adaptive for accessibility
   buttonTheme: ButtonThemeData(
-    buttonColor: Colors.blue,
+    buttonColor: Colors.transparent, // No background for buttons
     textTheme: ButtonTextTheme.primary,
     disabledColor: Colors.grey.shade400,
   ),
@@ -253,17 +274,20 @@ final ThemeData lightTheme = ThemeData(
     ),
   ),
   appBarTheme: AppBarTheme(
-    backgroundColor: Colors.blue.shade500,
-    elevation: 4,
+    backgroundColor: Colors.blue.shade500, // Background color for the AppBar
+    foregroundColor: Colors.black, // Default color for text/icons
     titleTextStyle: TextStyle(
-      fontFamily: 'Roboto',
-      fontSize: 20,
-      fontWeight: FontWeight.w600,
-      color: Colors.white,
+      fontSize: 22.0,
+      fontWeight: FontWeight.bold,
+      color: Colors.black,
     ),
+    elevation: 2.0,
     iconTheme: IconThemeData(
-      color: Colors.white,
-      size: 24,
+      color: Colors.black, // Ensures the back arrow is visible
+      size: 22,
+    ),
+    actionsIconTheme: IconThemeData(
+      color: Colors.black, // Ensures action icons are visible
     ),
   ),
   buttonTheme: ButtonThemeData(
@@ -272,6 +296,23 @@ final ThemeData lightTheme = ThemeData(
     height: 48,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(8),
+    ),
+  ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.blue.shade600, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      backgroundColor: Colors.transparent, // No background
+    ),
+  ),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.blue.shade600, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      side: BorderSide(color: Colors.transparent), // No border
+      backgroundColor: Colors.transparent, // No background
     ),
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
@@ -474,6 +515,23 @@ final ThemeData darkTheme = ThemeData(
       ),
     ),
   ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.blueGrey.shade700, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      backgroundColor: Colors.transparent, // No background
+    ),
+  ),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.blueGrey.shade700, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      side: BorderSide(color: Colors.transparent), // No border
+      backgroundColor: Colors.transparent, // No background
+    ),
+  ),
   inputDecorationTheme: InputDecorationTheme(
     filled: true,
     fillColor: Colors.blueGrey.shade900,
@@ -623,6 +681,23 @@ final ThemeData tealHarmonyTheme = ThemeData(
     height: 48,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(8),
+    ),
+  ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.teal, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      backgroundColor: Colors.transparent, // No background
+    ),
+  ),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.teal, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      side: BorderSide(color: Colors.transparent), // No border
+      backgroundColor: Colors.transparent, // No background
     ),
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
@@ -793,6 +868,23 @@ final ThemeData cosmicNightTheme = ThemeData(
     iconTheme: IconThemeData(
       color: Colors.white,
       size: 28,
+    ),
+  ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.deepPurple.shade500, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      backgroundColor: Colors.transparent, // No background
+    ),
+  ),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.deepPurple.shade500, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      side: BorderSide(color: Colors.transparent), // No border
+      backgroundColor: Colors.transparent, // No background
     ),
   ),
   buttonTheme: ButtonThemeData(
@@ -994,6 +1086,23 @@ final ThemeData sunriseBlissTheme = ThemeData(
       ),
     ),
   ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.orange.shade600, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      backgroundColor: Colors.transparent, // No background
+    ),
+  ),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.orange.shade600, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      side: BorderSide(color: Colors.transparent), // No border
+      backgroundColor: Colors.transparent, // No background
+    ),
+  ),
   inputDecorationTheme: InputDecorationTheme(
     filled: true,
     fillColor: Colors.orange.shade100,
@@ -1162,6 +1271,23 @@ final ThemeData midnightGlowTheme = ThemeData(
     height: 48,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
+    ),
+  ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.blueGrey.shade600, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      backgroundColor: Colors.transparent, // No background
+    ),
+  ),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.blueGrey.shade600, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      side: BorderSide(color: Colors.transparent), // No border
+      backgroundColor: Colors.transparent, // No background
     ),
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
@@ -1336,6 +1462,23 @@ final ThemeData zenGardenTheme = ThemeData(
     iconTheme: IconThemeData(
       color: Colors.white,
       size: 24,
+    ),
+  ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.green.shade700, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      backgroundColor: Colors.transparent, // No background
+    ),
+  ),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0),
+      foregroundColor: Colors.green.shade700, // Text/icon color
+      textStyle: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      side: BorderSide(color: Colors.transparent), // No border
+      backgroundColor: Colors.transparent, // No background
     ),
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(

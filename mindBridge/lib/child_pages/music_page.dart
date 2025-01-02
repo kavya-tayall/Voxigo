@@ -524,77 +524,71 @@ class _MusicPageState extends State<MusicPage> {
     final isTablet = mediaQuery.size.width > 600;
     final isSmallDevice = mediaQuery.size.width < 350;
     final theme = Theme.of(context); // Access the current theme
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = mediaQuery.size.width;
+    final screenHeight = mediaQuery.size.height;
     final isMobile = screenWidth < 600;
+
     void _dismissKeyboard() {
       FocusScope.of(context).requestFocus(FocusNode());
     }
 
-    return GestureDetector(
-      onTap: _dismissKeyboard,
-      child: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 20.0),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Text(
-                        'Music & Stories',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: isMobile ? 24 : 36,
-                          shadows: [
-                            Shadow(
-                              offset: const Offset(2, 2),
-                              blurRadius: 4,
-                              color: theme.shadowColor.withOpacity(0.5),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      labelText: 'Search by title or keyword',
-                      labelStyle: isMobile
-                          ? TextStyle(fontSize: 16, color: theme.primaryColor)
-                          : TextStyle(fontSize: 18, color: theme.primaryColor),
-                      filled: true,
-                      prefixIcon: Icon(Icons.search, color: theme.primaryColor),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(Icons.clear),
-                              onPressed: _clearSearch,
-                            )
-                          : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25.0),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Music & Stories'),
+      ),
+      body: GestureDetector(
+        onTap: _dismissKeyboard,
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(
+                    12.0), // Ensure padding around all content
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [],
                       ),
                     ),
-                    onChanged: (query) {
-                      _searchSongs(query);
-                    },
-                  ),
-                ),
-                SizedBox(height: 10),
-                Expanded(
-                  child: _filteredSongs.isEmpty
-                      ? Center(
+                    SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          labelText: 'Search by title or keyword',
+                          labelStyle: isMobile
+                              ? TextStyle(
+                                  fontSize: 16, color: theme.primaryColor)
+                              : TextStyle(
+                                  fontSize: 18, color: theme.primaryColor),
+                          filled: true,
+                          prefixIcon:
+                              Icon(Icons.search, color: theme.primaryColor),
+                          suffixIcon: _searchController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(Icons.clear),
+                                  onPressed: _clearSearch,
+                                )
+                              : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25.0),
+                          ),
+                        ),
+                        onChanged: (query) {
+                          _searchSongs(query);
+                        },
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    // Check if the song list is empty or not
+                    if (_filteredSongs.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Center(
                           child: Text(
                             'No Music file found',
                             style: TextStyle(
@@ -602,72 +596,79 @@ class _MusicPageState extends State<MusicPage> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        )
-                      : Scrollbar(
-                          controller: _scrollController,
-                          thickness: 6.0,
-                          radius: Radius.circular(10),
-                          thumbVisibility: true,
-                          child: ListView.builder(
-                            controller: _scrollController,
-                            primary: false,
-                            itemCount: _filteredSongs.length,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0, vertical: 5.0),
-                                child: MusicTile(
-                                  index: index,
-                                  song: _filteredSongs[index],
-                                  onPlayPause: _onPlayPause,
-                                  isPlaying: _currentlyPlayingIndex == index,
-                                  onDelete: _deleteSong,
-                                ),
-                              );
-                            },
-                          ),
                         ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: ElevatedButton(
-                    onPressed: () => _addMusic(context),
-                    child: Text('Add Music from Files'),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(
-                        isTablet ? 250 : 180,
-                        isTablet ? 50 : 40,
+                      )
+                    else
+                      // Use ListView.builder inside the scroll view
+                      Scrollbar(
+                        controller: _scrollController,
+                        thickness: 6.0,
+                        radius: Radius.circular(10),
+                        thumbVisibility: true,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          primary: false,
+                          shrinkWrap:
+                              true, // This ensures ListView takes only as much space as it needs
+                          itemCount: _filteredSongs.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10.0, vertical: 5.0),
+                              child: MusicTile(
+                                index: index,
+                                song: _filteredSongs[index],
+                                onPlayPause: _onPlayPause,
+                                isPlaying: _currentlyPlayingIndex == index,
+                                onDelete: _deleteSong,
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                      textStyle: TextStyle(
-                          fontSize: isTablet ? 18 : 14,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (_isRebuilding)
-            Container(
-              color: Colors.black54,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 20),
-                    Text(
-                      'Updating List...',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    // Add Music Button
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: ElevatedButton(
+                        onPressed: () => _addMusic(context),
+                        child: Text('Add Music from Files'),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size(
+                            isTablet ? 250 : 180,
+                            isTablet ? 50 : 40,
+                          ),
+                          textStyle: TextStyle(
+                              fontSize: isTablet ? 18 : 14,
+                              fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-        ],
+            if (_isRebuilding)
+              Container(
+                color: Colors.black54,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 20),
+                      Text(
+                        'Updating List...',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

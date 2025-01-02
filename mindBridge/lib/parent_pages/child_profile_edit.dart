@@ -9,6 +9,7 @@ class EditAndViewChildProfileForm extends StatefulWidget {
   final String username;
   final String firstName;
   final String lastName;
+  final String childtheme;
   final bool isEditMode;
   final bool isPasswordRequired;
   final Function(bool) onEditModeChanged;
@@ -21,6 +22,7 @@ class EditAndViewChildProfileForm extends StatefulWidget {
     required this.username,
     required this.firstName,
     required this.lastName,
+    required this.childtheme,
     required this.onEditModeChanged,
     required this.onPasswordRequiredChanged,
     this.isEditMode = false,
@@ -125,6 +127,7 @@ class _EditAndViewChildProfileFormState
           _usernameController.text,
           _firstNameController.text,
           _lastNameController.text,
+          widget.childtheme,
           '',
         );
 
@@ -296,6 +299,7 @@ class EditChildProfileDialog extends StatefulWidget {
   final String username;
   final String firstName;
   final String lastName;
+  final String childtheme;
   final bool isEditMode;
 
   const EditChildProfileDialog({
@@ -305,6 +309,7 @@ class EditChildProfileDialog extends StatefulWidget {
     required this.username,
     required this.firstName,
     required this.lastName,
+    required this.childtheme,
     this.isEditMode = false,
   });
 
@@ -357,6 +362,7 @@ class _EditChildProfileDialogState extends State<EditChildProfileDialog> {
             username: widget.username,
             firstName: widget.firstName,
             lastName: widget.lastName,
+            childtheme: widget.childtheme,
             isEditMode: _isEditMode,
             isPasswordRequired: _isPasswordRequired,
             onEditModeChanged: _updateEditMode,

@@ -424,6 +424,24 @@ class ChildCollectionWithKeys {
   // Getter to access the singleton instance.
   static ChildCollectionWithKeys get instance => _instance;
 
+  void updateChildTheme(String childuid, String childtheme) {
+    final existingIndex =
+        _records.indexWhere((record) => record.childuid == childuid);
+
+    if (existingIndex != -1) {
+      // Update the existing record.
+      _records[existingIndex] = ChildRecord(
+          childuid: childuid,
+          childsecureKey: _records[existingIndex].childsecureKey,
+          childbaserecordiv: _records[existingIndex].childbaserecordiv,
+          username: _records[existingIndex].username,
+          firstName: _records[existingIndex].firstName,
+          lastName: _records[existingIndex].lastName,
+          childtheme: childtheme,
+          settings: _records[existingIndex].settings);
+    }
+  }
+
   // Method to add or update a record in the collection.
   void addOrUpdateChildData(
       String childuid,
@@ -432,6 +450,7 @@ class ChildCollectionWithKeys {
       String username,
       String firstName,
       String lastName,
+      String childtheme,
       ChildSettings? settings) {
     final existingIndex =
         _records.indexWhere((record) => record.childuid == childuid);
@@ -445,6 +464,7 @@ class ChildCollectionWithKeys {
           username: username,
           firstName: firstName,
           lastName: lastName,
+          childtheme: childtheme,
           settings: settings);
     } else {
       // Add a new record.
@@ -455,6 +475,7 @@ class ChildCollectionWithKeys {
           username: username,
           firstName: firstName,
           lastName: lastName,
+          childtheme: childtheme,
           settings: settings));
     }
   }
@@ -470,6 +491,7 @@ class ChildCollectionWithKeys {
           username: '',
           firstName: '',
           lastName: '',
+          childtheme: '',
           settings:
               ChildSettings(childuid: childuid, childsecureKey: Uint8List(0))),
     );
@@ -479,12 +501,14 @@ class ChildCollectionWithKeys {
     return _records
         .firstWhere((record) => record.childuid == childuid,
             orElse: () => ChildRecord(
-                childuid: childuid,
-                childsecureKey: Uint8List(0),
-                childbaserecordiv: Uint8List(0),
-                username: '',
-                firstName: '',
-                lastName: ''))
+                  childuid: childuid,
+                  childsecureKey: Uint8List(0),
+                  childbaserecordiv: Uint8List(0),
+                  username: '',
+                  firstName: '',
+                  lastName: '',
+                  childtheme: '',
+                ))
         .childsecureKey;
   }
 
@@ -541,6 +565,7 @@ class ChildRecord {
   String? username;
   String? firstName;
   String? lastName;
+  String? childtheme;
   ChildSettings? settings;
 
   ChildRecord(
@@ -550,11 +575,12 @@ class ChildRecord {
       this.username,
       this.firstName,
       this.lastName,
+      this.childtheme,
       this.settings});
 
   @override
   String toString() {
-    return 'ChildRecord(childuid: $childuid, childsecureKey: ${childsecureKey.length} bytes, childbaserecordiv: ${childbaserecordiv?.length ?? 0} bytes, username: $username, firstName: $firstName, lastName: $lastName, settings: $settings)';
+    return 'ChildRecord(childuid: $childuid, childsecureKey: ${childsecureKey.length} bytes, childbaserecordiv: ${childbaserecordiv?.length ?? 0} bytes, username: $username, firstName: $firstName, lastName: $lastName, childtheme:$childtheme ,settings: $settings)';
   }
 }
 

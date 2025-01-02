@@ -13,8 +13,8 @@ if (localPropertiesFile.exists()) {
     }
 }
 
-def flutterVersionCode = localProperties.getProperty("flutter.versionCode", "3").toInteger()
-def flutterVersionName = localProperties.getProperty("flutter.versionName", "1.1")
+def flutterVersionCode = localProperties.getProperty("flutter.versionCode", "5").toInteger()
+def flutterVersionName = localProperties.getProperty("flutter.versionName", "1.5")
 
 android {
     namespace = "com.VoxigoAAC.appcore"

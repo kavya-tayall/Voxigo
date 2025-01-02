@@ -5,6 +5,9 @@ import 'package:test_app/cache_utility.dart';
 import 'package:test_app/widgets/child_provider.dart';
 import '../widgets/parent_music_page.dart';
 import 'edit_child_grid.dart';
+import 'package:test_app/widgets/parent_provider.dart';
+import 'package:provider/provider.dart';
+import '../parent_pages/child_add_newchild.dart';
 
 class GradientText extends StatelessWidget {
   const GradientText(
@@ -117,10 +120,23 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
     } finally {
       setState(() {
         isFetchingData = false;
+        ParentProvider parentProvider =
+            Provider.of<ParentProvider>(context, listen: false);
+        adminName = parentProvider.parentData.firstname!;
       });
     }
   }
 
+  Future<void> _showAddChildDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return RegisterChildDialog(); // Your custom dialog widget
+      },
+    );
+  }
+
+/*
   Future<void> fetchChildren() async {
     setState(() {
       isLoading = true;
@@ -147,54 +163,51 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
         isLoading = false;
       });
     }
-  }
-
-  @override
+  }*/
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
     return Scaffold(
       appBar: PreferredSize(
-          preferredSize: Size.fromHeight(75.0),
-          child: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0, // Removes shadow
-            automaticallyImplyLeading: false,
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(Icons.home, color: Colors.black, size: 30),
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 3.0),
-                      child: Image.asset("assets/imgs/logo_without_text.png",
-                          width: 60),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: GradientText(
-                        "Voxigo",
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.blue,
-                            Colors.blueAccent,
-                            Colors.deepPurpleAccent,
-                          ],
-                        ),
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30,
-                        ),
+        preferredSize: Size.fromHeight(75.0),
+        child: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0, // Removes shadow
+          automaticallyImplyLeading: false,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.home, color: Colors.black, size: 30),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3.0),
+                    child: Image.asset("assets/imgs/logo_without_text.png",
+                        width: 60),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: GradientText(
+                      "Voxigo",
+                      gradient: LinearGradient(colors: [
+                        Colors.blue,
+                        Colors.blueAccent,
+                        Colors.deepPurpleAccent,
+                      ]),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-            toolbarHeight: 80,
-          )),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          toolbarHeight: 80,
+        ),
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : Stack(
@@ -323,77 +336,118 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                 color: theme.primaryColorLight,
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Column(children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Text(
-                                    'Manage Your Children 👥',
-                                    style: TextStyle(
-                                        color:
-                                            theme.textTheme.titleMedium!.color,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 25),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Text(
+                                      childIdToUsername.isEmpty
+                                          ? 'No Children Added Yet'
+                                          : 'Manage Your Children 👥',
+                                      style: TextStyle(
+                                          color: theme
+                                              .textTheme.titleMedium!.color,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 25),
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: 16.0),
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: childIdToUsername.length,
-                                  itemBuilder: (context, index) {
-                                    String key =
-                                        childIdToUsername.keys.elementAt(index);
-                                    String value = childIdToUsername[key]!;
-                                    return Container(
-                                      margin: EdgeInsets.only(
-                                          bottom: 16.0, left: 6, right: 6),
-                                      decoration: BoxDecoration(
-                                        color: theme.primaryColorDark,
-                                        borderRadius: BorderRadius.circular(10),
+                                  SizedBox(height: 5.0),
+                                  if (childIdToUsername.isEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0),
+                                      child: Text(
+                                        "Click 'Add Child' below to start managing your children.",
+                                        style: TextStyle(
+                                          color:
+                                              theme.textTheme.bodyMedium!.color,
+                                          fontSize: 18,
+                                        ),
+                                        textAlign: TextAlign.center,
                                       ),
-                                      child: ExpansionTile(
-                                        title: Text(value),
-                                        children: <Widget>[
-                                          ListTile(
-                                            title: Text('Edit Grid'),
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      ChildGridPage(
-                                                          username: value,
-                                                          childId: key),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                          ListTile(
-                                            title: Text('Edit Music'),
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      ParentMusicPage(
-                                                    username: value,
-                                                    childId: key,
+                                    ),
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemCount: childIdToUsername.length,
+                                    itemBuilder: (context, index) {
+                                      String key = childIdToUsername.keys
+                                          .elementAt(index);
+                                      String value = childIdToUsername[key]!;
+                                      return Container(
+                                        margin: EdgeInsets.only(
+                                            bottom: 16.0, left: 6, right: 6),
+                                        decoration: BoxDecoration(
+                                          color: theme.primaryColorDark,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: ExpansionTile(
+                                          title: Text(value),
+                                          children: <Widget>[
+                                            ListTile(
+                                              title: Text('Edit Grid'),
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ChildGridPage(
+                                                            username: value,
+                                                            childId: key),
                                                   ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                          ListTile(
-                                            title:
-                                                Text('Edit Username/Password'),
-                                            onTap: () {},
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
+                                                );
+                                              },
+                                            ),
+                                            ListTile(
+                                              title: Text('Edit Music'),
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ParentMusicPage(
+                                                      username: value,
+                                                      childId: key,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16.0, top: 16.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: theme.primaryColorDark,
+                                foregroundColor:
+                                    theme.textTheme.bodyMedium!.color,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                              ]),
+                              ),
+                              onPressed: () async {
+                                await _showAddChildDialog(context);
+                                await _fetchAndStoreChildrenDataInBackground();
+                              },
+                              icon: Icon(Icons.add),
+                              label: Text(
+                                "Add Child",
+                                style: TextStyle(fontSize: 18),
+                              ),
                             ),
                           ),
                         ),

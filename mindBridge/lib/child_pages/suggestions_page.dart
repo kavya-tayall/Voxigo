@@ -22,15 +22,6 @@ class SuggestionsPage extends StatelessWidget {
           child: Container(
             alignment: Alignment.center,
             width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Colors.black,
-                  width: 5,
-                  style: BorderStyle.solid,
-                ),
-              ),
-            ),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Text(
@@ -53,18 +44,14 @@ class SuggestionsPage extends StatelessWidget {
           print('suggestion $suggestion');
           String imagePath = "";
           if (suggestion == "Fidget Spinner") {
-           imagePath = "assets/imgs/fidgetspinner.png"; // Placeholder path
-          }
-          else if (suggestion == "Deep Breathing") {
+            imagePath = "assets/imgs/fidgetspinner.png"; // Placeholder path
+          } else if (suggestion == "Deep Breathing") {
             imagePath = "assets/imgs/deepbreathing.png"; // Placeholder path
-          }
-          else if (suggestion == "Coloring") {
+          } else if (suggestion == "Coloring") {
             imagePath = "assets/imgs/coloring.png"; // Placeholder path
-          }
-          else if (suggestion == "Music") {
+          } else if (suggestion == "Music") {
             imagePath = "assets/imgs/music.png"; // Placeholder path
-          }
-          else if (suggestion == "Calm Down with 54321") {
+          } else if (suggestion == "Calm Down with 54321") {
             imagePath = "assets/imgs/calmdown.png"; // Placeholder path
           }
           final route = temp.values.toList()[index];

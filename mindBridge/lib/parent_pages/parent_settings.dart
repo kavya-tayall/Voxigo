@@ -46,6 +46,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
   bool canUseGridControls = true;
   bool canUseEmotionHandling = true;
   bool canUseAudioPage = true;
+  String childtheme = '';
   late ThemeProvider themeProvider;
 
   @override
@@ -66,6 +67,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
       canUseGridControls = true;
       canUseEmotionHandling = true;
       canUseAudioPage = true;
+      childtheme = '';
     });
     // Re-fetch data if needed
     fetchChildrenData();
@@ -135,6 +137,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
           username: childRecord.username!,
           firstName: childRecord.firstName!,
           lastName: childRecord.lastName!,
+          childtheme: childRecord.childtheme!,
           isEditMode: isEditMode,
         );
       },
@@ -220,6 +223,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
         childrenSettingsData[record.childuid] = {
           'name': "${record.firstName ?? ''} ${record.lastName ?? ''}".trim(),
           'settings': record.settings,
+          'childtheme': record.childtheme,
         };
       }
 
@@ -233,6 +237,8 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
         if (childrenNamesList.isNotEmpty) {
           // Default to the first child's ID
           _selectedOption = childrenNamesList.first['childId'] ?? '';
+          childtheme =
+              childrenSettingsData[_selectedOption]?['childtheme'] ?? '';
 
           if (childrenSettingsData.isNotEmpty) {
             _selectedOptionId = childrenSettingsData.keys.first;
@@ -277,11 +283,15 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
     ChildSettings settings =
         await getChildSettings(childId, childIchildsecureKey, iv);
     print('settings $settings.gridEditing');
+    String childtheme = childRecord.childtheme ?? '';
+    print('childtheme $childtheme');
     setState(() {
       canUseGridControls = settings.gridEditing ?? false;
       canUseEmotionHandling = settings.emotionHandling ?? false;
       useSentenceHelper = settings.sentenceHelper ?? false;
       canUseAudioPage = settings.audioPage ?? false;
+      print('hello theme $childtheme');
+      childtheme = childtheme;
     });
   }
 
@@ -634,7 +644,9 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                       leading:
                           Icon(Icons.color_lens, color: theme.iconTheme.color),
                       title: Text('Child Theme'),
-                      trailing: Text(""),
+                      trailing: Text(childrenSettingsData[_selectedOption]
+                              ?['childtheme'] ??
+                          ''),
                       onPressed: (context) {
                         showDialog(
                           context: context,
@@ -653,6 +665,12 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                                         value!,
                                         _selectedOption,
                                       );
+                                      setState(() {
+                                        childtheme = value;
+                                        childrenSettingsData[_selectedOption]![
+                                            'childtheme'] = value;
+                                      });
+
                                       Navigator.of(context)
                                           .pop(); // Close dialog
                                     },

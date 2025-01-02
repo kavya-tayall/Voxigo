@@ -440,7 +440,7 @@ class UserService {
 
       // Encrypt the child data
       final Map<String, dynamic> encryptedData = await encryptChildInfoWithIV(
-          parentId, childId, username, firstName, lastName, 'add');
+          parentId, childId, username, firstName, lastName, 'default', 'add');
       print('after encyrption registering child with id $childId');
       // Register the child with the encrypted data
       await registerChild(

@@ -162,6 +162,7 @@ Future<Map<String, String>> encryptChildInfoWithIV(
   String username,
   String firstname,
   String lastname,
+  String childtheme,
   String mode,
 ) async {
   Uint8List key;
@@ -265,6 +266,7 @@ Future<Map<String, String>> encryptChildInfoWithIV(
     username,
     firstname,
     lastname,
+    childtheme,
     finalChildSettings,
   );
 
@@ -278,6 +280,7 @@ Future<Map<String, String>> encryptChildInfoWithIV(
       'emotion handling': encryptedemotionHandling,
       'grid editing': encryptedgridEditing,
       'sentence helper': encryptedsentenceHelper,
+      'theme': childtheme,
     }),
   };
 }
@@ -583,7 +586,9 @@ Future<void> setChildCollectionWithDecryptedData(String parentId,
       lastname = await decryptChildfield(
           encryptedChildData['last name'], encryptionKey, iv);
     }
-
+    //child theme
+    String childtheme = 'default';
+    childtheme = encryptedChildData?['settings']?['theme'] ?? 'default';
     // Create a ChildSettings object
 
     ChildSettings childSettings =
@@ -591,7 +596,7 @@ Future<void> setChildCollectionWithDecryptedData(String parentId,
 
     // Add or update the record in the collection
     childCollection.addOrUpdateChildData(childId, encryptionKey, iv, username,
-        firstname, lastname, childSettings);
+        firstname, lastname, childtheme, childSettings);
 
     print('Record added successfully for childId: $childId');
   } catch (e) {
