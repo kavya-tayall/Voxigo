@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:test_app/widgets/parent_provider.dart';
 import '../auth_logic.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
@@ -25,6 +26,8 @@ class _RegisterChildPageState extends State<RegisterChildForm> {
 
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+  bool _isAgreementChecked = false;
+  String discliamer = ParentProvider().globaldisclaimer;
 
   @override
   void dispose() {
@@ -163,6 +166,26 @@ class _RegisterChildPageState extends State<RegisterChildForm> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 16),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Checkbox(
+                      value: _isAgreementChecked,
+                      onChanged: (value) {
+                        setState(() {
+                          _isAgreementChecked = value!;
+                        });
+                      },
+                    ),
+                    Expanded(
+                      child: Text(
+                        discliamer,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -171,41 +194,44 @@ class _RegisterChildPageState extends State<RegisterChildForm> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  onPressed: () async {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      _showLoadingDialog(context);
-                      try {
-                        User? user = FirebaseAuth.instance.currentUser;
-                        await _user.encryptChildDataAndRegister(
-                          user!.uid,
-                          _firstNameController.text.trim(),
-                          _lastNameController.text.trim(),
-                          _usernameController.text.trim(),
-                          _passwordController.text.trim(),
-                        );
-                        Navigator.pop(context); // Close loading dialog
-                        Navigator.pop(context, true); // Return success
-                      } on UsernameAlreadyExistsException {
-                        Navigator.pop(context); // Close loading dialog
-                        showTopSnackBar(
-                          Overlay.of(context),
-                          CustomSnackBar.error(
-                            backgroundColor: Colors.red.shade900,
-                            message: "Username already exists",
-                          ),
-                        );
-                      } catch (e) {
-                        Navigator.pop(context); // Close loading dialog
-                        showTopSnackBar(
-                          Overlay.of(context),
-                          CustomSnackBar.error(
-                            backgroundColor: Colors.red.shade900,
-                            message: "An error occurred",
-                          ),
-                        );
-                      }
-                    }
-                  },
+                  onPressed: _isAgreementChecked
+                      ? () async {
+                          if (_formKey.currentState?.validate() ?? false) {
+                            _showLoadingDialog(context);
+                            try {
+                              User? user = FirebaseAuth.instance.currentUser;
+                              await _user.encryptChildDataAndRegister(
+                                user!.uid,
+                                _firstNameController.text.trim(),
+                                _lastNameController.text.trim(),
+                                _usernameController.text.trim(),
+                                _passwordController.text.trim(),
+                                discliamer,
+                              );
+                              Navigator.pop(context); // Close loading dialog
+                              Navigator.pop(context, true); // Return success
+                            } on UsernameAlreadyExistsException {
+                              Navigator.pop(context); // Close loading dialog
+                              showTopSnackBar(
+                                Overlay.of(context),
+                                CustomSnackBar.error(
+                                  backgroundColor: Colors.red.shade900,
+                                  message: "Username already exists",
+                                ),
+                              );
+                            } catch (e) {
+                              Navigator.pop(context); // Close loading dialog
+                              showTopSnackBar(
+                                Overlay.of(context),
+                                CustomSnackBar.error(
+                                  backgroundColor: Colors.red.shade900,
+                                  message: "An error occurred",
+                                ),
+                              );
+                            }
+                          }
+                        }
+                      : null,
                   child: const Text(
                     "Add Child",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

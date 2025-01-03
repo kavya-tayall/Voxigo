@@ -449,9 +449,33 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                 ),
                               ),
                               onPressed: () async {
-                                Navigator.of(context).pushNamed('/add_child');
-                                await _buildChildCollectionAndGridDataForParent(
-                                    context);
+                                final result = await Navigator.of(context)
+                                    .pushNamed('/add_child');
+
+                                if (result == true) {
+                                  // Show success message
+                                  await _buildChildCollectionAndGridDataForParent(
+                                      context);
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          Text("Child added successfully!"),
+                                      duration: const Duration(seconds: 3),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                  // Refresh child data
+                                } else if (result == false) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          "Child addition was canceled or failed."),
+                                      duration: const Duration(seconds: 3),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
                               },
                               icon: Icon(Icons.add),
                               label: Text(

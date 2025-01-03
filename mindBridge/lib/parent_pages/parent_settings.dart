@@ -122,6 +122,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
             ChildCollectionWithKeys.instance;
         ChildRecord childRecord =
             childCollection.getRecord(childId) as ChildRecord;
+        print('disclaier ${childRecord.disclaimer}');
 
         return EditChildProfileDialog(
           parentId: parentId,
@@ -130,6 +131,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
           firstName: childRecord.firstName!,
           lastName: childRecord.lastName!,
           childtheme: childRecord.childtheme!,
+          disclaimer: childRecord.disclaimer!,
           isEditMode: isEditMode,
         );
       },
@@ -421,6 +423,8 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
 
                         if (result == true) {
                           // Show success message
+                          await fetchChildrenData();
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text("Child added successfully!"),
@@ -430,7 +434,6 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           );
                           // Refresh child data
                         } else if (result == false) {
-                          await fetchChildrenData();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(

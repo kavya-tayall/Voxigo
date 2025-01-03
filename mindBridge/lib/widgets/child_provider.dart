@@ -437,6 +437,7 @@ class ChildCollectionWithKeys {
         username: _records[existingIndex].username,
         firstName: _records[existingIndex].firstName,
         lastName: _records[existingIndex].lastName,
+        disclaimer: _records[existingIndex].disclaimer,
         childtheme: childtheme,
         settings: _records[existingIndex].settings,
         timestamp: _records[existingIndex].timestamp,
@@ -453,6 +454,7 @@ class ChildCollectionWithKeys {
       String firstName,
       String lastName,
       String childtheme,
+      String disclaimer,
       Timestamp? timestamp,
       ChildSettings? settings) {
     final existingIndex =
@@ -467,6 +469,7 @@ class ChildCollectionWithKeys {
           username: username,
           firstName: firstName,
           lastName: lastName,
+          disclaimer: disclaimer,
           childtheme: childtheme,
           settings: settings,
           timestamp: timestamp);
@@ -479,6 +482,7 @@ class ChildCollectionWithKeys {
           username: username,
           firstName: firstName,
           lastName: lastName,
+          disclaimer: disclaimer,
           childtheme: childtheme,
           settings: settings,
           timestamp: timestamp));
@@ -497,6 +501,7 @@ class ChildCollectionWithKeys {
           firstName: '',
           lastName: '',
           childtheme: '',
+          disclaimer: '',
           timestamp: null,
           settings:
               ChildSettings(childuid: childuid, childsecureKey: Uint8List(0))),
@@ -513,6 +518,7 @@ class ChildCollectionWithKeys {
                   username: '',
                   firstName: '',
                   lastName: '',
+                  disclaimer: '',
                   childtheme: '',
                   timestamp: null,
                 ))
@@ -573,6 +579,7 @@ class ChildRecord {
   String? firstName;
   String? lastName;
   String? childtheme;
+  String? disclaimer;
   ChildSettings? settings;
   Timestamp? timestamp;
 
@@ -584,12 +591,13 @@ class ChildRecord {
       this.firstName,
       this.lastName,
       this.childtheme,
+      this.disclaimer,
       this.settings,
       this.timestamp});
 
   @override
   String toString() {
-    return 'ChildRecord(childuid: $childuid, childsecureKey: ${childsecureKey.length} bytes, childbaserecordiv: ${childbaserecordiv?.length ?? 0} bytes, username: $username, firstName: $firstName, lastName: $lastName, childtheme:$childtheme ,settings: $settings, timestamp: $timestamp)';
+    return 'ChildRecord(childuid: $childuid, childsecureKey: ${childsecureKey.length} bytes, childbaserecordiv: ${childbaserecordiv?.length ?? 0} bytes, username: $username, firstName: $firstName, lastName: $lastName, childtheme:$childtheme ,disclaimer:$disclaimer , settings: $settings, timestamp: $timestamp)';
   }
 }
 

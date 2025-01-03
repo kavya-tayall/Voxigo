@@ -71,6 +71,9 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
   bool isRecoverPasswordMode = false;
   bool isPasswordVisible = false;
   bool isConfirmPasswordVisible = false;
+  bool isTermsAccepted = true;
+  bool isSignupEnabled = true;
+  bool isParentManaged = false;
 
   @override
   void initState() {
@@ -81,6 +84,7 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
   }
 
   String? emailValidator(String? value) {
+    if (isSignupEnabled = false) return 'not needed yet';
     final emailRegex =
         RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
     if (value == null || value.isEmpty) {
@@ -95,6 +99,7 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
 
   Future<void> _handleLogin() async {
     // Existing login logic
+    print('_handleLogin');
     final email = emailController.text.trim();
 
     if (widget.userType == 'parent') {
@@ -512,74 +517,94 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (isSignUpMode && !widget.hideSignupButton)
+        // For signup mode and user type 'parent'
+        if (isSignUpMode &&
+            widget.userType == 'parent' &&
+            !widget.hideSignupButton)
           Column(
             children: [
-              SizedBox(height: isCompact ? 8.0 : 16.0), // Dynamic spacing
-              Padding(
-                padding: EdgeInsets.only(bottom: isCompact ? 12.0 : 24.0),
-                child: Center(
-                  child: RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      text: "I have read and accepted Voxigo's ",
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontSize:
-                            isCompact ? 12.0 : 14.0, // Responsive font size
+              Row(
+                children: [
+                  Checkbox(
+                    value: isTermsAccepted,
+                    onChanged: (value) {
+                      setState(() {
+                        isTermsAccepted = value ?? false;
+                        isSignupEnabled = isTermsAccepted;
+                      });
+                    },
+                  ),
+                  Expanded(
+                    child: RichText(
+                      textAlign: TextAlign.start,
+                      text: TextSpan(
+                        text: "I have read and accepted Voxigo's ",
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize:
+                              isCompact ? 12.0 : 14.0, // Responsive font size
+                        ),
+                        children: [
+                          TextSpan(
+                            text: "Terms of Service",
+                            style: const TextStyle(
+                              color: Color(0xFF56B1FB),
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                Navigator.pushNamed(context, '/terms_of_use');
+                              },
+                          ),
+                          const TextSpan(text: " and "),
+                          TextSpan(
+                            text: "Privacy Policy",
+                            style: const TextStyle(
+                              color: Color(0xFF56B1FB),
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                Navigator.pushNamed(context, '/privacy_policy');
+                              },
+                          ),
+                          const TextSpan(text: "."),
+                        ],
                       ),
-                      children: [
-                        TextSpan(
-                          text: "Terms of Service",
-                          style: const TextStyle(
-                            color: Color(0xFF56B1FB),
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              Navigator.pushNamed(context, '/terms_of_use');
-                            },
-                        ),
-                        const TextSpan(text: " and "),
-                        TextSpan(
-                          text: "Privacy Policy",
-                          style: const TextStyle(
-                            color: Color(0xFF56B1FB),
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              Navigator.pushNamed(context, '/privacy_policy');
-                            },
-                        ),
-                        const TextSpan(text: "."),
-                      ],
                     ),
                   ),
-                ),
+                ],
               ),
+              SizedBox(height: isCompact ? 8.0 : 16.0), // Dynamic spacing
             ],
           ),
-        ElevatedButton(
-          onPressed: isSignUpMode ? _handleSignup : _handleLogin,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF56B1FB),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.0),
+
+        // Elevated button for signup or login
+        if (widget.userType == 'parent')
+          ElevatedButton(
+            onPressed: isSignUpMode
+                ? (isTermsAccepted ? _handleSignup : null)
+                : _handleLogin,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF56B1FB),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+              padding: EdgeInsets.symmetric(vertical: isCompact ? 12.0 : 16.0),
             ),
-            padding: EdgeInsets.symmetric(vertical: isCompact ? 12.0 : 16.0),
-          ),
-          child: Text(
-            isSignUpMode ? 'SIGN UP' : 'LOGIN',
-            style: TextStyle(
-              fontSize: isCompact ? 18.0 : 20.0,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
+            child: Text(
+              isSignUpMode ? 'SIGN UP' : 'LOGIN',
+              style: TextStyle(
+                fontSize: isCompact ? 18.0 : 20.0,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
             ),
           ),
-        ),
+
+        // Forgot Password button for login mode
         if (!isSignUpMode && !widget.hideForgotPasswordButton)
           Align(
             alignment: Alignment.centerRight,
@@ -605,9 +630,9 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
               ),
             ),
           ),
-        if (widget.userType ==
-            'parent') // Show Google and toggle sections only for 'parent'
-          ...[
+
+        // Google Login and Toggle Section for 'parent' userType
+        if (widget.userType == 'parent') ...[
           SizedBox(height: isCompact ? 8.0 : 16.0),
           Row(
             children: [
@@ -648,6 +673,8 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
               setState(() {
                 isSignUpMode = !isSignUpMode;
                 isValidationTriggered = false;
+                isTermsAccepted = false;
+                isSignupEnabled = false;
               });
             },
             style: TextButton.styleFrom(
@@ -667,6 +694,95 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
             ),
           ),
         ],
+
+        // Compliance Section for 'child' userType
+        if (widget.userType == 'child')
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Checkbox(
+                    value: isParentManaged,
+                    onChanged: (value) {
+                      setState(() {
+                        isParentManaged = value ?? false;
+                      });
+                    },
+                  ),
+                  Expanded(
+                    child: Text(
+                      "I understand my parent/guardian manages this account.",
+                      style: TextStyle(
+                        fontSize: isCompact ? 12.0 : 14.0,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: isCompact ? 8.0 : 16.0),
+              ElevatedButton(
+                onPressed: isParentManaged ? _handleLogin : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF56B1FB),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                  ),
+                  padding:
+                      EdgeInsets.symmetric(vertical: isCompact ? 12.0 : 16.0),
+                ),
+                child: Text(
+                  'LOGIN',
+                  style: TextStyle(
+                    fontSize: isCompact ? 18.0 : 20.0,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ),
+              SizedBox(height: isCompact ? 8.0 : 16.0),
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  text:
+                      "By logging in, you confirm that your parent/guardian has agreed to Voxigo's ",
+                  style: TextStyle(
+                    fontSize: isCompact ? 12.0 : 14.0,
+                    color: Colors.grey[700],
+                  ),
+                  children: [
+                    TextSpan(
+                      text: "Terms of Service",
+                      style: const TextStyle(
+                        color: Color(0xFF56B1FB),
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          Navigator.pushNamed(context, '/terms_of_use');
+                        },
+                    ),
+                    const TextSpan(text: " and "),
+                    TextSpan(
+                      text: "Privacy Policy",
+                      style: const TextStyle(
+                        color: Color(0xFF56B1FB),
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          Navigator.pushNamed(context, '/privacy_policy');
+                        },
+                    ),
+                    const TextSpan(text: "."),
+                  ],
+                ),
+              ),
+            ],
+          ),
       ],
     );
   }

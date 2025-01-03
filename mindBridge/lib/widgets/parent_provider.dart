@@ -60,6 +60,9 @@ class ParentProvider with ChangeNotifier {
 
   // Getter for parent data
   ParentRecord get parentData => _parentData;
+  String get globaldisclaimer {
+    return "I confirm that I will manage this account if the child is a minor. I take full responsibility for ensuring the app is used and operated appropriately and in compliance with Voxigo's Terms of Use and Privacy Policy. I understand that I am accountable for all content uploaded and interactions conducted within the app.";
+  }
 
   // Method to update the parent data
   void updateParentData({

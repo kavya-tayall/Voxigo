@@ -423,8 +423,13 @@ String generateFirebaseId() {
 class UserService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<String> encryptChildDataAndRegister(String parentId, String firstName,
-      String lastName, String username, String password) async {
+  Future<String> encryptChildDataAndRegister(
+      String parentId,
+      String firstName,
+      String lastName,
+      String username,
+      String password,
+      String disclaimer) async {
     try {
       // Check if the username already exists
       bool usernameExists = await _checkUsernameExists(username);
@@ -442,7 +447,14 @@ class UserService {
 
       // Encrypt the child data
       final Map<String, dynamic> encryptedData = await encryptChildInfoWithIV(
-          parentId, childId, username, firstName, lastName, 'default', 'add');
+          parentId,
+          childId,
+          username,
+          firstName,
+          lastName,
+          'default',
+          disclaimer,
+          'add');
       print('after encyrption registering child with id $childId');
       // Register the child with the encrypted data
       await registerChild(
@@ -450,6 +462,7 @@ class UserService {
         parentId,
         encryptedData['first name'],
         encryptedData['last name'],
+        encryptedData['disclaimer'],
         encryptedData['username'],
         hashedPassword,
         encryptedData['timestamp'],
@@ -604,6 +617,7 @@ class UserService {
       String parentId,
       String firstName,
       String lastName,
+      String disclaimer,
       String username,
       String password,
       String timestamp,
@@ -620,13 +634,15 @@ class UserService {
       'last name': lastName,
       'password': password,
       'parents': [parentId],
+      'disclaimer': disclaimer,
       if (iv.isNotEmpty) 'iv': iv,
       'data': {'selectedButtons': [], 'selectedFeelings': []},
       'settings': {
         'sentence helper': settings['sentence helper'],
         'emotion handling': settings['emotion handling'],
         'grid editing': settings['grid editing'],
-        'audio page': settings['audio page']
+        'audio page': settings['audio page'],
+        'theme': settings['childtheme'],
       }
     });
 

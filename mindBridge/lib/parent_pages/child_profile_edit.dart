@@ -11,6 +11,7 @@ class EditAndViewChildProfileForm extends StatefulWidget {
   final String firstName;
   final String lastName;
   final String childtheme;
+  final String disclaimer;
   final bool isEditMode;
   final bool isPasswordRequired;
   final Function(bool) onEditModeChanged;
@@ -23,6 +24,7 @@ class EditAndViewChildProfileForm extends StatefulWidget {
     required this.username,
     required this.firstName,
     required this.lastName,
+    required this.disclaimer,
     required this.childtheme,
     required this.onEditModeChanged,
     required this.onPasswordRequiredChanged,
@@ -44,13 +46,14 @@ class _EditAndViewChildProfileFormState
   late final TextEditingController _lastNameController;
   late final TextEditingController _passwordController;
 
-  late final FocusNode _usernameFocusNode; // Added focus node
+  late final FocusNode _usernameFocusNode;
 
   bool _isPasswordValidated = false;
   late bool _isPasswordRequired;
   late bool _isEditMode;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   bool _showPassword = false;
+  String disclaimer = '';
 
   @override
   void initState() {
@@ -60,9 +63,11 @@ class _EditAndViewChildProfileFormState
     _lastNameController = TextEditingController(text: widget.lastName);
     _passwordController = TextEditingController();
 
-    _usernameFocusNode = FocusNode(); // Initialize focus node
+    _usernameFocusNode = FocusNode();
     _isEditMode = widget.isEditMode;
     _isPasswordRequired = widget.isPasswordRequired;
+    disclaimer = widget.disclaimer;
+    print('disclaimer: $disclaimer');
   }
 
   @override
@@ -72,7 +77,7 @@ class _EditAndViewChildProfileFormState
     _lastNameController.dispose();
     _passwordController.dispose();
 
-    _usernameFocusNode.dispose(); // Dispose focus node
+    _usernameFocusNode.dispose();
     super.dispose();
   }
 
@@ -91,12 +96,11 @@ class _EditAndViewChildProfileFormState
       );
       if (isValid) {
         setState(() {
-          print('Password validated');
           _isPasswordValidated = true;
           _isEditMode = true;
           _isPasswordRequired = false;
           Future.delayed(Duration.zero, () {
-            _usernameFocusNode.requestFocus(); // Set focus
+            _usernameFocusNode.requestFocus();
           });
         });
         widget.onEditModeChanged(true);
@@ -129,6 +133,7 @@ class _EditAndViewChildProfileFormState
           _firstNameController.text,
           _lastNameController.text,
           widget.childtheme,
+          disclaimer,
           '',
         );
 
@@ -136,6 +141,7 @@ class _EditAndViewChildProfileFormState
           'username': encryptedChildInfo['username'],
           'first name': encryptedChildInfo['first name'],
           'last name': encryptedChildInfo['last name'],
+          'disclaimer': encryptedChildInfo['disclaimer'],
           'iv': encryptedChildInfo['iv'],
         });
 
@@ -177,7 +183,7 @@ class _EditAndViewChildProfileFormState
           children: [
             if (!_isPasswordValidated && _isEditMode)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -186,7 +192,9 @@ class _EditAndViewChildProfileFormState
                       obscureText: !_showPassword,
                       decoration: InputDecoration(
                         labelText: 'Parent Password',
-                        border: const OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _showPassword
@@ -201,9 +209,14 @@ class _EditAndViewChildProfileFormState
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8.0),
+                    const SizedBox(height: 16.0),
                     ElevatedButton(
                       onPressed: _validateParentPassword,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       child: const Text('Validate Password'),
                     ),
                   ],
@@ -211,40 +224,71 @@ class _EditAndViewChildProfileFormState
               ),
             if (_isPasswordValidated || !_isEditMode) ...[
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
                 child: TextFormField(
                   controller: _usernameController,
-                  focusNode: _usernameFocusNode, // Attach focus node
+                  focusNode: _usernameFocusNode,
                   enabled: _isEditMode,
                   decoration: const InputDecoration(
                     labelText: 'Username',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
                 child: TextFormField(
                   controller: _firstNameController,
                   enabled: _isEditMode,
                   decoration: const InputDecoration(
                     labelText: 'First Name',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
                 child: TextFormField(
                   controller: _lastNameController,
                   enabled: _isEditMode,
                   decoration: const InputDecoration(
                     labelText: 'Last Name',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
                   ),
                 ),
               ),
             ],
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Column(
+                children: [
+                  Text(
+                    'Disclaimer: By editing this information, the following consent provided remains valid.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(
+                    disclaimer,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: Colors.grey[600],
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Row(
               children: [
                 if (!_isEditMode)
@@ -256,11 +300,17 @@ class _EditAndViewChildProfileFormState
                           _isPasswordRequired = true;
                           widget.onEditModeChanged(true);
                           widget.onPasswordRequiredChanged(true);
+                          disclaimer = widget.disclaimer;
                           Future.delayed(Duration.zero, () {
-                            _usernameFocusNode.requestFocus(); // Set focus
+                            _usernameFocusNode.requestFocus();
                           });
                         });
                       },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       child: const Text('Edit'),
                     ),
                   ),
@@ -268,10 +318,15 @@ class _EditAndViewChildProfileFormState
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _saveChildProfile,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       child: const Text('Save'),
                     ),
                   ),
-                  const SizedBox(width: 8.0),
+                  const SizedBox(width: 16.0),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
@@ -283,6 +338,11 @@ class _EditAndViewChildProfileFormState
                         });
                         FocusScope.of(context).unfocus();
                       },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       child: const Text('Cancel'),
                     ),
                   ),
@@ -303,6 +363,7 @@ class EditChildProfileDialog extends StatefulWidget {
   final String firstName;
   final String lastName;
   final String childtheme;
+  final String disclaimer;
   final bool isEditMode;
 
   const EditChildProfileDialog({
@@ -313,6 +374,7 @@ class EditChildProfileDialog extends StatefulWidget {
     required this.firstName,
     required this.lastName,
     required this.childtheme,
+    required this.disclaimer,
     this.isEditMode = false,
   });
 
@@ -366,6 +428,7 @@ class _EditChildProfileDialogState extends State<EditChildProfileDialog> {
             firstName: widget.firstName,
             lastName: widget.lastName,
             childtheme: widget.childtheme,
+            disclaimer: widget.disclaimer,
             isEditMode: _isEditMode,
             isPasswordRequired: _isPasswordRequired,
             onEditModeChanged: _updateEditMode,
