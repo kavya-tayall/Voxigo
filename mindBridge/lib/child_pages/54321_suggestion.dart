@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:test_app/child_pages/Five_things_to_see.dart';
 
 class FiveCalmDownHome extends StatefulWidget {
   FiveCalmDownHome({super.key});
@@ -32,32 +33,12 @@ class _FiveCalmDownHomeState extends State<FiveCalmDownHome> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final isMobile = mediaQuery.size.width < 600;
-    final isTablet =
-        mediaQuery.size.width >= 600 && mediaQuery.size.width < 1200;
-    final isDesktop = mediaQuery.size.width >= 1200;
 
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Container(
-            alignment: Alignment.center,
-            width: double.infinity,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Text(
-                "Calm down with 54321",
-                style: TextStyle(
-                  fontSize: isMobile
-                      ? 20
-                      : isTablet
-                          ? 24
-                          : 30,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
+        title: Text(
+          "Calm Down with 54321",
+          textAlign: TextAlign.center,
         ),
       ),
       body: Padding(
@@ -96,127 +77,105 @@ class _FiveCalmDownHomeState extends State<FiveCalmDownHome> {
         "color": Colors.redAccent,
         "borderColor": Colors.red,
         "isChecked": _isChecked1,
-        "onChanged": _toggleChecked1
+        "onTap": () {
+          /* Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FiveThingsToSeePage(),
+            ),
+          );*/
+        }
       },
       {
         "title": "4 things I can touch",
         "color": Colors.orangeAccent,
         "borderColor": Colors.orange,
         "isChecked": _isChecked2,
-        "onChanged": _toggleChecked2
       },
       {
         "title": "3 things I can hear",
         "color": Colors.lightGreen,
         "borderColor": Colors.green,
         "isChecked": _isChecked3,
-        "onChanged": _toggleChecked3
       },
       {
         "title": "2 things I can smell",
         "color": Colors.lightBlue,
         "borderColor": Colors.blue,
         "isChecked": _isChecked4,
-        "onChanged": _toggleChecked4
       },
       {
         "title": "1 thing I can taste",
         "color": Colors.pinkAccent,
         "borderColor": Colors.pink,
         "isChecked": _isChecked5,
-        "onChanged": _toggleChecked5
       },
     ];
 
     return activities.map((activity) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Container(
-          height: 125,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: activity["color"],
-            border: Border.all(color: activity["borderColor"], width: 8),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Flexible(
-                flex: 3,
-                child: Text(
-                  activity["title"],
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: isMobile ? 25 : 45,
-                    overflow: TextOverflow.ellipsis,
+        child: GestureDetector(
+          onTap: activity["onTap"],
+          child: Container(
+            height: 125,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: activity["color"],
+              border: Border.all(color: activity["borderColor"], width: 8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Flexible(
+                  flex: 3,
+                  child: Text(
+                    activity["title"],
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: isMobile ? 25 : 45,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
                 ),
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: Text(
-                        "Done?",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: isMobile ? 14 : 20,
+                Align(
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 5),
+                        child: Text(
+                          "Done?",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: isMobile ? 14 : 20,
+                          ),
                         ),
                       ),
-                    ),
-                    Checkbox(
-                      value: activity["isChecked"],
-                      onChanged: (value) {
-                        setState(() {
-                          activity["onChanged"](value);
-                          _calmingCheck();
-                        });
-                      },
-                    ),
-                  ],
+                      Checkbox(
+                        value: activity["isChecked"],
+                        onChanged: (value) {
+                          setState(() {
+                            if (activity.containsKey("onChanged")) {
+                              activity["onChanged"](value);
+                              _calmingCheck();
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );
     }).toList();
-  }
-
-  void _toggleChecked1(bool? value) {
-    setState(() {
-      _isChecked1 = value ?? false;
-    });
-  }
-
-  void _toggleChecked2(bool? value) {
-    setState(() {
-      _isChecked2 = value ?? false;
-    });
-  }
-
-  void _toggleChecked3(bool? value) {
-    setState(() {
-      _isChecked3 = value ?? false;
-    });
-  }
-
-  void _toggleChecked4(bool? value) {
-    setState(() {
-      _isChecked4 = value ?? false;
-    });
-  }
-
-  void _toggleChecked5(bool? value) {
-    setState(() {
-      _isChecked5 = value ?? false;
-    });
   }
 }

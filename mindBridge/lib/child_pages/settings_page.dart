@@ -157,28 +157,33 @@ class CustomSettings extends StatelessWidget {
                   }),
             ],
           ),
+          // Privacy Section
           SettingsSection(
-            title: Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: Text(
-                'Privacy',
-                style: TextStyle(
-                  fontSize: titleFontSize,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+            title: Text('Help and Support'),
             tiles: <SettingsTile>[
               SettingsTile.navigation(
-                leading: Icon(Icons.lock_outline, color: theme.iconTheme.color),
-                title: Text(
-                  'Privacy Policy',
-                  style: TextStyle(fontSize: tileFontSize),
-                ),
-                trailing:
-                    Icon(Icons.chevron_right, color: theme.iconTheme.color),
+                leading: Icon(Icons.privacy_tip, color: theme.iconTheme.color),
+                trailing: Text(""),
+                title: Text('Privacy Policy'),
                 onPressed: (context) {
-                  // Navigate to privacy policy
+                  Navigator.pushNamed(context, '/privacy_policy');
+                },
+              ),
+              SettingsTile.navigation(
+                leading: Icon(Icons.rule, color: theme.iconTheme.color),
+                trailing: Text(""),
+                title: Text('Term of Use'),
+                onPressed: (context) {
+                  Navigator.pushNamed(context, '/terms_of_use');
+                },
+              ),
+              SettingsTile.navigation(
+                leading:
+                    Icon(Icons.contact_support, color: theme.iconTheme.color),
+                trailing: Text(""),
+                title: Text('Contact Us'),
+                onPressed: (context) {
+                  Navigator.of(context).pushNamed('/contact_us');
                 },
               ),
             ],

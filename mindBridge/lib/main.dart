@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test_app/child_pages/Five_things_to_see.dart';
 import 'package:test_app/getauthtokenandkey.dart';
 import 'package:test_app/parent_pages/ai_chatbot.dart';
 import 'package:test_app/widgets/parent_provider.dart';
@@ -37,6 +38,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:test_app/auth_logic.dart';
 import 'package:test_app/parent_pages/privacy_policy.dart';
 import 'package:test_app/parent_pages/terms_of_use.dart';
+import 'package:test_app/parent_pages/child_add_newchild.dart';
 
 typedef VoidCallBack = void Function();
 final GlobalKey<BasePageState> basePageKey1 = GlobalKey<BasePageState>();
@@ -128,6 +130,8 @@ class _MyAppState extends State<MyApp> {
               '/privacy_policy': (_) => PrivacyPolicyPage(),
               '/terms_of_use': (_) => TermsOfUsePage(),
               '/contact_us': (_) => ContactUsPage(),
+              '/add_child': (_) => RegisterChildForm(),
+              '/five_things': (_) => FiveThingsToSeePage(),
             },
           ),
         );
@@ -238,7 +242,7 @@ class BasePageState extends State<BasePage> {
     print(
         "BasePage initialized with key: ${widget.key}"); // Confirm key assignment
     // Fetch login child data and set loading state
-    fetchLoginChildData(context, false).then((_) {
+    fetchSingleChildBoardData(context, false).then((_) {
       setState(() {
         isLoading = false;
       });

@@ -257,6 +257,7 @@ Future<Map<String, String>> encryptChildInfoWithIV(
     sentenceHelper: sentenceHelper,
   );
 
+  Timestamp timestamp = Timestamp.fromDate(DateTime.now());
   // Add or update the record in the collection
   final childCollection = ChildCollectionWithKeys.instance;
   childCollection.addOrUpdateChildData(
@@ -267,6 +268,7 @@ Future<Map<String, String>> encryptChildInfoWithIV(
     firstname,
     lastname,
     childtheme,
+    timestamp,
     finalChildSettings,
   );
 
@@ -275,6 +277,7 @@ Future<Map<String, String>> encryptChildInfoWithIV(
     'first name': encryptedFirstname,
     'last name': encryptedLastname,
     'iv': encodedIV,
+    'timestamp': timestamp.toString(),
     'settings': jsonEncode({
       'audio page': encryptedaudioPage,
       'emotion handling': encryptedemotionHandling,
@@ -543,8 +546,11 @@ Future<Uint8List> getChildKey(String parentId, String childId,
   }
 }
 
-Future<void> setChildCollectionWithDecryptedData(String parentId,
-    String childId, Map<String, dynamic> encryptedChildData) async {
+Future<void> setChildCollectionWithDecryptedData(
+    String parentId,
+    String childId,
+    Map<String, dynamic> encryptedChildData,
+    Timestamp timestamp) async {
   try {
     String username = '';
     String firstname = '';
@@ -596,7 +602,7 @@ Future<void> setChildCollectionWithDecryptedData(String parentId,
 
     // Add or update the record in the collection
     childCollection.addOrUpdateChildData(childId, encryptionKey, iv, username,
-        firstname, lastname, childtheme, childSettings);
+        firstname, lastname, childtheme, timestamp, childSettings);
 
     print('Record added successfully for childId: $childId');
   } catch (e) {

@@ -27,7 +27,6 @@ class ThemeProvider extends ChangeNotifier {
   static final Map<String, ThemeData> _themeMap = {
     'default': defaultTheme,
     'light': lightTheme,
-    'dark': midnightGlowTheme,
     'teal': tealHarmonyTheme,
     'orange': sunriseBlissTheme,
     'green': zenGardenTheme,

@@ -19,12 +19,11 @@ class _BreathingHomeState extends State<BreathingHome>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 5)
-    )..addListener(() {
-      setState(() {});
-    });
+    _controller =
+        AnimationController(vsync: this, duration: Duration(seconds: 5))
+          ..addListener(() {
+            setState(() {});
+          });
 
     _breathingAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
@@ -63,10 +62,9 @@ class _BreathingHomeState extends State<BreathingHome>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         title: Text(
           "Breathing Exercise",
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+          textAlign: TextAlign.center,
         ),
       ),
       body: Stack(
@@ -92,10 +90,10 @@ class _BreathingHomeState extends State<BreathingHome>
               duration: const Duration(milliseconds: 600),
               child: Center(
                   child: Text(
-                    "All Done!",
-                    style: TextStyle(fontSize: 80, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  )),
+                "All Done!",
+                style: TextStyle(fontSize: 80, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              )),
             ),
             child: Center(
               child: Container(
@@ -152,9 +150,8 @@ class _BreathingHomeState extends State<BreathingHome>
                     padding: EdgeInsets.symmetric(vertical: 20),
                     child: Text(
                       "Deep Breathing",
-                      style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     )),
               ),

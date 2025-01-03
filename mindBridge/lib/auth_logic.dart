@@ -244,6 +244,8 @@ class AuthService {
     //   if (userDoc.exists && userDoc['role'] == 'parent') {
     //  await _fetchAndStoreChildrenData(userDoc['children'], context, email);
 
+    ChildCollectionWithKeys.instance.dispose();
+
     await ApiService.initialize();
 
     await setLoginUserKeys(parent, UserType.parent);
@@ -450,6 +452,7 @@ class UserService {
         encryptedData['last name'],
         encryptedData['username'],
         hashedPassword,
+        encryptedData['timestamp'],
         jsonDecode(encryptedData['settings']),
         iv: encryptedData['iv'],
       );
@@ -603,6 +606,7 @@ class UserService {
       String lastName,
       String username,
       String password,
+      String timestamp,
       Map<String, dynamic> settings,
       {String iv = ''}) async {
     // Create a document reference with the custom ID
@@ -627,8 +631,10 @@ class UserService {
     });
 
     await _db.collection('parents').doc(parentId).update({
-      'children': FieldValue.arrayUnion([childRef.id])
+      'children': FieldValue.arrayUnion(
+          [childRef.id]), // Keep the existing 'children' field intact
     });
+    await updateParentChildrenField(parentId, customDocIdForChild);
 
     await uploadJsonFromAssets('assets/board_info/board.json',
         '/user_folders/$customDocIdForChild/board.json');

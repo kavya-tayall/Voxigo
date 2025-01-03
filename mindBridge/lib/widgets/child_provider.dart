@@ -431,14 +431,16 @@ class ChildCollectionWithKeys {
     if (existingIndex != -1) {
       // Update the existing record.
       _records[existingIndex] = ChildRecord(
-          childuid: childuid,
-          childsecureKey: _records[existingIndex].childsecureKey,
-          childbaserecordiv: _records[existingIndex].childbaserecordiv,
-          username: _records[existingIndex].username,
-          firstName: _records[existingIndex].firstName,
-          lastName: _records[existingIndex].lastName,
-          childtheme: childtheme,
-          settings: _records[existingIndex].settings);
+        childuid: childuid,
+        childsecureKey: _records[existingIndex].childsecureKey,
+        childbaserecordiv: _records[existingIndex].childbaserecordiv,
+        username: _records[existingIndex].username,
+        firstName: _records[existingIndex].firstName,
+        lastName: _records[existingIndex].lastName,
+        childtheme: childtheme,
+        settings: _records[existingIndex].settings,
+        timestamp: _records[existingIndex].timestamp,
+      );
     }
   }
 
@@ -451,6 +453,7 @@ class ChildCollectionWithKeys {
       String firstName,
       String lastName,
       String childtheme,
+      Timestamp? timestamp,
       ChildSettings? settings) {
     final existingIndex =
         _records.indexWhere((record) => record.childuid == childuid);
@@ -465,7 +468,8 @@ class ChildCollectionWithKeys {
           firstName: firstName,
           lastName: lastName,
           childtheme: childtheme,
-          settings: settings);
+          settings: settings,
+          timestamp: timestamp);
     } else {
       // Add a new record.
       _records.add(ChildRecord(
@@ -476,7 +480,8 @@ class ChildCollectionWithKeys {
           firstName: firstName,
           lastName: lastName,
           childtheme: childtheme,
-          settings: settings));
+          settings: settings,
+          timestamp: timestamp));
     }
   }
 
@@ -492,6 +497,7 @@ class ChildCollectionWithKeys {
           firstName: '',
           lastName: '',
           childtheme: '',
+          timestamp: null,
           settings:
               ChildSettings(childuid: childuid, childsecureKey: Uint8List(0))),
     );
@@ -508,6 +514,7 @@ class ChildCollectionWithKeys {
                   firstName: '',
                   lastName: '',
                   childtheme: '',
+                  timestamp: null,
                 ))
         .childsecureKey;
   }
@@ -567,6 +574,7 @@ class ChildRecord {
   String? lastName;
   String? childtheme;
   ChildSettings? settings;
+  Timestamp? timestamp;
 
   ChildRecord(
       {required this.childuid,
@@ -576,11 +584,12 @@ class ChildRecord {
       this.firstName,
       this.lastName,
       this.childtheme,
-      this.settings});
+      this.settings,
+      this.timestamp});
 
   @override
   String toString() {
-    return 'ChildRecord(childuid: $childuid, childsecureKey: ${childsecureKey.length} bytes, childbaserecordiv: ${childbaserecordiv?.length ?? 0} bytes, username: $username, firstName: $firstName, lastName: $lastName, childtheme:$childtheme ,settings: $settings)';
+    return 'ChildRecord(childuid: $childuid, childsecureKey: ${childsecureKey.length} bytes, childbaserecordiv: ${childbaserecordiv?.length ?? 0} bytes, username: $username, firstName: $firstName, lastName: $lastName, childtheme:$childtheme ,settings: $settings, timestamp: $timestamp)';
   }
 }
 

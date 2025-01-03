@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test_app/security.dart';
 import 'package:test_app/auth_logic.dart';
+import 'package:test_app/cache_utility.dart';
 
 class EditAndViewChildProfileForm extends StatefulWidget {
   final String parentId;
@@ -137,6 +138,8 @@ class _EditAndViewChildProfileFormState
           'last name': encryptedChildInfo['last name'],
           'iv': encryptedChildInfo['iv'],
         });
+
+        await updateParentChildrenField(widget.parentId, widget.childId);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Child profile updated successfully!')),

@@ -290,7 +290,7 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
                                 fontSize: isMobile
                                     ? 32.0
                                     : 48.0, // Responsive font size
-                                fontWeight: FontWeight.w200,
+                                fontWeight: FontWeight.w300,
                               ),
                             ),
                             const SizedBox(

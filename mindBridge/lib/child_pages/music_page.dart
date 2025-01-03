@@ -535,6 +535,14 @@ class _MusicPageState extends State<MusicPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Music & Stories'),
+        automaticallyImplyLeading:
+            true, // Ensures a back button if there is a previous route
+        leading: Navigator.canPop(context)
+            ? BackButton(onPressed: () {
+                Navigator.pop(
+                    context); // Pops the current route from the navigation stack
+              })
+            : null, // If there's no route to pop, leading is null
       ),
       body: GestureDetector(
         onTap: _dismissKeyboard,

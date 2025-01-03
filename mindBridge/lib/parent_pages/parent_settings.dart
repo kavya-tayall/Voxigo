@@ -19,6 +19,7 @@ import '../child_pages/home_page.dart';
 import '../widgets/child_provider.dart';
 import '../widgets/parent_provider.dart';
 import '../widgets/theme_provider.dart';
+import '../parent_pages/child_add_newchild.dart';
 
 extension StringExtension on String {
   String capitalize() {
@@ -47,6 +48,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
   bool canUseEmotionHandling = true;
   bool canUseAudioPage = true;
   String childtheme = '';
+  String parentId = FirebaseAuth.instance.currentUser?.uid ?? '';
   late ThemeProvider themeProvider;
 
   @override
@@ -71,15 +73,6 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
     });
     // Re-fetch data if needed
     fetchChildrenData();
-  }
-
-  Future<void> _showAddChildDialog(BuildContext context) async {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return RegisterChildDialog(); // Your custom dialog widget
-      },
-    );
   }
 
   Future<void> _showDeleteDialog(BuildContext context) async {
@@ -129,7 +122,6 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
             ChildCollectionWithKeys.instance;
         ChildRecord childRecord =
             childCollection.getRecord(childId) as ChildRecord;
-        String parentId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
         return EditChildProfileDialog(
           parentId: parentId,
@@ -171,8 +163,6 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
-        User? currentUser = FirebaseAuth.instance.currentUser;
-        String parentId = currentUser?.uid ?? '';
         return DeleteAccountDialog(
             parentId: parentId); // Your custom dialog widget
       },
@@ -189,22 +179,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
       if (currentUser != null) {
         parentId = currentUser.uid; // Removed re-declaration
         print('Parent ID: $parentId');
-        DocumentSnapshot parentSnapshot = await FirebaseFirestore.instance
-            .collection('parents')
-            .doc(parentId)
-            .get();
-
-        if (parentSnapshot.exists) {
-          Map<String, dynamic>? parentData =
-              parentSnapshot.data() as Map<String, dynamic>?;
-          parentEmailasUserName = parentData?['email'] ?? '';
-          if (parentData != null && parentData['children'] != null) {
-            List<String> childIds = List<String>.from(parentData['children']);
-            print('Calling fetchAndStoreChildrenData for $childIds');
-            await fetchAndStoreChildrenData(
-                parentId, childIds, context, parentEmailasUserName, true);
-          }
-        }
+        await refreshChildCollection(context, parentId);
       }
 
       // Wait for generateChildNameDropdownItems to complete
@@ -441,8 +416,30 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                       trailing: Text(""),
                       title: Text('Add Child'),
                       onPressed: (context) async {
-                        await _showAddChildDialog(context);
-                        fetchChildrenData();
+                        final result =
+                            await Navigator.of(context).pushNamed('/add_child');
+
+                        if (result == true) {
+                          // Show success message
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Child added successfully!"),
+                              duration: const Duration(seconds: 3),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          // Refresh child data
+                        } else if (result == false) {
+                          await fetchChildrenData();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  "Child addition was canceled or failed."),
+                              duration: const Duration(seconds: 3),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       },
                     ),
                     SettingsTile.navigation(
@@ -581,6 +578,9 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           FieldPath(['settings', 'sentence helper']):
                               encryptSetting(_selectedOption, value),
                         });
+                        await updateParentChildrenField(
+                            parentId, _selectedOption);
+
                         setState(() {
                           useSentenceHelper = value;
                         });
@@ -599,14 +599,17 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           FieldPath(['settings', 'grid editing']):
                               encryptSetting(_selectedOption, value),
                         });
+                        await updateParentChildrenField(
+                            parentId, _selectedOption);
+
                         setState(() {
                           canUseGridControls = value;
                         });
                       },
                     ),
                     SettingsTile.switchTile(
-                      leading:
-                          Icon(Icons.settings, color: theme.iconTheme.color),
+                      leading: Icon(Icons.emoji_emotions,
+                          color: theme.iconTheme.color),
                       title: Text('Emotion handling page'),
                       initialValue: canUseEmotionHandling,
                       onToggle: (bool value) async {
@@ -617,14 +620,16 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           FieldPath(['settings', 'emotion handling']):
                               encryptSetting(_selectedOption, value),
                         });
+                        await updateParentChildrenField(
+                            parentId, _selectedOption);
                         setState(() {
                           canUseEmotionHandling = value;
                         });
                       },
                     ),
                     SettingsTile.switchTile(
-                      leading: Icon(Icons.grid_on_rounded,
-                          color: theme.iconTheme.color),
+                      leading:
+                          Icon(Icons.music_note, color: theme.iconTheme.color),
                       title: Text('Music & stories page'),
                       initialValue: canUseAudioPage,
                       onToggle: (bool value) async {
@@ -635,14 +640,17 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           FieldPath(['settings', 'audio page']):
                               encryptSetting(_selectedOption, value),
                         });
+                        await updateParentChildrenField(
+                            parentId, _selectedOption);
+
                         setState(() {
                           canUseAudioPage = value;
                         });
                       },
                     ),
                     SettingsTile.navigation(
-                      leading:
-                          Icon(Icons.color_lens, color: theme.iconTheme.color),
+                      leading: Icon(Icons.color_lens_sharp,
+                          color: theme.iconTheme.color),
                       title: Text('Child Theme'),
                       trailing: Text(childrenSettingsData[_selectedOption]
                               ?['childtheme'] ??
@@ -658,13 +666,15 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                                 children: ThemeProvider.themes.map((theme) {
                                   return RadioListTile(
                                     value: theme.id,
-                                    groupValue: themeProvider.themeName,
+                                    groupValue: childtheme,
                                     title: Text(theme.name),
                                     onChanged: (value) async {
                                       await themeProvider.setChildTheme(
                                         value!,
                                         _selectedOption,
                                       );
+                                      await updateParentChildrenField(
+                                          parentId, _selectedOption);
                                       setState(() {
                                         childtheme = value;
                                         childrenSettingsData[_selectedOption]![

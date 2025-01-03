@@ -345,6 +345,13 @@ class AddButtonState extends State<AddButton> {
                         FirstButton button = await _createFirstButtonFromData(
                             buttonData, enteredText, childId!);
                         addVisibleButtons(button);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                "Pictogram with title '$enteredText' has been added successfully to the board."),
+                          ),
+                        );
+
                         setState(() {
                           _isUploading = false;
                         });
@@ -355,6 +362,12 @@ class AddButtonState extends State<AddButton> {
                         if (useCustomImage == true) {
                           await addCustomImageToFirebaseAndLocal(
                               enteredText, childId!, childUsername!);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  "Custom image with title '$enteredText' has been added successfully to the board."),
+                            ),
+                          );
                         }
                       }
                     }
@@ -364,6 +377,12 @@ class AddButtonState extends State<AddButton> {
                     if (enteredText != null) {
                       await addCustomImageToFirebaseAndLocal(
                           enteredText, childId!, childUsername!);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                              "Custom image with title '$enteredText' has been added successfully to the board."),
+                        ),
+                      );
                     }
                   }
                 },

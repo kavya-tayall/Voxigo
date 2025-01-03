@@ -42,7 +42,7 @@ class ChildManagementPage extends StatefulWidget {
 }
 
 class _ChildManagementPageState extends State<ChildManagementPage> {
-  Map<String, String> childIdToUsername = {};
+  Map<String, dynamic> childIdToUsername = {};
   bool isLoading = true;
   String parentEmailasUserName = "";
   String adminName = "";
@@ -52,15 +52,18 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
   void initState() {
     super.initState();
     print("inside init state");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusManager.instance.primaryFocus?.unfocus();
+    });
     _initializeData();
   }
 
   Future<void> _initializeData() async {
-    await _fetchAndStoreChildrenDataInBackground();
-    //  fetchChildren();
+    await _buildChildCollectionAndGridDataForParent(context);
   }
 
-  Future<void> _fetchAndStoreChildrenDataInBackground() async {
+  Future<void> _buildChildCollectionAndGridDataForParent(
+      BuildContext context) async {
     setState(() {
       isFetchingData = true;
     });
@@ -71,23 +74,9 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
       if (currentUser != null) {
         String parentId = currentUser.uid;
         print('parent id: $parentId');
-        DocumentSnapshot parentSnapshot = await FirebaseFirestore.instance
-            .collection('parents')
-            .doc(parentId)
-            .get();
 
-        if (parentSnapshot.exists) {
-          Map<String, dynamic>? parentData =
-              parentSnapshot.data() as Map<String, dynamic>?;
-          parentEmailasUserName = parentData?['email'];
-          if (parentData != null && parentData['children'] != null) {
-            List<String> childIds = List<String>.from(parentData['children']);
-            print('inside _fetchAndStoreChildrenDataInBackground');
-            await fetchAndStoreChildrenData(
-                parentId, childIds, context, parentEmailasUserName, true,
-                refreshButtons: true);
-          }
-        }
+        await refreshChildCollection(context, parentId);
+
         print('done fetching children now prepin to child list');
         setState(() {
           isLoading = true;
@@ -100,7 +89,11 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
             var childCollection = ChildCollectionWithKeys.instance;
             for (var record in childCollection.allRecords) {
               if (record.username != null && record.childuid.isNotEmpty) {
-                childIdToUsername[record.childuid] = record.username!;
+                childIdToUsername[record.childuid] = {
+                  "username": record.username!,
+                  "isUpdated": false, // Default value for the isUpdated flag
+                  "isMusicUpdated": false,
+                };
               }
             }
           }
@@ -111,9 +104,15 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
           print('Error fetching children: $e');
         } finally {
           setState(() {
+            print(childIdToUsername);
             isLoading = false;
           });
         }
+
+        // Trigger background task to fetch board data for all children
+        Future.microtask(() async {
+          await _fetchBoardDataforAllChildren(context);
+        });
       }
     } catch (e) {
       print('Error in background data fetching: $e');
@@ -127,43 +126,46 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
     }
   }
 
-  Future<void> _showAddChildDialog(BuildContext context) async {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return RegisterChildDialog(); // Your custom dialog widget
-      },
-    );
+  Future<void> _fetchBoardDataforAllChildren(BuildContext context) async {
+    try {
+      final childCollection = ChildCollectionWithKeys.instance;
+
+      // Use Future.wait to handle all async calls concurrently
+      await Future.wait(childCollection.allRecords.map((record) async {
+        await _fetchSingleChildButtonsinBackground(context, record.childuid);
+      }));
+
+      print('Fetching board data for all children completed.');
+    } catch (e) {
+      print('Error fetching board data for all children: $e');
+    }
   }
 
-/*
-  Future<void> fetchChildren() async {
-    setState(() {
-      isLoading = true;
-    });
-
+  Future<void> _fetchSingleChildButtonsinBackground(
+      BuildContext context, String childId) async {
     try {
-      User? currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
-        childIdToUsername.clear();
-        var childCollection = ChildCollectionWithKeys.instance;
-        for (var record in childCollection.allRecords) {
-          if (record.username != null && record.childuid.isNotEmpty) {
-            childIdToUsername[record.childuid] = record.username!;
-          }
-        }
+      String childUsernameToBePassed = childIdToUsername[childId]['username']!;
+      await fetchSingleChildBoardData(context, false,
+          childIdPassed: childId, childUsernamePassed: childUsernameToBePassed);
+
+      // Update isUpdated flag for the child
+      if (childIdToUsername.containsKey(childId)) {
+        childIdToUsername[childId]['isUpdated'] = true;
+        childIdToUsername[childId]['isMusicUpdated'] = true;
+      } else {
+        print('Child ID $childId not found in childIdToUsername map.');
       }
-      print('completed fetching children');
-      // Trigger UI rebuild after the data is updated
-      setState(() {});
-    } catch (e) {
-      print('Error fetching children: $e');
-    } finally {
+
+      // Trigger UI update after all operations are done
       setState(() {
-        isLoading = false;
+        print('Setting isUpdated to true for childId: $childId');
       });
+    } catch (e) {
+      print('Error fetching single child buttons for childId $childId: $e');
     }
-  }*/
+  }
+
+  @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
@@ -270,7 +272,9 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       Icon(Icons.chat,
-                                          size: 75, color: Color(0xA6000000)),
+                                          size: 75,
+                                          color:
+                                              Color.fromARGB(166, 102, 42, 42)),
                                       Text(
                                         "Chat with VoxiBot",
                                         style: TextStyle(
@@ -373,7 +377,8 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                     itemBuilder: (context, index) {
                                       String key = childIdToUsername.keys
                                           .elementAt(index);
-                                      String value = childIdToUsername[key]!;
+                                      String value =
+                                          childIdToUsername[key]['username']!;
                                       return Container(
                                         margin: EdgeInsets.only(
                                             bottom: 16.0, left: 6, right: 6),
@@ -387,6 +392,8 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                           children: <Widget>[
                                             ListTile(
                                               title: Text('Edit Grid'),
+                                              enabled: childIdToUsername[key]
+                                                  ['isUpdated'],
                                               onTap: () {
                                                 Navigator.push(
                                                   context,
@@ -401,6 +408,8 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                             ),
                                             ListTile(
                                               title: Text('Edit Music'),
+                                              enabled: childIdToUsername[key]
+                                                  ['isMusicUpdated'],
                                               onTap: () {
                                                 Navigator.push(
                                                   context,
@@ -440,8 +449,9 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                 ),
                               ),
                               onPressed: () async {
-                                await _showAddChildDialog(context);
-                                await _fetchAndStoreChildrenDataInBackground();
+                                Navigator.of(context).pushNamed('/add_child');
+                                await _buildChildCollectionAndGridDataForParent(
+                                    context);
                               },
                               icon: Icon(Icons.add),
                               label: Text(

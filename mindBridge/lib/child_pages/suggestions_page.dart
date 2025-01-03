@@ -18,22 +18,9 @@ class SuggestionsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Container(
-            alignment: Alignment.center,
-            width: double.infinity,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Text(
-                "Suggestions",
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
+        title: Text(
+          "Suggestions",
+          textAlign: TextAlign.center,
         ),
       ),
       body: ListView.builder(
