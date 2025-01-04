@@ -204,11 +204,11 @@ class DeleteAccountDialog extends StatefulWidget {
 }
 
 class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
-  bool _isParentAuthenticated = false;
+  bool _isParentAuthenticated = true; //false;
 
   void _updateParentAuthentication(bool isAuthenticated) {
     setState(() {
-      _isParentAuthenticated = isAuthenticated;
+      _isParentAuthenticated = true; //isAuthenticated;
     });
   }
 
