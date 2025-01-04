@@ -17,6 +17,8 @@ class ChildLoginPage extends StatelessWidget {
 
   Future<String?> _authUser(BuildContext context, LoginData data) async {
     try {
+      await logOutUser(context);
+
       await _auth.signInChild(data.name, data.password, context);
     } on ChildDoesNotExistException {
       return ChildDoesNotExistException().toString();

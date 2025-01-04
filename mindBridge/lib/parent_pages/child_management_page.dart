@@ -6,6 +6,7 @@ import 'package:test_app/widgets/child_provider.dart';
 import '../widgets/parent_music_page.dart';
 import 'edit_child_grid.dart';
 import 'package:test_app/widgets/parent_provider.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../parent_pages/child_add_newchild.dart';
 
@@ -168,6 +169,11 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).unfocus();
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+    });
+
     ThemeData theme = Theme.of(context);
 
     return Scaffold(

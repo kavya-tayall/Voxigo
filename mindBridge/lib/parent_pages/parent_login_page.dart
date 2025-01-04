@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter/services.dart'; // Add this line
 import 'package:google_sign_in/google_sign_in.dart'; // For Google sign-in
 import 'package:test_app/parent_pages/privacy_policy.dart';
 import 'package:test_app/parent_pages/terms_of_use.dart';
@@ -34,8 +35,10 @@ class ParentLoginPage extends StatelessWidget {
   }
 
   Future<String?> _authUser(LoginData data, BuildContext context) async {
-    _startLoading(context); // Start loading when login starts
+    FocusScope.of(context).unfocus();
 
+    _startLoading(context); // Start loading when login starts
+    await logOutUser(context);
     try {
       print("ParentLoginPage: _authUser: ${data.name}, ${data.password}");
       await _auth.signInParentwithEmailandPassword(
@@ -130,197 +133,204 @@ class ParentLoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Clear any previous user session before starting the login process
-    logOutUser(context);
-    FirebaseAuth.instance.signOut();
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return MouseRegion(
-      cursor: isLoading
-          ? SystemMouseCursors.progress
-          : SystemMouseCursors.basic, // Change cursor based on loading state
-      child: AbsorbPointer(
-        absorbing: isLoading, // Prevent user interactions during loading
-        child: Container(
-          color: Colors
-              .lightBlue[50], // Light blue background for the entire screen
-          child: Stack(
-            children: [
-              Center(
-                child: Stack(
-                  children: [
-                    VoxigoLoginWidget(
-                      privacyPolicy: PrivacyPolicyPage(),
-                      termsOfService: TermsOfUsePage(),
-                      onLogin: (email, password) => _authUser(
-                          LoginData(name: email, password: password), context),
-                      onSignup: (email, password, additionalSignupData) async {
-                        _startLoading(context); // Start loading on signup
-                        try {
-                          final signupResult = await _signUp(
-                            SignupData(
-                              name: email,
-                              password: password,
-                              additionalSignupData:
-                                  additionalSignupData, // Pass additional fields
-                            ),
-                          );
-                          return signupResult;
-                        } finally {
-                          _stopLoading(context); // Stop loading after signup
-                        }
-                      },
-                      onRecoverPassword: (email) async {
-                        _startLoading(
-                            context); // Start loading on recover password
-                        try {
-                          final recoverResult = await _recoverPassword(email);
-                          return recoverResult;
-                        } finally {
-                          _stopLoading(
-                              context); // Stop loading after recover password
-                        }
-                      },
-                      footer: "Voxigo",
-                      messages: LoginMessages(
-                        recoverPasswordIntro:
-                            'Please enter the email address associated with your account.',
-                        recoverPasswordDescription:
-                            'We will send you a link to reset your password.',
-                      ),
-                      savedEmail: '',
-                      savedPassword: '',
-                      additionalSignupFields: [
-                        UserFormField(keyName: "First name"),
-                        UserFormField(keyName: "Last name"),
-                        UserFormField(keyName: "Username"),
-                      ],
-                      title: "Parent Login",
-                      theme: LoginTheme(primaryColor: Color(0xFF56B1FB)),
-                      userValidator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Username is required';
-                        }
-                        return null;
-                      },
-                      passwordValidator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Password is required';
-                        }
-                        return null;
-                      },
-                      loginAfterSignUp: true,
-                      redirectAfterSignup: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                              builder: (context) => ParentLoginPage()),
-                        );
-                      },
-                      redirectAfterRecoverPassword: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                              builder: (context) => ParentLoginPage()),
-                        );
-                      },
-                      onGoogleSignIn: () async {
-                        final googleSignInResult = await _googleSignIn(context);
-                        return googleSignInResult;
-                      },
-                      onSubmitAnimationCompleted: () async {
-                        User? user = FirebaseAuth.instance.currentUser;
-
-                        if (user != null) {
-                          print("ParentLoginPage: _authUser: ${user.email}");
-
-                          if (user.emailVerified == false) {
-                            await user.sendEmailVerification();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    'Email verification sent. Please verify your email before signing in.'),
+    return GestureDetector(
+      onTap: () {
+        // Hide the keyboard when tapping outside controls
+        FocusScope.of(context).unfocus();
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
+      },
+      child: MouseRegion(
+        cursor: isLoading
+            ? SystemMouseCursors.progress
+            : SystemMouseCursors.basic, // Change cursor based on loading state
+        child: AbsorbPointer(
+          absorbing: isLoading, // Prevent user interactions during loading
+          child: Container(
+            color: Colors
+                .lightBlue[50], // Light blue background for the entire screen
+            child: Stack(
+              children: [
+                Center(
+                  child: Stack(
+                    children: [
+                      VoxigoLoginWidget(
+                        privacyPolicy: PrivacyPolicyPage(),
+                        termsOfService: TermsOfUsePage(),
+                        onLogin: (email, password) => _authUser(
+                            LoginData(name: email, password: password),
+                            context),
+                        onSignup:
+                            (email, password, additionalSignupData) async {
+                          _startLoading(context); // Start loading on signup
+                          try {
+                            final signupResult = await _signUp(
+                              SignupData(
+                                name: email,
+                                password: password,
+                                additionalSignupData:
+                                    additionalSignupData, // Pass additional fields
                               ),
                             );
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                  builder: (context) => ParentLoginPage()),
-                            );
-                            return;
+                            return signupResult;
+                          } finally {
+                            _stopLoading(context); // Stop loading after signup
                           }
-
-                          await _auth.postParentLogin(user);
-
-                          ParentProvider parentProvider =
-                              Provider.of<ParentProvider>(context,
-                                  listen: false);
-
-                          await parentProvider.fetchParentData(user.uid);
-
-                          bool checkAdditionalInfo =
-                              await _auth.checkAdditionalInfo(user.email!,
-                                  user.uid, parentProvider.parentData);
-
-                          bool needsAdditionalInfo;
-
-                          if (checkAdditionalInfo == true) {
-                            needsAdditionalInfo = false;
-                          } else {
-                            needsAdditionalInfo = true;
+                        },
+                        onRecoverPassword: (email) async {
+                          _startLoading(
+                              context); // Start loading on recover password
+                          try {
+                            final recoverResult = await _recoverPassword(email);
+                            return recoverResult;
+                          } finally {
+                            _stopLoading(
+                                context); // Stop loading after recover password
                           }
-
-                          if (needsAdditionalInfo) {
-                            Navigator.of(context)
-                                .pushReplacement(MaterialPageRoute(
-                              builder: (context) =>
-                                  AdditionalInfoScreen(user: user, auth: _auth),
-                            ));
-                          } else {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                  builder: (context) => ParentBasePage()),
-                            );
+                        },
+                        footer: "Voxigo",
+                        messages: LoginMessages(
+                          recoverPasswordIntro:
+                              'Please enter the email address associated with your account.',
+                          recoverPasswordDescription:
+                              'We will send you a link to reset your password.',
+                        ),
+                        savedEmail: '',
+                        savedPassword: '',
+                        additionalSignupFields: [
+                          UserFormField(keyName: "First name"),
+                          UserFormField(keyName: "Last name"),
+                          UserFormField(keyName: "Username"),
+                        ],
+                        title: "Parent Login",
+                        theme: LoginTheme(primaryColor: Color(0xFF56B1FB)),
+                        userValidator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Username is required';
                           }
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text(
-                                    'Authentication failed. Please try again.')),
+                          return null;
+                        },
+                        passwordValidator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Password is required';
+                          }
+                          return null;
+                        },
+                        loginAfterSignUp: true,
+                        redirectAfterSignup: () {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                                builder: (context) => ParentLoginPage()),
                           );
-                        }
-                      },
-                    ),
-                    if (isLoading) // Display loading indicator if loading
-                      Center(
-                        child: CircularProgressIndicator(),
+                        },
+                        redirectAfterRecoverPassword: () {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                                builder: (context) => ParentLoginPage()),
+                          );
+                        },
+                        onGoogleSignIn: () async {
+                          final googleSignInResult =
+                              await _googleSignIn(context);
+                          return googleSignInResult;
+                        },
+                        onSubmitAnimationCompleted: () async {
+                          User? user = FirebaseAuth.instance.currentUser;
+
+                          if (user != null) {
+                            print("ParentLoginPage: _authUser: ${user.email}");
+
+                            if (user.emailVerified == false) {
+                              await user.sendEmailVerification();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'Email verification sent. Please verify your email before signing in.'),
+                                ),
+                              );
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                    builder: (context) => ParentLoginPage()),
+                              );
+                              return;
+                            }
+
+                            await _auth.postParentLogin(user);
+
+                            ParentProvider parentProvider =
+                                Provider.of<ParentProvider>(context,
+                                    listen: false);
+
+                            await parentProvider.fetchParentData(user.uid);
+
+                            bool checkAdditionalInfo =
+                                await _auth.checkAdditionalInfo(user.email!,
+                                    user.uid, parentProvider.parentData);
+
+                            bool needsAdditionalInfo;
+
+                            if (checkAdditionalInfo == true) {
+                              needsAdditionalInfo = false;
+                            } else {
+                              needsAdditionalInfo = true;
+                            }
+
+                            if (needsAdditionalInfo) {
+                              Navigator.of(context)
+                                  .pushReplacement(MaterialPageRoute(
+                                builder: (context) => AdditionalInfoScreen(
+                                    user: user, auth: _auth),
+                              ));
+                            } else {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                    builder: (context) => ParentBasePage()),
+                              );
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(
+                                      'Authentication failed. Please try again.')),
+                            );
+                          }
+                        },
                       ),
-                  ],
-                ),
-              ),
-              Positioned(
-                top: screenHeight *
-                    0.05, // Adjust dynamically based on screen height
-                right: screenWidth *
-                    0.05, // Adjust dynamically based on screen width
-                child: ElevatedButton(
-                  onPressed: () {
-                    _navigateToChildLogin(context);
-                  },
-                  child: Text(
-                    "Child Login",
-                    style: TextStyle(
-                        fontSize: 18,
-                        color:
-                            Colors.blueAccent), // Smaller text for better fit
+                      if (isLoading) // Display loading indicator if loading
+                        Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                    ],
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                ),
+                Positioned(
+                  top: screenHeight *
+                      0.05, // Adjust dynamically based on screen height
+                  right: screenWidth *
+                      0.05, // Adjust dynamically based on screen width
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _navigateToChildLogin(context);
+                    },
+                    child: Text(
+                      "Child Login",
+                      style: TextStyle(
+                          fontSize: 18,
+                          color:
+                              Colors.blueAccent), // Smaller text for better fit
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -329,6 +339,8 @@ class ParentLoginPage extends StatelessWidget {
 
   Future<String?> _googleSignIn(BuildContext context) async {
     try {
+      await logOutUser(context);
+
       final GoogleSignIn googleSignIn = GoogleSignIn(
         scopes: [
           'email',

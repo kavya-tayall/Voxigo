@@ -245,13 +245,31 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
   }
 
   void _handleGoogleLogin() async {
-    // Implement Google login logic
-    final result = await widget.onGoogleSignIn();
-    if (result != null) {
+    try {
+      // Implement Google login logic
+      final result = await widget.onGoogleSignIn();
+
+      if (result == 'Google Sign-In cancelled or failed') {
+        throw Exception("Google Sign-In cancelled or failed");
+      }
+
+      if (result != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result),
+            behavior: SnackBarBehavior.floating, // Optional: Floating behavior
+            margin: EdgeInsets.all(10),
+          ),
+        );
+        widget.onSubmitAnimationCompleted?.call();
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result)),
+        SnackBar(
+          content: Text(e.toString()), // Display the error message
+          backgroundColor: Colors.red,
+        ),
       );
-      widget.onSubmitAnimationCompleted?.call();
     }
   }
 
