@@ -75,7 +75,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
     fetchChildrenData();
   }
 
-  Future<void> _showDeleteDialog(BuildContext context) async {
+  Future<void> _showChildDeleteDialog(BuildContext context) async {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -100,13 +100,25 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
       builder: (BuildContext context) {
         ParentProvider parentProvider =
             Provider.of<ParentProvider>(context, listen: false);
-        ParentRecord parentRecord = parentProvider.parentData;
+        ParentRecord? parentRecord = parentProvider.parentData;
+
+        // Null check to prevent accessing null parentRecord
+        if (parentRecord == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // Safely accessing properties after the null check
         return EditProfileDialog(
-          userid: parentRecord.parentUid!,
-          username: parentRecord.username!,
-          firstName: parentRecord.firstname!,
-          lastName: parentRecord.lastname!,
-          email: parentRecord.email!,
+          userid: parentRecord.parentUid ?? parentId,
+          // Use a default value or handle it appropriately
+          username: parentRecord.username ?? 'voxigo',
+          firstName: parentRecord.firstname ??
+              FirebaseAuth.instance.currentUser?.displayName ??
+              'Unknown', // Provide a fallback value
+          lastName: parentRecord.lastname ?? '', // Provide a fallback value
+          email: parentRecord.email ??
+              FirebaseAuth.instance.currentUser?.email ??
+              '', // Provide a fallback value
           isEditMode: isEditMode, // View mode
         );
       },
@@ -450,7 +462,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                       trailing: Text(""),
                       title: Text('Delete Child'),
                       onPressed: (context) async {
-                        await _showDeleteDialog(context);
+                        await _showChildDeleteDialog(context);
                         fetchChildrenData();
                       },
                     ),

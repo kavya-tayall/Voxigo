@@ -29,7 +29,7 @@ class EditAndViewProfileForm extends StatefulWidget {
 class _EditAndViewProfileFormState extends State<EditAndViewProfileForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  late final TextEditingController _usernameController;
+  //late final TextEditingController _usernameController;
   late final TextEditingController _firstNameController;
   late final TextEditingController _lastNameController;
   late bool _isEditMode;
@@ -38,7 +38,7 @@ class _EditAndViewProfileFormState extends State<EditAndViewProfileForm> {
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController(text: widget.username);
+    //  _usernameController = TextEditingController(text: widget.username);
     _firstNameController = TextEditingController(text: widget.firstName);
     _lastNameController = TextEditingController(text: widget.lastName);
     _isEditMode = widget.isEditMode;
@@ -46,7 +46,7 @@ class _EditAndViewProfileFormState extends State<EditAndViewProfileForm> {
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    // _usernameController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     super.dispose();
@@ -66,7 +66,7 @@ class _EditAndViewProfileFormState extends State<EditAndViewProfileForm> {
         // Simulate save profile logic
         final encryptedParentInfo = await encryptParentInfoWithIV(
           widget.userid,
-          _usernameController.text,
+          'voxigo',
           widget.email,
           _firstNameController.text,
           _lastNameController.text,
@@ -96,7 +96,7 @@ class _EditAndViewProfileFormState extends State<EditAndViewProfileForm> {
         ParentProvider parentProvider =
             Provider.of<ParentProvider>(context, listen: false);
         parentProvider.updateParentData(
-          username: _usernameController.text,
+          username: 'voxigo',
           firstname: _firstNameController.text,
           lastname: _lastNameController.text,
         );
@@ -157,6 +157,7 @@ class _EditAndViewProfileFormState extends State<EditAndViewProfileForm> {
               ),
             ),
             // Username Field
+            /*
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: TextFormField(
@@ -173,7 +174,7 @@ class _EditAndViewProfileFormState extends State<EditAndViewProfileForm> {
                   return null;
                 },
               ),
-            ),
+            ),*/
             // First Name Field
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),

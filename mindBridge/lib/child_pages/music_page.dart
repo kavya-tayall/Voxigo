@@ -537,10 +537,14 @@ class _MusicPageState extends State<MusicPage> {
         title: Text('Music & Stories'),
         automaticallyImplyLeading:
             true, // Ensures a back button if there is a previous route
-        leading: Navigator.canPop(context)
+        leading: Provider.of<ChildProvider>(context, listen: false)
+                    .childNavigateFrom ==
+                "feelings"
             ? BackButton(onPressed: () {
                 Navigator.pop(
                     context); // Pops the current route from the navigation stack
+                Provider.of<ChildProvider>(context, listen: false)
+                    .childNavigateFrom = "";
               })
             : null, // If there's no route to pop, leading is null
       ),

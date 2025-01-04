@@ -10,6 +10,7 @@ class ColoringHome extends StatefulWidget {
 
 class _ColoringHomeState extends State<ColoringHome> {
   late ScribbleNotifier notifier;
+  Color? _selectedColor;
 
   @override
   void initState() {
@@ -177,11 +178,22 @@ class _ColoringHomeState extends State<ColoringHome> {
     return colors.map((color) {
       return _buildPaletteSlot(
         child: TextButton(
-          onPressed: () => notifier.setColor(color),
+          onPressed: () {
+            setState(() {
+              _selectedColor = color;
+            });
+            notifier.setColor(color);
+          },
           style: TextButton.styleFrom(
-            backgroundColor: Colors.white,
+            backgroundColor:
+                _selectedColor == color ? color.withOpacity(0.5) : Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
+              side: BorderSide(
+                color:
+                    _selectedColor == color ? Colors.black : Colors.transparent,
+                width: 2,
+              ),
             ),
             padding: const EdgeInsets.all(8),
           ),
@@ -190,9 +202,7 @@ class _ColoringHomeState extends State<ColoringHome> {
             color: color,
           ),
         ),
-        borderColor: color == Colors.white
-            ? Colors.black
-            : null, // Border for white color
+        //   borderColor: color == Colors.white ? Colors.black : null,
       );
     }).toList();
   }

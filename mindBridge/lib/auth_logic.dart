@@ -67,6 +67,8 @@ Future<void> logOutUser(BuildContext context) async {
     print('All singleton classes disposed during logout');
     final childProvider = Provider.of<ChildProvider>(context, listen: false);
     childProvider.logout();
+    final parentProvider = Provider.of<ParentProvider>(context, listen: false);
+    parentProvider.clearParentData();
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     await FirebaseAuth.instance.signOut();
@@ -90,11 +92,12 @@ class AuthService {
     bool createUserOrNot = true,
   ]) async {
     // Check if the username already exists
+    /*
     bool usernameExists = await _checkUsernameExists(username);
 
     if (usernameExists) {
       throw UsernameAlreadyExistsException();
-    }
+    }*/
 
     // Enforce password requirement if creating a new user
     if (createUserOrNot && (password == null || password.isEmpty)) {
@@ -174,12 +177,8 @@ class AuthService {
 
     // Check if name or username fields are missing or empty
     String? name = parentData.firstname;
-    String? savedUsername = parentData.username;
 
-    if (name == null ||
-        name.trim().isEmpty ||
-        savedUsername == null ||
-        savedUsername.trim().isEmpty) {
+    if (name == null || name.trim().isEmpty) {
       return false;
     }
 
@@ -546,6 +545,8 @@ class UserService {
 
       print('Child ID removed from parent\'s children array.');
 
+      await removeChildFromParentField(parentId, childId);
+
       // Reference to the child document in Firestore
       DocumentReference childRef = _db.collection('children').doc(childId);
 
@@ -572,6 +573,8 @@ class UserService {
       // Delete the child's local folder
       await deleteLocalChildFolder(childId);
       print('Child\'s local folder deleted.');
+
+      ChildCollectionWithKeys.instance.removeRecord(childId);
     } catch (e) {
       print('Error deleting child $childId: $e');
       throw Exception('Failed to delete child. Please try again.');

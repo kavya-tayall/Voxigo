@@ -48,7 +48,7 @@ class _EditAndViewChildProfileFormState
 
   late final FocusNode _usernameFocusNode;
 
-  bool _isPasswordValidated = false;
+  bool _isPasswordValidated = true;
   late bool _isPasswordRequired;
   late bool _isEditMode;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -269,7 +269,7 @@ class _EditAndViewChildProfileFormState
               child: Column(
                 children: [
                   Text(
-                    'Disclaimer: By editing this information, the following consent provided remains valid.',
+                    'Disclaimer: By editing this information, the previously provided consent (as shown below) remains valid.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -401,7 +401,7 @@ class _EditChildProfileDialogState extends State<EditChildProfileDialog> {
 
   void _updatePasswordRequired(bool isPasswordRequired) {
     setState(() {
-      _isPasswordRequired = isPasswordRequired;
+      _isPasswordRequired = false; //isPasswordRequired;
     });
   }
 
@@ -430,7 +430,7 @@ class _EditChildProfileDialogState extends State<EditChildProfileDialog> {
             childtheme: widget.childtheme,
             disclaimer: widget.disclaimer,
             isEditMode: _isEditMode,
-            isPasswordRequired: _isPasswordRequired,
+            isPasswordRequired: false, //_isPasswordRequired,
             onEditModeChanged: _updateEditMode,
             onPasswordRequiredChanged: _updatePasswordRequired,
           ),

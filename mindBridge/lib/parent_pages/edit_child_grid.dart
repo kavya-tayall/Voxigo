@@ -134,9 +134,15 @@ class _ChildGridPageState extends State<ChildGridPage> {
     return null;
   }
 
-  Future<void> addCustomImageOrPictorgramButton(String enteredText) async {
+  Future<void> addCustomImageOrPictorgramButton() async {
     bool? choosePictogram = await _showChoiceDialog(context);
     if (choosePictogram == true) {
+      String? enteredText =
+          await _showTextInputDialog(context, "Enter button label:");
+      if (enteredText == null) {
+        return;
+      }
+
       dynamic buttonData = searchButtonData(pictogramsData, enteredText);
       if (buttonData != null) {
         await _createFirstButtonFromData(
@@ -159,6 +165,11 @@ class _ChildGridPageState extends State<ChildGridPage> {
         );
       }
     } else {
+      String? enteredText =
+          await _showTextInputDialog(context, "Enter button label:");
+      if (enteredText == null) {
+        return;
+      }
       await uploadCustomImage(enteredText, widget.childId, widget.username);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -419,11 +430,7 @@ class _ChildGridPageState extends State<ChildGridPage> {
             child: Icon(Icons.add),
             label: 'Add Button',
             onTap: () async {
-              String? enteredText =
-                  await _showTextInputDialog(context, "Enter button label:");
-              if (enteredText != null) {
-                await addCustomImageOrPictorgramButton(enteredText);
-              }
+              await addCustomImageOrPictorgramButton();
             },
           ),
           SpeedDialChild(

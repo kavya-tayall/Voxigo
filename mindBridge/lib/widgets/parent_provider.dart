@@ -119,4 +119,14 @@ class ParentProvider with ChangeNotifier {
       print("Error in fetching or updating parent data: $e");
     }
   }
+
+  void clearParentData() {
+    _parentData = ParentRecord(
+      parentUid: '',
+      parentSecureKey: Uint8List(16), // Empty secure key by default
+    );
+    super.dispose();
+
+    notifyListeners(); // Notify listeners to update the UI
+  }
 }

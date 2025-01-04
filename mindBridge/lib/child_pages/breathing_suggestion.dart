@@ -60,6 +60,8 @@ class _BreathingHomeState extends State<BreathingHome>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -72,10 +74,10 @@ class _BreathingHomeState extends State<BreathingHome>
         children: [
           AnimateGradient(
             duration: Duration(seconds: 10),
-            primaryColors: const [
-              Color(0xFFB5B9FF),
-              Color(0xFFBD8EF8),
-              Color(0xFFA598F8),
+            primaryColors: [
+              theme.primaryColor,
+              theme.primaryColorLight,
+              theme.primaryColorDark
             ],
             secondaryColors: const [
               Color(0xFF97A2FF),
@@ -146,14 +148,6 @@ class _BreathingHomeState extends State<BreathingHome>
               child: Container(
                 alignment: Alignment.center,
                 width: double.infinity,
-                child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                    child: Text(
-                      "Deep Breathing",
-                      style:
-                          TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    )),
               ),
             ),
           ),

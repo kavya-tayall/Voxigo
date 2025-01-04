@@ -196,12 +196,37 @@ Future<String> getInitialRoute(BuildContext context) async {
 
 Future<bool> validateParentLogin() async {
   // Check if a user is logged in with Firebase
-  final user = FirebaseAuth.instance.currentUser;
+  User? user = FirebaseAuth.instance.currentUser;
+
+  if (user != null) {
+    try {
+      // Try to fetch user info or perform a valid operation that requires an active session
+      await user.reload(); // Reload user data to ensure session is updated
+      user = FirebaseAuth
+          .instance.currentUser; // Refresh the user object after reloading
+
+      // If the user is not found after reloading, sign them out
+      if (user == null) {
+        await FirebaseAuth.instance.signOut();
+        print('User is no longer valid, signed out.');
+      }
+    } catch (e) {
+      // If there's an issue (e.g., user deleted), sign out the user
+      await FirebaseAuth.instance.signOut();
+      print('Error checking user: $e');
+    }
+  }
+
+  // Return whether the user is still logged in
   return user != null;
 }
 
 Future<bool> validateChildToken() async {
   final token = await getChildTokenFromStorage();
+  final user = FirebaseAuth.instance.currentUser;
+  print('validateChildToken: $token');
+  print(user?.uid);
+  if (user == null) return false;
   return token != null && await isTokenValid(token);
 }
 
@@ -270,7 +295,10 @@ class BasePageState extends State<BasePage> {
     final childProvider = Provider.of<ChildProvider>(context, listen: false);
     String? childUsername = childProvider.childData?['username'];
     String? childId = childProvider.childId;
+
     print('childUsername: $childUsername');
+
+    // Clear all previous routes and navigate to the Home Page
 
     refreshGridFromLatestBoard(context, childUsername!, childId!, false);
   }

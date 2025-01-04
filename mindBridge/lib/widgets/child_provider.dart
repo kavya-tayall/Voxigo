@@ -15,6 +15,15 @@ class ChildProvider with ChangeNotifier {
   String firstName = '';
   String lastName = '';
   String username = '';
+  String navigateFrom = '';
+
+  String get childNavigateFrom {
+    return navigateFrom;
+  }
+
+  set childNavigateFrom(String value) {
+    navigateFrom = value;
+  }
 
   Future<void> setChildData(String childId, Map<String, dynamic> data) async {
     this.childId = childId;

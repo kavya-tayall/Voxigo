@@ -12,6 +12,7 @@ import '../main.dart';
 import 'package:test_app/authExceptions.dart';
 import 'package:test_app/widgets/parent_provider.dart'; // Adjust the path as necessary
 import 'package:provider/provider.dart'; // Add this line
+import 'package:flutter/gestures.dart'; // Add this line
 import 'package:test_app/parent_pages/parent_login_widget.dart';
 
 class ParentLoginPage extends StatelessWidget {
@@ -129,6 +130,9 @@ class ParentLoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Clear any previous user session before starting the login process
+    logOutUser(context);
+    FirebaseAuth.instance.signOut();
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -382,13 +386,20 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
   final _formKey = GlobalKey<FormState>();
   String? _firstName;
   String? _lastName;
-  String? _username;
+  bool _isTermsAccepted = false;
 
-  Future<String> _registerParentforProviderLogin(String email,
-      String? firstname, String? lastname, String? username) async {
+  Future<String> _registerParentForProviderLogin(
+      String email, String? firstname, String? lastname) async {
     try {
       await widget.auth
-          .registerParent(username!, firstname!, lastname!, email, null, false);
+          .registerParent('voxigo', firstname!, lastname!, email, null, false);
+
+      ParentProvider parentProvider =
+          Provider.of<ParentProvider>(context, listen: false);
+
+      parentProvider.parentData.firstname = firstname;
+      parentProvider.parentData.lastname = lastname;
+
       return "Additional information saved successfully";
     } on UsernameAlreadyExistsException {
       return "Username already exists";
@@ -400,75 +411,137 @@ class _AdditionalInfoScreenState extends State<AdditionalInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isCompact = MediaQuery.of(context).size.width < 600;
+
     return Scaffold(
-      appBar: AppBar(title: Text('Additional Information')),
+      appBar: AppBar(
+        title: Text('Additional Information'),
+      ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                decoration: InputDecoration(labelText: 'First Name'),
-                onSaved: (value) => _firstName = value,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'First name is required'
-                    : null,
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Last Name'),
-                onSaved: (value) => _lastName = value,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Last name is required'
-                    : null,
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Username'),
-                onSaved: (value) => _username = value,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Username is required'
-                    : null,
-              ),
-              SizedBox(height: 20.0),
-              ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    /*
-                    final encryptedParentInfo = await encryptParentInfoWithIV(
-                      widget.user.uid,
-                      _username!,
-                      widget.user.email!,
-                      _firstName ?? '',
-                      _lastName ?? '',
-                    );*/
-
-                    // Save additional information to the database
-                    String result = await _registerParentforProviderLogin(
-                      widget.user.email!,
-                      _firstName ?? '',
-                      _lastName ?? '',
-                      _username ?? '',
-                    );
-
-                    //        await widget.auth.postParentLogin(widget.user!);
-                    // Show a snackbar with the result
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(result)),
-                    );
-
-                    if (result == "Additional information saved successfully") {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => ParentBasePage(),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'First Name'),
+                  onSaved: (value) => _firstName = value,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'First name is required'
+                      : null,
+                ),
+                SizedBox(height: 16.0),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Last Name'),
+                  onSaved: (value) => _lastName = value,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Last name is required'
+                      : null,
+                ),
+                SizedBox(height: 24.0),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _isTermsAccepted,
+                      onChanged: (value) {
+                        setState(() {
+                          _isTermsAccepted = value ?? false;
+                        });
+                      },
+                    ),
+                    Expanded(
+                      child: RichText(
+                        textAlign: TextAlign.start,
+                        text: TextSpan(
+                          text: "I have read and accepted Voxigo's ",
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontSize: isCompact ? 12.0 : 14.0,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: "Terms of Service",
+                              style: const TextStyle(
+                                color: Color(0xFF56B1FB),
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  Navigator.pushNamed(context, '/terms_of_use');
+                                },
+                            ),
+                            const TextSpan(text: " and "),
+                            TextSpan(
+                              text: "Privacy Policy",
+                              style: const TextStyle(
+                                color: Color(0xFF56B1FB),
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  Navigator.pushNamed(
+                                      context, '/privacy_policy');
+                                },
+                            ),
+                            const TextSpan(text: "."),
+                          ],
                         ),
-                      );
-                    }
-                  }
-                },
-                child: Text('Submit'),
-              ),
-            ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 24.0),
+                ElevatedButton(
+                  onPressed: _isTermsAccepted
+                      ? () async {
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
+                            String result =
+                                await _registerParentForProviderLogin(
+                              widget.user.email!,
+                              _firstName ?? '',
+                              _lastName ?? '',
+                            );
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(result)),
+                            );
+
+                            if (result ==
+                                "Additional information saved successfully") {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) => ParentBasePage(),
+                                ),
+                              );
+                            }
+                          }
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF56B1FB),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      vertical: isCompact ? 12.0 : 16.0,
+                    ),
+                  ),
+                  child: Text(
+                    'Submit',
+                    style: TextStyle(
+                      fontSize: isCompact ? 18.0 : 20.0,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

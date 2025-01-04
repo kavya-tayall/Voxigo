@@ -90,7 +90,8 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
             for (var record in childCollection.allRecords) {
               if (record.username != null && record.childuid.isNotEmpty) {
                 childIdToUsername[record.childuid] = {
-                  "username": record.username!,
+                  "name": "${record.firstName!} ${record.lastName!}",
+                  "username": record.username,
                   "isUpdated": false, // Default value for the isUpdated flag
                   "isMusicUpdated": false,
                 };
@@ -378,6 +379,8 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                       String key = childIdToUsername.keys
                                           .elementAt(index);
                                       String value =
+                                          childIdToUsername[key]['name']!;
+                                      String username =
                                           childIdToUsername[key]['username']!;
                                       return Container(
                                         margin: EdgeInsets.only(
@@ -400,7 +403,7 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                                   MaterialPageRoute(
                                                     builder: (context) =>
                                                         ChildGridPage(
-                                                            username: value,
+                                                            username: username,
                                                             childId: key),
                                                   ),
                                                 );
@@ -416,7 +419,7 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                                   MaterialPageRoute(
                                                     builder: (context) =>
                                                         ParentMusicPage(
-                                                      username: value,
+                                                      username: username,
                                                       childId: key,
                                                     ),
                                                   ),

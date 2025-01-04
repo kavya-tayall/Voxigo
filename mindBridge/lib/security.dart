@@ -606,7 +606,7 @@ Future<void> setChildCollectionWithDecryptedData(
       var encryptedDisclaimer = encryptedChildData['disclaimer'];
 
 // If it exists and is not null, proceed with decryption
-      String disclaimer = '';
+      print('encryptedDisclaimer: $encryptedDisclaimer');
       if (encryptedDisclaimer != null) {
         disclaimer = await decryptChildfield(
           encryptedDisclaimer, // decrypt the disclaimer field
@@ -617,12 +617,14 @@ Future<void> setChildCollectionWithDecryptedData(
         // Provide a fallback if 'disclaimer' is null or missing
         disclaimer = ParentProvider().globaldisclaimer;
       }
-
+      print('disclaimer 1: $disclaimer');
 // In case the decrypted disclaimer is empty, provide a default fallback message
       if (disclaimer.isEmpty) {
         disclaimer = ParentProvider().globaldisclaimer;
       }
     }
+    print('disclaimer 2: $disclaimer');
+
     //child theme
     String childtheme = 'default';
     childtheme = encryptedChildData?['settings']?['theme'] ?? 'default';

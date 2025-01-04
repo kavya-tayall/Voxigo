@@ -25,7 +25,8 @@ class _DeleteAccountFormState extends State<DeleteAccountForm> {
   final TextEditingController _confirmationController = TextEditingController();
   final UserService _user = UserService();
 
-  bool _isParentAuthenticated = false;
+  bool _isParentAuthenticated =
+      true; // Set to false to require parent password;
   bool _showParentPassword = false;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 

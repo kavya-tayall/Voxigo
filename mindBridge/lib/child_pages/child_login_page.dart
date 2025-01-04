@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test_app/parent_pages/privacy_policy.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../main.dart';
 import 'package:test_app/parent_pages/parent_login_page.dart';
 import '../auth_logic.dart';
@@ -32,6 +33,8 @@ class ChildLoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Clear any previous user session before starting the login process
+    // logOutUser(context);
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 

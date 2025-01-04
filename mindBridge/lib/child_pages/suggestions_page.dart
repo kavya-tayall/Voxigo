@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:test_app/widgets/child_provider.dart';
 
 Map<String, String> temp = {
   "Fidget Spinner": "/fidget",
@@ -80,6 +81,8 @@ class SuggestionTile extends StatelessWidget {
         height: isMobile ? 100 : 150,
         child: ElevatedButton(
           onPressed: () {
+            final childProvider = ChildProvider();
+            childProvider.childNavigateFrom = "feelings";
             Navigator.pushNamed(context, route);
           },
           style: ElevatedButton.styleFrom(

@@ -1098,6 +1098,35 @@ Future<void> updateParentChildrenField(String parentId, String childId) async {
   }
 }
 
+Future<void> removeChildFromParentField(String parentId, String childId) async {
+  try {
+    print('inside removeChildFromParentField');
+    // Reference to the parent document
+    final parentRef =
+        FirebaseFirestore.instance.collection('parents').doc(parentId);
+    DocumentSnapshot updatedParentSnapshot = await parentRef.get();
+
+    Map<String, dynamic>? parentData =
+        updatedParentSnapshot.data() as Map<String, dynamic>?;
+    List<dynamic> childrenList = parentData?['ChildrenList'] ?? [];
+
+    // Find the child in the list and remove it
+    int index = childrenList.indexWhere((child) => child['ChildId'] == childId);
+
+    if (index != -1) {
+      // Remove the child from the list
+      childrenList.removeAt(index);
+      // Update the parent document with the modified ChildrenList
+      await parentRef.update({'ChildrenList': childrenList});
+      print('Child removed successfully.');
+    } else {
+      print('Child not found in the list.');
+    }
+  } catch (e) {
+    print('Error while removing child from parent: $e');
+  }
+}
+
 Future<void> refreshChildCollection(
     BuildContext context, String parentId) async {
 // Fetch the parent document
