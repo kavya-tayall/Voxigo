@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:test_app/child_pages/Five_things_to_see.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 class FiveCalmDownHome extends StatefulWidget {
   FiveCalmDownHome({super.key});
@@ -33,7 +35,11 @@ class _FiveCalmDownHomeState extends State<FiveCalmDownHome> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final isMobile = mediaQuery.size.width < 600;
-
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(

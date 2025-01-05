@@ -21,6 +21,7 @@ import 'cache_utility.dart';
 import 'package:bcrypt/bcrypt.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test_app/user_session_management.dart';
 
 class InvalidCredentialsException implements Exception {
   final String message;
@@ -250,6 +251,8 @@ class AuthService {
     await setLoginUserKeys(parent, UserType.parent);
 
     await saveLoginType('parent'); // Save the login type
+    await setUserSessionActive(parent.uid!);
+    listenToUserSession(parent.uid);
 
     return parent;
     //  } else {
@@ -378,6 +381,8 @@ class AuthService {
     }
 
     saveChildToken(firebaseToken, username);
+    await setUserSessionActive(childId);
+    listenToUserSession(childId);
 
     // Set child data in the provider
     final childProvider = Provider.of<ChildProvider>(context, listen: false);

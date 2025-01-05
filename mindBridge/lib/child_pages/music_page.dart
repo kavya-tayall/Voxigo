@@ -10,6 +10,8 @@ import 'package:test_app/widgets/child_provider.dart';
 import 'package:path/path.dart' as path;
 import '../widgets/music_tile.dart';
 import '../fileUploadandDownLoad.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 class MusicPage extends StatefulWidget {
   @override
@@ -532,6 +534,11 @@ class _MusicPageState extends State<MusicPage> {
       FocusScope.of(context).requestFocus(FocusNode());
     }
 
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Music & Stories'),

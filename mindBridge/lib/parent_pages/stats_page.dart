@@ -6,6 +6,8 @@ import '../child_pages/home_page.dart';
 import '../widgets/buttons_table.dart';
 import '../widgets/feelings_timeline.dart';
 import 'package:test_app/security.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 class StatsPage extends StatefulWidget {
   @override
@@ -259,6 +261,11 @@ class _StatsPageState extends State<StatsPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,

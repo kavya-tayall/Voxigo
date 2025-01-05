@@ -9,6 +9,8 @@ import 'package:test_app/widgets/parent_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../parent_pages/child_add_newchild.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 class GradientText extends StatelessWidget {
   const GradientText(
@@ -175,7 +177,11 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
     });
 
     ThemeData theme = Theme.of(context);
-
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(75.0),

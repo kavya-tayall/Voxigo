@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:test_app/widgets/child_provider.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 Map<String, String> temp = {
   "Fidget Spinner": "/fidget",
@@ -16,7 +18,11 @@ class SuggestionsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
-
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(

@@ -9,6 +9,8 @@ import 'package:test_app/widgets/child_provider.dart';
 import '../child_pages/home_page.dart';
 import 'package:test_app/security.dart';
 import 'package:test_app/cache_utility.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 class ChatPage extends StatefulWidget {
   @override
@@ -221,6 +223,11 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Colors.white,

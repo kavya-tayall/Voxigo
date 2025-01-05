@@ -125,7 +125,6 @@ class ParentProvider with ChangeNotifier {
       parentUid: '',
       parentSecureKey: Uint8List(16), // Empty secure key by default
     );
-    super.dispose();
 
     notifyListeners(); // Notify listeners to update the UI
   }

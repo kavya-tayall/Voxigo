@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -39,9 +40,13 @@ import 'package:test_app/auth_logic.dart';
 import 'package:test_app/parent_pages/privacy_policy.dart';
 import 'package:test_app/parent_pages/terms_of_use.dart';
 import 'package:test_app/parent_pages/child_add_newchild.dart';
+import 'package:test_app/user_session_management.dart';
+
+//import 'package:flutter_restart/flutter_restart.dart';
 
 typedef VoidCallBack = void Function();
 final GlobalKey<BasePageState> basePageKey1 = GlobalKey<BasePageState>();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -87,11 +92,61 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late Future<String> _initialRouteFuture;
+  Timer? _sessionCheckTimer; // Null safety for the timer
 
   @override
   void initState() {
     super.initState();
     _initialRouteFuture = getInitialRoute(context); // Call the method once
+
+    // Start periodic session check after login
+    //if (FirebaseAuth.instance.currentUser != null) {
+    //  listenToUserSession(FirebaseAuth.instance.currentUser?.uid ?? "");
+    // _startSessionCheck();
+    // }
+  }
+
+  void restartApp() {
+    AlertDialog alert = AlertDialog(
+      title: const Text("Restart App"),
+      content: const Text("The app will now restart."),
+      actions: [
+        TextButton(
+          onPressed: () {
+            // Restart the app
+            //FlutterRestart.restartApp();
+          },
+          child: const Text("Restart"),
+        ),
+      ],
+    );
+
+    showDialog(
+      context: navigatorKey.currentContext!,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+    if (navigatorKey.currentState != null) {
+      navigatorKey.currentState?.popUntil((route) => false);
+      navigatorKey.currentState?.pushReplacementNamed('/');
+    } else {
+      print('Navigator key state is null, unable to restart app.');
+    }
+  }
+
+  void _startSessionCheck() {
+    _sessionCheckTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      print('Session validity: $isSessionValid');
+      if (!isSessionValid) {
+        print('Session invalid, restarting app');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          print('Restarting app');
+          restartApp();
+        });
+        _sessionCheckTimer?.cancel();
+      }
+    });
   }
 
   @override
@@ -106,12 +161,13 @@ class _MyAppState extends State<MyApp> {
               child: CircularProgressIndicator()); // Loading state
         }
 
-        final initialRoute = snapshot.data ?? '/child_login'; // Default route
+        var initialRoute = snapshot.data ?? '/child_login'; // Default route
 
         return ChangeNotifierProvider(
           create: (context) => MyAppState(),
           child: MaterialApp(
             title: 'Namer App',
+            navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
             theme: themeProvider.themeData,
             initialRoute: initialRoute,
@@ -132,11 +188,19 @@ class _MyAppState extends State<MyApp> {
               '/contact_us': (_) => ContactUsPage(),
               '/add_child': (_) => RegisterChildForm(),
               '/five_things': (_) => FiveThingsToSeePage(),
+              '/': (_) => ParentLoginPage(),
             },
           ),
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _sessionCheckTimer
+        ?.cancel(); // Clean up the timer when the widget is disposed
+    super.dispose();
   }
 }
 
@@ -351,6 +415,13 @@ class BasePageState extends State<BasePage> {
   @override
   Widget build(BuildContext context) {
     // Show loading indicator if data is being fetched
+
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
+
     if (isLoading) {
       return Scaffold(
         body: Center(
@@ -447,6 +518,12 @@ class ParentBasePageState extends State<ParentBasePage> {
       ChatPage(),
       ParentSettingsPage(),
     ];
+
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
 
     return Scaffold(
       body: Container(

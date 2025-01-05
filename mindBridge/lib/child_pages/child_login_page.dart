@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:test_app/parent_pages/privacy_policy.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:test_app/user_session_management.dart';
 import '../main.dart';
 import 'package:test_app/parent_pages/parent_login_page.dart';
 import '../auth_logic.dart';
@@ -20,6 +21,7 @@ class ChildLoginPage extends StatelessWidget {
       await logOutUser(context);
 
       await _auth.signInChild(data.name, data.password, context);
+      isSessionValid = true;
     } on ChildDoesNotExistException {
       return ChildDoesNotExistException().toString();
     } catch (e) {

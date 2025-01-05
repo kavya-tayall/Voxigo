@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:animate_gradient/animate_gradient.dart';
 import 'dart:async';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 class BreathingHome extends StatefulWidget {
   @override
@@ -61,7 +63,11 @@ class _BreathingHomeState extends State<BreathingHome>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(

@@ -20,6 +20,8 @@ import '../widgets/child_provider.dart';
 import '../widgets/parent_provider.dart';
 import '../widgets/theme_provider.dart';
 import '../parent_pages/child_add_newchild.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 extension StringExtension on String {
   String capitalize() {
@@ -255,6 +257,7 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
   }
 
   void resetSettings() {
+    print('resetting settings');
     _selectedOption = '';
     canUseGridControls = false;
     canUseEmotionHandling = false;
@@ -307,7 +310,11 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     ThemeData theme = Theme.of(context);
-
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -593,6 +600,11 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           FieldPath(['settings', 'sentence helper']):
                               encryptSetting(_selectedOption, value),
                         });
+                        (ChildCollectionWithKeys.instance
+                                .getRecord(_selectedOption) as ChildRecord)
+                            .settings
+                            ?.sentenceHelper = value;
+
                         await updateParentChildrenField(
                             parentId, _selectedOption);
 
@@ -614,6 +626,10 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           FieldPath(['settings', 'grid editing']):
                               encryptSetting(_selectedOption, value),
                         });
+                        (ChildCollectionWithKeys.instance
+                                .getRecord(_selectedOption) as ChildRecord)
+                            .settings
+                            ?.gridEditing = value;
                         await updateParentChildrenField(
                             parentId, _selectedOption);
 
@@ -635,6 +651,10 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           FieldPath(['settings', 'emotion handling']):
                               encryptSetting(_selectedOption, value),
                         });
+                        (ChildCollectionWithKeys.instance
+                                .getRecord(_selectedOption) as ChildRecord)
+                            .settings
+                            ?.emotionHandling = value;
                         await updateParentChildrenField(
                             parentId, _selectedOption);
                         setState(() {
@@ -655,6 +675,10 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
                           FieldPath(['settings', 'audio page']):
                               encryptSetting(_selectedOption, value),
                         });
+                        (ChildCollectionWithKeys.instance
+                                .getRecord(_selectedOption) as ChildRecord)
+                            .settings
+                            ?.audioPage = value;
                         await updateParentChildrenField(
                             parentId, _selectedOption);
 

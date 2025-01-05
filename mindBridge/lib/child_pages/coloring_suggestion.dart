@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scribble/scribble.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 class ColoringHome extends StatefulWidget {
   const ColoringHome({super.key});

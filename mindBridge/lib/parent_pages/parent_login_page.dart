@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart'; // For Google sign-in
 import 'package:test_app/parent_pages/privacy_policy.dart';
 import 'package:test_app/parent_pages/terms_of_use.dart';
 import 'package:test_app/security.dart';
+import 'package:test_app/user_session_management.dart';
 
 import '../auth_logic.dart';
 import '../child_pages/child_login_page.dart';
@@ -43,6 +44,7 @@ class ParentLoginPage extends StatelessWidget {
       print("ParentLoginPage: _authUser: ${data.name}, ${data.password}");
       await _auth.signInParentwithEmailandPassword(
           data.name, data.password, context);
+      isSessionValid = true;
     } on UserNotParentException {
       return 'User is not a parent';
     } on ParentDoesNotExistException {
@@ -115,6 +117,7 @@ class ParentLoginPage extends StatelessWidget {
         data.password!,
         true,
       );
+      isSessionValid = true;
     } on UsernameAlreadyExistsException {
       print("Username already exists");
       return "Username already exists";
@@ -365,6 +368,10 @@ class ParentLoginPage extends StatelessWidget {
             await FirebaseAuth.instance.signInWithCredential(credential);
         print(
             "Google SignIn successful: ${userCredential.user!.email}"); // Debugging step
+        isSessionValid = true;
+        setUserSessionActive(userCredential.user!.uid);
+        listenToUserSession(userCredential.user!.uid);
+
         return "Google SignIn successful"; // Return null to indicate success
       }
       print("Google Sign-In cancelled or failed");

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 class FidgetSpinnerHome extends StatefulWidget {
   @override
@@ -78,6 +80,11 @@ class _FidgetSpinnerHomeState extends State<FidgetSpinnerHome>
 
   @override
   Widget build(BuildContext context) {
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(

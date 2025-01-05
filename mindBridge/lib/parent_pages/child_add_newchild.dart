@@ -5,6 +5,8 @@ import '../auth_logic.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
 import 'package:test_app/authExceptions.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 class RegisterChildForm extends StatefulWidget {
   const RegisterChildForm({Key? key}) : super(key: key);
@@ -41,6 +43,11 @@ class _RegisterChildPageState extends State<RegisterChildForm> {
 
   @override
   Widget build(BuildContext context) {
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text("Add Child"),

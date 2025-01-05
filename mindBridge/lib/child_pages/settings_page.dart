@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_app/auth_logic.dart';
 import '../widgets/child_provider.dart';
 import '../widgets/theme_provider.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 extension StringExtension on String {
   String capitalize() {
@@ -42,7 +44,11 @@ class CustomSettings extends StatelessWidget {
     final theme = Theme.of(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
     final childId = Provider.of<ChildProvider>(context).childId;
-
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       body: SettingsList(
         sections: [
