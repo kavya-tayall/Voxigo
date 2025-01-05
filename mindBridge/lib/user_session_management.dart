@@ -24,7 +24,9 @@ Future<void> setUserSessionInactive(String userId) async {
 
 // Delete the user session (for full session revocation)
 Future<void> deleteUserSession(String userId) async {
+  print('Deleting user session for $userId');
   await _firestore.collection('user_sessions').doc(userId).delete();
+  print('User session deleted');
 }
 
 // Listen for changes in the user session and update the global variable

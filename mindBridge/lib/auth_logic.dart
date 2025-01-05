@@ -109,6 +109,7 @@ class AuthService {
     User? parent;
 
     try {
+      email = email.trim().toLowerCase();
       if (createUserOrNot) {
         // Create user with email and password
         UserCredential userCredential =
@@ -342,6 +343,7 @@ class AuthService {
       String username, String password, BuildContext context,
       {bool alreadyAuth = false}) async {
     // Query Firestore for the username
+
     QuerySnapshot childQuery = await _db
         .collection('children')
         .where('username', isEqualTo: username)
@@ -350,6 +352,15 @@ class AuthService {
 
     if (childQuery.docs.isEmpty) {
       throw ChildDoesNotExistException();
+    }
+
+    String parentId = childQuery.docs.first['parents'][0];
+
+    DocumentSnapshot parentDoc =
+        await _db.collection('parents').doc(parentId).get();
+
+    if (!parentDoc.exists) {
+      throw Exception('Parent data not found.');
     }
 
     var childData = childQuery.docs.first.data() as Map<String, dynamic>;
@@ -580,6 +591,7 @@ class UserService {
       print('Child\'s local folder deleted.');
 
       ChildCollectionWithKeys.instance.removeRecord(childId);
+      deleteUserSession(childId);
     } catch (e) {
       print('Error deleting child $childId: $e');
       throw Exception('Failed to delete child. Please try again.');
@@ -595,24 +607,24 @@ class UserService {
         throw Exception('No user is currently logged in.');
       }
       String parentId = user.uid;
-
+      print('Parent ID now deleteting own account: $parentId');
       // Delete all child accounts associated with the parent
       final childAccounts = await _db
           .collection('children')
-          .where('parentId', isEqualTo: parentId)
+          .where('parents', arrayContains: parentId)
           .get();
-
+      print('childAccounts.docs.length ${childAccounts.docs.length}');
       for (var doc in childAccounts.docs) {
         print('Deleting child account: ${doc['username']}');
         await deleteChildByUsername(doc['username']);
       }
-
       // Delete the parent document in Firestore
       await _db.collection('parents').doc(parentId).delete();
       print('Parent document deleted.');
 
       // Delete the parent account from firebase auth
       await user.delete();
+      deleteUserSession(parentId);
     } catch (e) {
       print('Error deleting parent account: $e');
       throw Exception('Failed to delete child. Please try again.');
