@@ -8,6 +8,7 @@ import '../widgets/child_provider.dart';
 import '../widgets/theme_provider.dart';
 import 'package:test_app/auth_logic.dart';
 import 'package:test_app/user_session_management.dart';
+import 'package:test_app/widgets/globals.dart';
 
 extension StringExtension on String {
   String capitalize() {
@@ -44,6 +45,7 @@ class CustomSettings extends StatelessWidget {
     final theme = Theme.of(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
     final childId = Provider.of<ChildProvider>(context).childId;
+    atBasePage = true;
     if (isSessionValid == false) {
       return SessionExpiredWidget(
         onLogout: () => logOutUser(context),

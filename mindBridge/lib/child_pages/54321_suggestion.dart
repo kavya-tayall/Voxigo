@@ -25,8 +25,10 @@ class _FiveCalmDownHomeState extends State<FiveCalmDownHome> {
         _isChecked3 &&
         _isChecked4 &&
         _isChecked5) {
-      _isVisible = false;
-      _animate = true;
+      setState(() {
+        _isVisible = false;
+        _animate = true;
+      });
     }
     print(_isVisible);
   }
@@ -68,7 +70,71 @@ class _FiveCalmDownHomeState extends State<FiveCalmDownHome> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              ..._buildCheckBoxes(context, isMobile),
+              _buildCheckBox(
+                "5 things I can see",
+                Colors.redAccent,
+                Colors.red,
+                _isChecked1,
+                (value) {
+                  setState(() {
+                    _isChecked1 = value!;
+                    _calmingCheck();
+                  });
+                },
+                isMobile,
+              ),
+              _buildCheckBox(
+                "4 things I can touch",
+                Colors.orangeAccent,
+                Colors.orange,
+                _isChecked2,
+                (value) {
+                  setState(() {
+                    _isChecked2 = value!;
+                    _calmingCheck();
+                  });
+                },
+                isMobile,
+              ),
+              _buildCheckBox(
+                "3 things I can hear",
+                Colors.lightGreen,
+                Colors.green,
+                _isChecked3,
+                (value) {
+                  setState(() {
+                    _isChecked3 = value!;
+                    _calmingCheck();
+                  });
+                },
+                isMobile,
+              ),
+              _buildCheckBox(
+                "2 things I can smell",
+                Colors.lightBlue,
+                Colors.blue,
+                _isChecked4,
+                (value) {
+                  setState(() {
+                    _isChecked4 = value!;
+                    _calmingCheck();
+                  });
+                },
+                isMobile,
+              ),
+              _buildCheckBox(
+                "1 thing I can taste",
+                Colors.pinkAccent,
+                Colors.pink,
+                _isChecked5,
+                (value) {
+                  setState(() {
+                    _isChecked5 = value!;
+                    _calmingCheck();
+                  });
+                },
+                isMobile,
+              ),
             ],
           ),
         ),
@@ -76,112 +142,60 @@ class _FiveCalmDownHomeState extends State<FiveCalmDownHome> {
     );
   }
 
-  List<Widget> _buildCheckBoxes(BuildContext context, bool isMobile) {
-    final List<Map<String, dynamic>> activities = [
-      {
-        "title": "5 things I can see",
-        "color": Colors.redAccent,
-        "borderColor": Colors.red,
-        "isChecked": _isChecked1,
-        "onTap": () {
-          /* Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FiveThingsToSeePage(),
-            ),
-          );*/
-        }
-      },
-      {
-        "title": "4 things I can touch",
-        "color": Colors.orangeAccent,
-        "borderColor": Colors.orange,
-        "isChecked": _isChecked2,
-      },
-      {
-        "title": "3 things I can hear",
-        "color": Colors.lightGreen,
-        "borderColor": Colors.green,
-        "isChecked": _isChecked3,
-      },
-      {
-        "title": "2 things I can smell",
-        "color": Colors.lightBlue,
-        "borderColor": Colors.blue,
-        "isChecked": _isChecked4,
-      },
-      {
-        "title": "1 thing I can taste",
-        "color": Colors.pinkAccent,
-        "borderColor": Colors.pink,
-        "isChecked": _isChecked5,
-      },
-    ];
-
-    return activities.map((activity) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: GestureDetector(
-          onTap: activity["onTap"],
-          child: Container(
-            height: 125,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: activity["color"],
-              border: Border.all(color: activity["borderColor"], width: 8),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Flexible(
-                  flex: 3,
-                  child: Text(
-                    activity["title"],
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: isMobile ? 25 : 45,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 5),
-                        child: Text(
-                          "Done?",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontSize: isMobile ? 14 : 20,
-                          ),
-                        ),
-                      ),
-                      Checkbox(
-                        value: activity["isChecked"],
-                        onChanged: (value) {
-                          setState(() {
-                            if (activity.containsKey("onChanged")) {
-                              activity["onChanged"](value);
-                              _calmingCheck();
-                            }
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+  Widget _buildCheckBox(String title, Color color, Color borderColor,
+      bool isChecked, ValueChanged<bool?> onChanged, bool isMobile) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Container(
+        height: 125,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: color,
+          border: Border.all(color: borderColor, width: 8),
         ),
-      );
-    }).toList();
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Flexible(
+              flex: 3,
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: isMobile ? 25 : 45,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 5),
+                    child: Text(
+                      "Done?",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: isMobile ? 14 : 20,
+                      ),
+                    ),
+                  ),
+                  Checkbox(
+                    value: isChecked,
+                    onChanged: onChanged,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

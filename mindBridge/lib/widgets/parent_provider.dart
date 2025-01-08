@@ -97,19 +97,18 @@ class ParentProvider with ChangeNotifier {
       print('uid inside fetchParentData: $parentuid');
       // If successful, update the provider with real data
       if (parentDetails != null) {
+        print('parentDetails: $parentDetails');
         updateParentData(
           parentUid: parentuid,
           username: parentDetails['username'],
-          name: parentDetails['name'],
           firstname: parentDetails['firstname'],
           lastname: parentDetails['lastname'],
           email: parentDetails['email'],
-          parentSecureKey: parentDetails['parentSecureKey'] != null
-              ? Uint8List.fromList(parentDetails['parentSecureKey']!.codeUnits)
+          parentSecureKey: parentDetails['key'] != null
+              ? Uint8List.fromList(parentDetails['key']!.codeUnits)
               : null,
-          parentBaseRecordIv: parentDetails['parentBaseRecordIv'] != null
-              ? Uint8List.fromList(
-                  parentDetails['parentBaseRecordIv']!.codeUnits)
+          parentBaseRecordIv: parentDetails['iv'] != null
+              ? Uint8List.fromList(parentDetails['iv']!.codeUnits)
               : null,
         );
       } else {

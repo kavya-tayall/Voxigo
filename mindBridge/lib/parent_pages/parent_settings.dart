@@ -102,6 +102,8 @@ class _ParentSettingsPageState extends State<ParentSettingsPage> {
       builder: (BuildContext context) {
         ParentProvider parentProvider =
             Provider.of<ParentProvider>(context, listen: false);
+
+        parentProvider.fetchParentData(parentId);
         ParentRecord? parentRecord = parentProvider.parentData;
 
         // Null check to prevent accessing null parentRecord

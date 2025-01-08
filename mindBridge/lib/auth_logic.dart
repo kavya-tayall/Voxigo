@@ -342,66 +342,85 @@ class AuthService {
   Future<void> signInChild(
       String username, String password, BuildContext context,
       {bool alreadyAuth = false}) async {
-    // Query Firestore for the username
+    try {
+      // Query Firestore for the username
+      QuerySnapshot childQuery = await _db
+          .collection('children')
+          .where('username', isEqualTo: username)
+          .limit(1)
+          .get();
 
-    QuerySnapshot childQuery = await _db
-        .collection('children')
-        .where('username', isEqualTo: username)
-        .limit(1)
-        .get();
-
-    if (childQuery.docs.isEmpty) {
-      throw ChildDoesNotExistException();
-    }
-
-    String parentId = childQuery.docs.first['parents'][0];
-
-    DocumentSnapshot parentDoc =
-        await _db.collection('parents').doc(parentId).get();
-
-    if (!parentDoc.exists) {
-      throw Exception('Parent data not found.');
-    }
-
-    var childData = childQuery.docs.first.data() as Map<String, dynamic>;
-
-    if (!alreadyAuth) {
-      var storedHashedPassword = childData['password'] as String;
-      // Validate the entered password against the hashed password
-      if (!BCrypt.checkpw(password, storedHashedPassword)) {
-        throw InvalidCredentialsException(); // Custom exception for invalid credentials
+      if (childQuery.docs.isEmpty) {
+        throw ChildDoesNotExistException(); // Custom exception for missing child
       }
-    }
 
-    var childId = childQuery.docs.first.id;
+      String parentId = childQuery.docs.first['parents'][0];
 
-    await ApiService.initialize();
+      // Fetch parent document
+      DocumentSnapshot parentDoc =
+          await _db.collection('parents').doc(parentId).get();
 
-    final apiService = ApiService.instance;
+      if (!parentDoc.exists) {
+        throw Exception('Parent data not found.');
+      }
 
-    final firebaseToken = await apiService.getFirebaseToken(childId);
+      Map<String, dynamic> childData =
+          childQuery.docs.first.data() as Map<String, dynamic>;
 
-    UserCredential userCredential = await signInWithCustomToken(firebaseToken);
+      // Validate the password only if not already authenticated
+      if (!alreadyAuth) {
+        final storedHashedPassword = childData['password'] as String;
+        if (!BCrypt.checkpw(password, storedHashedPassword)) {
+          throw InvalidCredentialsException(); // Custom exception for invalid credentials
+        }
+      }
 
-    User? child = userCredential.user;
+      String childId = childQuery.docs.first.id;
 
-    if (child != null) {
+      // Initialize API service
+      await ApiService.initialize();
+      final apiService = ApiService.instance;
+
+      // Get Firebase custom token
+      final firebaseToken = await apiService.getFirebaseToken(childId);
+      if (firebaseToken.isEmpty) {
+        throw Exception('Failed to generate Firebase token.');
+      }
+
+      // Sign in with the custom token
+      UserCredential userCredential =
+          await signInWithCustomToken(firebaseToken);
+      final User? child = userCredential.user;
+
+      if (child == null) {
+        throw Exception("Invalid user or credentials."); // Ensure user is valid
+      }
+
+      // Perform session setup
       await setLoginUserKeys(child, UserType.child);
-    } else {
-      print("No user found");
+      saveChildToken(firebaseToken, username);
+      await setUserSessionActive(childId);
+      listenToUserSession(childId);
+
+      // Update child provider
+      final childProvider = Provider.of<ChildProvider>(context, listen: false);
+      childProvider.setChildData(childId, childData);
+
+      // Load the theme
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      await themeProvider.loadTheme(isChild: true);
+
+      print("Sign-in successful for child: $username");
+    } catch (e) {
+      // Clear session validity in case of any error
+      isSessionValid = false;
+
+      // Log or record error for debugging or analytics
+      print("Error during child sign-in: $e");
+
+      // Rethrow the exception for caller to handle
+      throw Exception("Sign-in failed: ${e.toString()}");
     }
-
-    saveChildToken(firebaseToken, username);
-    await setUserSessionActive(childId);
-    listenToUserSession(childId);
-
-    // Set child data in the provider
-    final childProvider = Provider.of<ChildProvider>(context, listen: false);
-    childProvider.setChildData(childId, childData);
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-
-    await themeProvider.loadTheme(
-        isChild: true); // Load the theme from Firebase
   }
 }
 

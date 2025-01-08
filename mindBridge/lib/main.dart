@@ -31,6 +31,7 @@ import 'child_pages/coloring_suggestion.dart';
 import 'child_pages/breathing_suggestion.dart';
 import 'child_pages/54321_suggestion.dart';
 import 'widgets/globals.dart';
+import 'widgets/basePageObserver.dart';
 import 'cache_utility.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:test_app/getauthtokenandkey.dart'; // Add this line
@@ -171,6 +172,7 @@ class _MyAppState extends State<MyApp> {
             debugShowCheckedModeBanner: false,
             theme: themeProvider.themeData,
             initialRoute: initialRoute,
+            navigatorObservers: [BasePageObserver()],
             routes: {
               '/parent_login': (_) => ParentLoginPage(),
               '/child_login': (_) => ChildLoginPage(),
@@ -334,6 +336,7 @@ class BasePageState extends State<BasePage> {
     fetchSingleChildBoardData(context, false).then((_) {
       setState(() {
         isLoading = false;
+        atBasePage = true;
       });
     });
 
@@ -343,7 +346,7 @@ class BasePageState extends State<BasePage> {
   void onItemTapped(int index) {
     setState(() {
       selectedIndex = index;
-
+      atBasePage = true;
       // Call the desired method when index 0 is selected
       if (index == 0) {
         onHomePageVisible();
@@ -414,76 +417,119 @@ class BasePageState extends State<BasePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Show loading indicator if data is being fetched
+    return PopScope(
+      canPop: atBasePage ? false : true,
+      onPopInvokedWithResult: (didPop, result) async {
+        print('didPop: $didPop');
+        print('result: $result');
+        print('atBasePage: $atBasePage');
+        if (didPop == false && result == null) {
+          setState(() {
+            // Reset to index 0 when back button is pressed on BasePage
+            print("Resetting to index 0");
+            selectedIndex = 0;
+            atBasePage = true;
+          });
+        }
+        if (atBasePage) {
+          // Prevent back navigation from the base page
+          setState(() {
+            // Reset to index 0 when back button is pressed on BasePage
+            print("Resetting to index 0");
+            selectedIndex = 0;
+            atBasePage = true;
+          });
+          return Future.value(false); // Prevent back navigation from base page
+        } else {
+          // Allow back navigation on other screens
+          return Future.value(true);
+        }
+      },
+      child: Builder(
+        builder: (context) {
+          // Show loading indicator if data is being fetched
+          if (isSessionValid == false) {
+            return SessionExpiredWidget(
+              onLogout: () => logOutUser(context),
+            );
+          }
 
-    if (isSessionValid == false) {
-      return SessionExpiredWidget(
-        onLogout: () => logOutUser(context),
-      );
-    }
-
-    if (isLoading) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(),
-              const SizedBox(height: 16),
-              const Text("Please wait, loading data..."),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // Permission settings from the Provider
-    final childPermission =
-        Provider.of<ChildProvider>(context, listen: false).childPermission;
-    final canUseEmotionHandling = childPermission?.emotionHandling ?? false;
-    final canUseAudioPage = childPermission?.audioPage ?? false;
-
-    // Get the appropriate page based on permissions and selectedIndex
-    Widget _getPage() {
-      switch (selectedIndex) {
-        case 0:
-          return DataWidget(
-            data: data,
-            onDataChange: (Map<String, List> newData) async {
-              await modifyData(newData); // Fixed to await the async function
-            },
-            child: PathWidget(
-              onPathChange: (newPath) => setState(() {
-                pathOfBoard =
-                    List.from(newPath); // Preserves original functionality
-              }),
-              pathOfBoard: pathOfBoard,
-              child: HomePage(
-                key: homePageKey,
-                isLoading: isLoading,
+          if (isLoading) {
+            return Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    const Text("Please wait, loading data..."),
+                  ],
+                ),
               ),
+            );
+          }
+
+          // Permission settings from the Provider
+          final childPermission =
+              Provider.of<ChildProvider>(context, listen: false)
+                  .childPermission;
+          final canUseEmotionHandling =
+              childPermission?.emotionHandling ?? false;
+          final canUseAudioPage = childPermission?.audioPage ?? false;
+
+          // Get the appropriate page based on permissions and selectedIndex
+          Widget _getPage() {
+            switch (selectedIndex) {
+              case 0:
+                return DataWidget(
+                  data: data,
+                  onDataChange: (Map<String, List> newData) async {
+                    await modifyData(
+                        newData); // Fixed to await the async function
+                  },
+                  child: PathWidget(
+                    onPathChange: (newPath) => setState(() {
+                      pathOfBoard = List.from(
+                          newPath); // Preserves original functionality
+                    }),
+                    pathOfBoard: pathOfBoard,
+                    child: HomePage(
+                      key: homePageKey,
+                      isLoading: isLoading,
+                    ),
+                  ),
+                );
+              case 1:
+                // Set global variable to false for other pages
+                return canUseEmotionHandling
+                    ? FeelingsPage()
+                    : CustomSettings();
+              case 2:
+                return canUseAudioPage ? MusicPage() : CustomSettings();
+              case 3:
+                return CustomSettings();
+              default:
+                throw UnimplementedError('No widget for $selectedIndex');
+            }
+          }
+
+          return Scaffold(
+            body: Column(
+              children: <Widget>[
+                Expanded(child: _getPage()),
+                CustomNavigationBar(
+                  selectedIndex: selectedIndex,
+                  onItemTapped: (index) {
+                    setState(() {
+                      selectedIndex = index;
+                      atBasePage = true;
+                    });
+                  },
+                ),
+              ],
             ),
           );
-        case 1:
-          return canUseEmotionHandling ? FeelingsPage() : CustomSettings();
-        case 2:
-          return canUseAudioPage ? MusicPage() : CustomSettings();
-        case 3:
-          return CustomSettings();
-        default:
-          throw UnimplementedError('No widget for $selectedIndex');
-      }
-    }
-
-    return Scaffold(
-      body: Column(
-        children: <Widget>[
-          Expanded(child: _getPage()),
-          CustomNavigationBar(
-            selectedIndex: selectedIndex,
-            onItemTapped: onItemTapped,
-          ),
-        ],
+        },
       ),
     );
   }

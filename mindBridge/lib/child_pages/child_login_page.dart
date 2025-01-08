@@ -8,15 +8,25 @@ import '../auth_logic.dart';
 import 'package:test_app/authExceptions.dart';
 import 'package:test_app/parent_pages/parent_login_widget.dart';
 
-class ChildLoginPage extends StatelessWidget {
+class ChildLoginPage extends StatefulWidget {
   ChildLoginPage({super.key});
+
+  @override
+  _ChildLoginPageState createState() => _ChildLoginPageState();
+}
+
+class _ChildLoginPageState extends State<ChildLoginPage> {
   final AuthService _auth = AuthService();
+  bool isLoading = false;
 
   String? checkUsername(input) {
     return null;
   }
 
   Future<String?> _authUser(BuildContext context, LoginData data) async {
+    setState(() {
+      isLoading = true; // Start loading
+    });
     try {
       await logOutUser(context);
 
@@ -27,6 +37,10 @@ class ChildLoginPage extends StatelessWidget {
     } catch (e) {
       print(e);
       return e.toString();
+    } finally {
+      setState(() {
+        isLoading = false; // Stop loading
+      });
     }
     return null;
   }
@@ -35,70 +49,80 @@ class ChildLoginPage extends StatelessWidget {
     return null;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Clear any previous user session before starting the login process
-    // logOutUser(context);
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Stack(
-      children: [
-        VoxigoLoginWidget(
-          onSignup: (email, password, additionalData) async {
-            // Implement your signup logic here
-            return 'not implemented';
-          },
-          onGoogleSignIn: () async => 'not implemented',
-          hideSignupButton: true,
-          hideForgotPasswordButton: true,
-          userType: 'child',
-          privacyPolicy: PrivacyPolicyPage(),
-          termsOfService: PrivacyPolicyPage(),
-          onLogin: (email, password) =>
-              _authUser(context, LoginData(name: email, password: password)),
-          onRecoverPassword: _recoverPassword,
-          userValidator: checkUsername,
-          title: "Child Login",
-          theme: LoginTheme(
-            primaryColor: Color(0xFF56B1FB),
-          ),
-          footer: "Voxigo",
-          onSubmitAnimationCompleted: () {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (context) => BasePage(),
-            ));
-          },
-        ),
-        Positioned(
-          top: screenHeight * 0.05, // Adjust dynamically based on screen height
-          right: screenWidth * 0.05, // Adjust dynamically based on screen width
-          child: ElevatedButton(
-            onPressed: () {
-              _navigateToParentLogin(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              "Parent Login",
-              style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.blueAccent), // Smaller text for better fit
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   void _navigateToParentLogin(BuildContext context) async {
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ParentLoginPage()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return MouseRegion(
+      cursor: isLoading
+          ? SystemMouseCursors.progress
+          : SystemMouseCursors.basic, // Update cursor based on loading state
+      child: AbsorbPointer(
+        absorbing: isLoading, // Prevent interactions during loading
+        child: Stack(
+          children: [
+            VoxigoLoginWidget(
+              onSignup: (email, password, additionalData) async {
+                return 'not implemented';
+              },
+              onGoogleSignIn: () async => 'not implemented',
+              hideSignupButton: true,
+              hideForgotPasswordButton: true,
+              userType: 'child',
+              privacyPolicy: PrivacyPolicyPage(),
+              termsOfService: PrivacyPolicyPage(),
+              onLogin: (email, password) => _authUser(
+                  context, LoginData(name: email, password: password)),
+              onRecoverPassword: _recoverPassword,
+              userValidator: checkUsername,
+              title: "Child Login",
+              theme: LoginTheme(
+                primaryColor: Color(0xFF56B1FB),
+              ),
+              footer: "Voxigo",
+              onSubmitAnimationCompleted: () {
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (context) => BasePage(),
+                ));
+              },
+            ),
+            if (isLoading)
+              Center(
+                child: CircularProgressIndicator(), // Show loading indicator
+              ),
+            Positioned(
+              top: screenHeight * 0.05, // Adjust dynamically based on height
+              right: screenWidth * 0.05, // Adjust dynamically based on width
+              child: ElevatedButton(
+                onPressed: () {
+                  _navigateToParentLogin(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  "Parent Login",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.blueAccent,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

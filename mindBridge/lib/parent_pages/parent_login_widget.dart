@@ -253,15 +253,17 @@ class _VoxigoLoginWidgetState extends State<VoxigoLoginWidget> {
         throw Exception("Google Sign-In cancelled or failed");
       }
 
-      if (result != null) {
+      if (result == 'Google Sign-In successful') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(result),
+            content: Text(result!),
             behavior: SnackBarBehavior.floating, // Optional: Floating behavior
             margin: EdgeInsets.all(10),
           ),
         );
         widget.onSubmitAnimationCompleted?.call();
+      } else {
+        throw Exception(result);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

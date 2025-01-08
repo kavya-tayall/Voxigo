@@ -242,64 +242,117 @@ class ParentLoginPage extends StatelessWidget {
                         onSubmitAnimationCompleted: () async {
                           User? user = FirebaseAuth.instance.currentUser;
 
-                          if (user != null) {
-                            print("ParentLoginPage: _authUser: ${user.email}");
+                          if (user == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Authentication failed. Please try again.'),
+                              ),
+                            );
+                            return; // Stop execution if no user is signed in
+                          }
 
-                            if (user.emailVerified == false) {
+                          print("ParentLoginPage: _authUser: ${user.email}");
+
+// Check if email is verified
+                          if (!user.emailVerified) {
+                            try {
                               await user.sendEmailVerification();
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                   content: Text(
-                                      'Email verification sent. Please verify your email before signing in.'),
+                                    'Email verification sent. Please verify your email before signing in.',
+                                  ),
                                 ),
                               );
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
-                                    builder: (context) => ParentLoginPage()),
+                                  builder: (context) => ParentLoginPage(),
+                                ),
                               );
-                              return;
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'Failed to send verification email: $e'),
+                                ),
+                              );
                             }
+                            isSessionValid = false;
 
+                            return; // Stop execution for unverified email
+                          }
+
+// Call server to log in the parent
+                          try {
                             await _auth.postParentLogin(user);
-
-                            ParentProvider parentProvider =
-                                Provider.of<ParentProvider>(context,
-                                    listen: false);
-
-                            await parentProvider.fetchParentData(user.uid);
-
-                            bool checkAdditionalInfo =
-                                await _auth.checkAdditionalInfo(user.email!,
-                                    user.uid, parentProvider.parentData);
-
-                            bool needsAdditionalInfo;
-
-                            if (checkAdditionalInfo == true) {
-                              needsAdditionalInfo = false;
-                            } else {
-                              needsAdditionalInfo = true;
-                            }
-
-                            if (needsAdditionalInfo) {
-                              Navigator.of(context)
-                                  .pushReplacement(MaterialPageRoute(
-                                builder: (context) => AdditionalInfoScreen(
-                                    user: user, auth: _auth),
-                              ));
-                            } else {
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                    builder: (context) => ParentBasePage()),
-                              );
-                            }
-                          } else {
+                          } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content: Text(
-                                      'Authentication failed. Please try again.')),
+                                content: Text('Login process failed: $e'),
+                              ),
+                            );
+                            isSessionValid = false;
+
+                            return; // Stop execution if server login fails
+                          }
+
+// Fetch parent data
+                          ParentProvider parentProvider =
+                              Provider.of<ParentProvider>(context,
+                                  listen: false);
+                          try {
+                            await parentProvider.fetchParentData(user.uid);
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to fetch user data: $e'),
+                              ),
+                            );
+                            isSessionValid = false;
+
+                            return; // Stop execution if parent data fetch fails
+                          }
+
+// Check additional information
+                          bool needsAdditionalInfo = true;
+                          try {
+                            bool checkAdditionalInfo =
+                                await _auth.checkAdditionalInfo(
+                              user.email!,
+                              user.uid,
+                              parentProvider.parentData,
+                            );
+
+                            needsAdditionalInfo = !checkAdditionalInfo;
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    'Error checking additional information: $e'),
+                              ),
+                            );
+                            isSessionValid = false;
+
+                            return; // Stop execution if additional info check fails
+                          }
+
+// Redirect based on additional info requirement
+                          if (needsAdditionalInfo) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => AdditionalInfoScreen(
+                                    user: user, auth: _auth),
+                              ),
+                            );
+                          } else {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => ParentBasePage(),
+                              ),
                             );
                           }
-                        },
+                        }, // on submit animation completed
                       ),
                       if (isLoading) // Display loading indicator if loading
                         Center(
@@ -342,43 +395,57 @@ class ParentLoginPage extends StatelessWidget {
 
   Future<String?> _googleSignIn(BuildContext context) async {
     try {
+      // Logout any existing session
       await logOutUser(context);
 
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        scopes: [
-          'email',
-          'https://www.googleapis.com/auth/contacts.readonly',
-          "https://www.googleapis.com/auth/userinfo.profile"
-        ],
-      );
+      // Initialize Google Sign-In with minimal scope
+      final GoogleSignIn googleSignIn = GoogleSignIn(scopes: ['email']);
       await googleSignIn.signOut();
 
-      GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      if (googleUser != null) {
-        print("Google User: ${googleUser.email}"); // Debugging step
-
-        final GoogleSignInAuthentication googleAuth =
-            await googleUser.authentication;
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-
-        final UserCredential userCredential =
-            await FirebaseAuth.instance.signInWithCredential(credential);
-        print(
-            "Google SignIn successful: ${userCredential.user!.email}"); // Debugging step
-        isSessionValid = true;
-        setUserSessionActive(userCredential.user!.uid);
-        listenToUserSession(userCredential.user!.uid);
-
-        return "Google SignIn successful"; // Return null to indicate success
+      // Start Google Sign-In flow
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        throw Exception("Google Sign-In cancelled by user");
       }
-      print("Google Sign-In cancelled or failed");
-      return "Google Sign-In cancelled or failed"; // Return error message if Google sign-in is canceled
-    } catch (e) {
-      print("Oops! Google SignIn failed: $e");
-      return "Oops! Google SignIn failed: $e"; // Return error message if an exception occurs
+
+      // Obtain authentication tokens
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      if (googleAuth.idToken == null || googleAuth.accessToken == null) {
+        throw Exception("Invalid Google Authentication tokens");
+      }
+
+      // Create Firebase credentials
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in with Firebase and validate user
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      final User? firebaseUser = userCredential.user;
+
+      if (firebaseUser == null ||
+          firebaseUser.email == null ||
+          firebaseUser.uid.isEmpty) {
+        throw Exception(
+            "Firebase authentication failed or user data is incomplete");
+      }
+
+      // Ensure session is secure and consistent
+      isSessionValid = true;
+      setUserSessionActive(firebaseUser.uid);
+      listenToUserSession(firebaseUser.uid);
+
+      print("Google Sign-In successful: ${firebaseUser.email}");
+      return "Google Sign-In successful";
+    } on FirebaseAuthException catch (e) {
+      print("FirebaseAuthException: ${e.message}");
+      return "Authentication error: ${e.message}";
+    } on Exception catch (e) {
+      print("General Exception during Google Sign-In: $e");
+      return "Oops! Something went wrong during sign-in: $e";
     }
   }
 
