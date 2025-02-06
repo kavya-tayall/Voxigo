@@ -5,6 +5,13 @@ import 'package:test_app/cache_utility.dart';
 import 'package:test_app/widgets/child_provider.dart';
 import '../widgets/parent_music_page.dart';
 import 'edit_child_grid.dart';
+import 'package:test_app/widgets/parent_provider.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import '../parent_pages/child_add_newchild.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
+import 'package:test_app/widgets/globals.dart';
 
 class GradientText extends StatelessWidget {
   const GradientText(
@@ -39,7 +46,7 @@ class ChildManagementPage extends StatefulWidget {
 }
 
 class _ChildManagementPageState extends State<ChildManagementPage> {
-  Map<String, String> childIdToUsername = {};
+  Map<String, dynamic> childIdToUsername = {};
   bool isLoading = true;
   String parentEmailasUserName = "";
   String adminName = "";
@@ -48,16 +55,20 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
   @override
   void initState() {
     super.initState();
+    atBasePage = true;
     print("inside init state");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusManager.instance.primaryFocus?.unfocus();
+    });
     _initializeData();
   }
 
   Future<void> _initializeData() async {
-    await _fetchAndStoreChildrenDataInBackground();
-    //  fetchChildren();
+    await _buildChildCollectionAndGridDataForParent(context);
   }
 
-  Future<void> _fetchAndStoreChildrenDataInBackground() async {
+  Future<void> _buildChildCollectionAndGridDataForParent(
+      BuildContext context) async {
     setState(() {
       isFetchingData = true;
     });
@@ -68,23 +79,9 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
       if (currentUser != null) {
         String parentId = currentUser.uid;
         print('parent id: $parentId');
-        DocumentSnapshot parentSnapshot = await FirebaseFirestore.instance
-            .collection('parents')
-            .doc(parentId)
-            .get();
 
-        if (parentSnapshot.exists) {
-          Map<String, dynamic>? parentData =
-              parentSnapshot.data() as Map<String, dynamic>?;
-          parentEmailasUserName = parentData?['email'];
-          if (parentData != null && parentData['children'] != null) {
-            List<String> childIds = List<String>.from(parentData['children']);
-            print('inside _fetchAndStoreChildrenDataInBackground');
-            await fetchAndStoreChildrenData(
-                parentId, childIds, context, parentEmailasUserName, true,
-                refreshButtons: true);
-          }
-        }
+        await refreshChildCollection(context, parentId);
+
         print('done fetching children now prepin to child list');
         setState(() {
           isLoading = true;
@@ -97,7 +94,12 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
             var childCollection = ChildCollectionWithKeys.instance;
             for (var record in childCollection.allRecords) {
               if (record.username != null && record.childuid.isNotEmpty) {
-                childIdToUsername[record.childuid] = record.username!;
+                childIdToUsername[record.childuid] = {
+                  "name": "${record.firstName!} ${record.lastName!}",
+                  "username": record.username,
+                  "isUpdated": false, // Default value for the isUpdated flag
+                  "isMusicUpdated": false,
+                };
               }
             }
           }
@@ -108,93 +110,121 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
           print('Error fetching children: $e');
         } finally {
           setState(() {
+            print(childIdToUsername);
             isLoading = false;
           });
         }
+
+        // Trigger background task to fetch board data for all children
+        Future.microtask(() async {
+          await _fetchBoardDataforAllChildren(context);
+        });
       }
     } catch (e) {
       print('Error in background data fetching: $e');
     } finally {
       setState(() {
         isFetchingData = false;
+        ParentProvider parentProvider =
+            Provider.of<ParentProvider>(context, listen: false);
+        adminName = parentProvider.parentData.firstname!;
       });
     }
   }
 
-  Future<void> fetchChildren() async {
-    setState(() {
-      isLoading = true;
-    });
-
+  Future<void> _fetchBoardDataforAllChildren(BuildContext context) async {
     try {
-      User? currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
-        childIdToUsername.clear();
-        var childCollection = ChildCollectionWithKeys.instance;
-        for (var record in childCollection.allRecords) {
-          if (record.username != null && record.childuid.isNotEmpty) {
-            childIdToUsername[record.childuid] = record.username!;
-          }
-        }
-      }
-      print('completed fetching children');
-      // Trigger UI rebuild after the data is updated
-      setState(() {});
+      final childCollection = ChildCollectionWithKeys.instance;
+
+      // Use Future.wait to handle all async calls concurrently
+      await Future.wait(childCollection.allRecords.map((record) async {
+        await _fetchSingleChildButtonsinBackground(context, record.childuid);
+      }));
+
+      print('Fetching board data for all children completed.');
     } catch (e) {
-      print('Error fetching children: $e');
-    } finally {
+      print('Error fetching board data for all children: $e');
+    }
+  }
+
+  Future<void> _fetchSingleChildButtonsinBackground(
+      BuildContext context, String childId) async {
+    try {
+      String childUsernameToBePassed = childIdToUsername[childId]['username']!;
+      await fetchSingleChildBoardData(context, false,
+          childIdPassed: childId, childUsernamePassed: childUsernameToBePassed);
+
+      // Update isUpdated flag for the child
+      if (childIdToUsername.containsKey(childId)) {
+        childIdToUsername[childId]['isUpdated'] = true;
+        childIdToUsername[childId]['isMusicUpdated'] = true;
+      } else {
+        print('Child ID $childId not found in childIdToUsername map.');
+      }
+
+      // Trigger UI update after all operations are done
       setState(() {
-        isLoading = false;
+        print('Setting isUpdated to true for childId: $childId');
       });
+    } catch (e) {
+      print('Error fetching single child buttons for childId $childId: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).unfocus();
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+    });
 
+    ThemeData theme = Theme.of(context);
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: PreferredSize(
-          preferredSize: Size.fromHeight(75.0),
-          child: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0, // Removes shadow
-            automaticallyImplyLeading: false,
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(Icons.home, color: Colors.black, size: 30),
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 3.0),
-                      child: Image.asset("assets/imgs/logo_without_text.png",
-                          width: 60),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: GradientText(
-                        "Voxigo",
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.blue,
-                            Colors.blueAccent,
-                            Colors.deepPurpleAccent,
-                          ],
-                        ),
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30,
-                        ),
+        preferredSize: Size.fromHeight(75.0),
+        child: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0, // Removes shadow
+          automaticallyImplyLeading: false,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.home, color: Colors.black, size: 30),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3.0),
+                    child: Image.asset("assets/imgs/logo_without_text.png",
+                        width: 60),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: GradientText(
+                      "Voxigo",
+                      gradient: LinearGradient(colors: [
+                        Colors.blue,
+                        Colors.blueAccent,
+                        Colors.deepPurpleAccent,
+                      ]),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-            toolbarHeight: 80,
-          )),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          toolbarHeight: 80,
+        ),
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : Stack(
@@ -257,7 +287,9 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       Icon(Icons.chat,
-                                          size: 75, color: Color(0xA6000000)),
+                                          size: 75,
+                                          color:
+                                              Color.fromARGB(166, 102, 42, 42)),
                                       Text(
                                         "Chat with VoxiBot",
                                         style: TextStyle(
@@ -323,77 +355,150 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                                 color: theme.primaryColorLight,
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Column(children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Text(
-                                    'Manage Your Children 👥',
-                                    style: TextStyle(
-                                        color:
-                                            theme.textTheme.titleMedium!.color,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 25),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Text(
+                                      childIdToUsername.isEmpty
+                                          ? 'No Children Added Yet'
+                                          : 'Manage Your Children 👥',
+                                      style: TextStyle(
+                                          color: theme
+                                              .textTheme.titleMedium!.color,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 25),
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: 16.0),
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: childIdToUsername.length,
-                                  itemBuilder: (context, index) {
-                                    String key =
-                                        childIdToUsername.keys.elementAt(index);
-                                    String value = childIdToUsername[key]!;
-                                    return Container(
-                                      margin: EdgeInsets.only(
-                                          bottom: 16.0, left: 6, right: 6),
-                                      decoration: BoxDecoration(
-                                        color: theme.primaryColorDark,
-                                        borderRadius: BorderRadius.circular(10),
+                                  SizedBox(height: 5.0),
+                                  if (childIdToUsername.isEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0),
+                                      child: Text(
+                                        "Click 'Add Child' below to start managing your children.",
+                                        style: TextStyle(
+                                          color:
+                                              theme.textTheme.bodyMedium!.color,
+                                          fontSize: 18,
+                                        ),
+                                        textAlign: TextAlign.center,
                                       ),
-                                      child: ExpansionTile(
-                                        title: Text(value),
-                                        children: <Widget>[
-                                          ListTile(
-                                            title: Text('Edit Grid'),
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      ChildGridPage(
-                                                          username: value,
-                                                          childId: key),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                          ListTile(
-                                            title: Text('Edit Music'),
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      ParentMusicPage(
-                                                    username: value,
-                                                    childId: key,
+                                    ),
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemCount: childIdToUsername.length,
+                                    itemBuilder: (context, index) {
+                                      String key = childIdToUsername.keys
+                                          .elementAt(index);
+                                      String value =
+                                          childIdToUsername[key]['name']!;
+                                      String username =
+                                          childIdToUsername[key]['username']!;
+                                      return Container(
+                                        margin: EdgeInsets.only(
+                                            bottom: 16.0, left: 6, right: 6),
+                                        decoration: BoxDecoration(
+                                          color: theme.primaryColorDark,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: ExpansionTile(
+                                          title: Text(value),
+                                          children: <Widget>[
+                                            ListTile(
+                                              title: Text('Edit Grid'),
+                                              enabled: childIdToUsername[key]
+                                                  ['isUpdated'],
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ChildGridPage(
+                                                            username: username,
+                                                            childId: key),
                                                   ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                          ListTile(
-                                            title:
-                                                Text('Edit Username/Password'),
-                                            onTap: () {},
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
+                                                );
+                                              },
+                                            ),
+                                            ListTile(
+                                              title: Text('Edit Music'),
+                                              enabled: childIdToUsername[key]
+                                                  ['isMusicUpdated'],
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ParentMusicPage(
+                                                      username: username,
+                                                      childId: key,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16.0, top: 16.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: theme.primaryColorDark,
+                                foregroundColor:
+                                    theme.textTheme.bodyMedium!.color,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                              ]),
+                              ),
+                              onPressed: () async {
+                                final result = await Navigator.of(context)
+                                    .pushNamed('/add_child');
+
+                                if (result == true) {
+                                  // Show success message
+                                  await _buildChildCollectionAndGridDataForParent(
+                                      context);
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          Text("Child added successfully!"),
+                                      duration: const Duration(seconds: 3),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                  // Refresh child data
+                                } else if (result == false) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          "Child addition was canceled or failed."),
+                                      duration: const Duration(seconds: 3),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
+                              icon: Icon(Icons.add),
+                              label: Text(
+                                "Add Child",
+                                style: TextStyle(fontSize: 18),
+                              ),
                             ),
                           ),
                         ),

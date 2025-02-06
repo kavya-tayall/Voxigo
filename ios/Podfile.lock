@@ -952,7 +952,7 @@ PODS:
   - AppAuth/Core (1.7.6)
   - AppAuth/ExternalUserAgent (1.7.6):
     - AppAuth/Core
-  - audioplayers_darwin (0.0.1):
+  - audioplayers_darwin (6.0.0):
     - Flutter
   - BoringSSL-GRPC (0.0.32):
     - BoringSSL-GRPC/Implementation (= 0.0.32)
@@ -1373,7 +1373,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   abseil: d121da9ef7e2ff4cab7666e76c5a3e0915ae08c3
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
-  audioplayers_darwin: 877d9a4d06331c5c374595e46e16453ac7eafa40
+  audioplayers_darwin: 59e8c08b6fa8852ff331ff51b3fe1849329ab352
   BoringSSL-GRPC: 1e2348957acdbcad360b80a264a90799984b2ba6
   cloud_firestore: 003d53b6b8b392600b7769acf9421cc4f23e5911
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
@@ -1429,4 +1429,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 68aefbf53b163d53c031b69519b0e28091a38746
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

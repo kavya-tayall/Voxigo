@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:test_app/widgets/child_provider.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 Map<String, String> temp = {
   "Fidget Spinner": "/fidget",
@@ -15,34 +18,16 @@ class SuggestionsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
-
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Container(
-            alignment: Alignment.center,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Colors.black,
-                  width: 5,
-                  style: BorderStyle.solid,
-                ),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Text(
-                "Suggestions",
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
+        title: Text(
+          "Suggestions",
+          textAlign: TextAlign.center,
         ),
       ),
       body: ListView.builder(
@@ -53,18 +38,14 @@ class SuggestionsPage extends StatelessWidget {
           print('suggestion $suggestion');
           String imagePath = "";
           if (suggestion == "Fidget Spinner") {
-           imagePath = "assets/imgs/fidgetspinner.png"; // Placeholder path
-          }
-          else if (suggestion == "Deep Breathing") {
+            imagePath = "assets/imgs/fidgetspinner.png"; // Placeholder path
+          } else if (suggestion == "Deep Breathing") {
             imagePath = "assets/imgs/deepbreathing.png"; // Placeholder path
-          }
-          else if (suggestion == "Coloring") {
+          } else if (suggestion == "Coloring") {
             imagePath = "assets/imgs/coloring.png"; // Placeholder path
-          }
-          else if (suggestion == "Music") {
+          } else if (suggestion == "Music") {
             imagePath = "assets/imgs/music.png"; // Placeholder path
-          }
-          else if (suggestion == "Calm Down with 54321") {
+          } else if (suggestion == "Calm Down with 54321") {
             imagePath = "assets/imgs/calmdown.png"; // Placeholder path
           }
           final route = temp.values.toList()[index];
@@ -106,6 +87,8 @@ class SuggestionTile extends StatelessWidget {
         height: isMobile ? 100 : 150,
         child: ElevatedButton(
           onPressed: () {
+            final childProvider = ChildProvider();
+            childProvider.childNavigateFrom = "feelings";
             Navigator.pushNamed(context, route);
           },
           style: ElevatedButton.styleFrom(

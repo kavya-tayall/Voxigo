@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:animate_gradient/animate_gradient.dart';
 import 'dart:async';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 class BreathingHome extends StatefulWidget {
   @override
@@ -19,12 +21,11 @@ class _BreathingHomeState extends State<BreathingHome>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 5)
-    )..addListener(() {
-      setState(() {});
-    });
+    _controller =
+        AnimationController(vsync: this, duration: Duration(seconds: 5))
+          ..addListener(() {
+            setState(() {});
+          });
 
     _breathingAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
@@ -61,12 +62,17 @@ class _BreathingHomeState extends State<BreathingHome>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         title: Text(
           "Breathing Exercise",
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+          textAlign: TextAlign.center,
         ),
       ),
       body: Stack(
@@ -74,10 +80,10 @@ class _BreathingHomeState extends State<BreathingHome>
         children: [
           AnimateGradient(
             duration: Duration(seconds: 10),
-            primaryColors: const [
-              Color(0xFFB5B9FF),
-              Color(0xFFBD8EF8),
-              Color(0xFFA598F8),
+            primaryColors: [
+              theme.primaryColor,
+              theme.primaryColorLight,
+              theme.primaryColorDark
             ],
             secondaryColors: const [
               Color(0xFF97A2FF),
@@ -92,10 +98,10 @@ class _BreathingHomeState extends State<BreathingHome>
               duration: const Duration(milliseconds: 600),
               child: Center(
                   child: Text(
-                    "All Done!",
-                    style: TextStyle(fontSize: 80, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  )),
+                "All Done!",
+                style: TextStyle(fontSize: 80, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              )),
             ),
             child: Center(
               child: Container(
@@ -148,15 +154,6 @@ class _BreathingHomeState extends State<BreathingHome>
               child: Container(
                 alignment: Alignment.center,
                 width: double.infinity,
-                child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                    child: Text(
-                      "Deep Breathing",
-                      style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    )),
               ),
             ),
           ),

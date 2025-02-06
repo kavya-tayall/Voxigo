@@ -13,6 +13,8 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import '../widgets/child_provider.dart';
 import '../widgets/suggestionWidget.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 class GradientText extends StatelessWidget {
   const GradientText(
@@ -322,7 +324,11 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final isLoading =
         context.findAncestorStateOfType<BasePageState>()!.isLoading;
-
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       body: isLoading
           ? Column(

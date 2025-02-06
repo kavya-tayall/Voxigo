@@ -13,6 +13,7 @@ import 'package:test_app/widgets/child_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as path;
 import 'package:test_app/fileUploadandDownLoad.dart';
+import 'package:test_app/widgets/globals.dart';
 
 class ChildGridPage extends StatefulWidget {
   final String username;
@@ -134,22 +135,54 @@ class _ChildGridPageState extends State<ChildGridPage> {
     return null;
   }
 
-  Future<void> addCustomImageOrPictorgramButton(String enteredText) async {
+  Future<void> addCustomImageOrPictorgramButton() async {
     bool? choosePictogram = await _showChoiceDialog(context);
     if (choosePictogram == true) {
+      String? enteredText = await showButtonOrFolderTextInputDialog(
+          context, "Enter button label:");
+      // await _showTextInputDialog(context, "Enter button label:");
+
+      if (enteredText == null) {
+        return;
+      }
+
       dynamic buttonData = searchButtonData(pictogramsData, enteredText);
       if (buttonData != null) {
         await _createFirstButtonFromData(
             buttonData, enteredText, widget.childId);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                "Pictogram with title '$enteredText' has been added successfully to the board."),
+          ),
+        );
       } else {
         await _showConfirmationDialog(context,
             "Pictogram not found. Would you like to upload a custom image?");
         await uploadCustomImage(enteredText, widget.childId, widget.username);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                "Custom image with title '$enteredText' has been added successfully to the board."),
+          ),
+        );
       }
     } else {
+      String? enteredText = await showButtonOrFolderTextInputDialog(
+          context, "Enter button label:");
+      if (enteredText == null) {
+        return;
+      }
       await uploadCustomImage(enteredText, widget.childId, widget.username);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              "Custom image with title '$enteredText' has been added successfully to the board."),
+        ),
+      );
     }
   }
+
 /*
   Future<void> uploadCustomImage(String enteredText, String childId) async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -348,7 +381,11 @@ class _ChildGridPageState extends State<ChildGridPage> {
                           return GestureDetector(
                             onTap: isRemovalMode
                                 ? () {
-                                    removeButton(index, widget.childId);
+                                    String itemType = (item['folder'] == true)
+                                        ? 'folder'
+                                        : 'button';
+                                    removeButton(
+                                        itemType, index, widget.childId);
                                   }
                                 : () {
                                     if (item['folder'] == true) {
@@ -396,19 +433,17 @@ class _ChildGridPageState extends State<ChildGridPage> {
             child: Icon(Icons.add),
             label: 'Add Button',
             onTap: () async {
-              String? enteredText =
-                  await _showTextInputDialog(context, "Enter button label:");
-              if (enteredText != null) {
-                await addCustomImageOrPictorgramButton(enteredText);
-              }
+              await addCustomImageOrPictorgramButton();
             },
           ),
           SpeedDialChild(
             child: Icon(Icons.folder),
             label: 'Add Folder',
             onTap: () async {
-              String? folderName =
-                  await _showTextInputDialog(context, "Enter folder name:");
+              /* String? folderName = await _showTextInputDialog(context, "Enter folder name:");*/
+
+              String? folderName = await showButtonOrFolderTextInputDialog(
+                  context, "Enter folder name:");
               if (folderName != null) {
                 Map<String, dynamic> currentFolder = getCurrentFolder();
 
@@ -476,7 +511,7 @@ class _ChildGridPageState extends State<ChildGridPage> {
           content: TextField(
             controller: _textFieldController,
             decoration: InputDecoration(
-              hintText: "Enter your input here",
+              hintText: "Enter your input here 1",
               hintStyle: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.hintColor, // Themed hint color
               ),
@@ -553,10 +588,62 @@ class _ChildGridPageState extends State<ChildGridPage> {
     });
   }
 
-  void removeButton(int index, String childId) {
-    setState(() {
-      getCurrentFolder()['buttons'].removeAt(index);
-    });
-    updateBoardInFirebase(childId, gridData);
+  void removeButton(String itemType, int index, String childId) async {
+    bool? confirmed = await showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        final theme = Theme.of(dialogContext);
+
+        return AlertDialog(
+          backgroundColor: theme.colorScheme.surface,
+          title: Text(
+            itemType == "folder" ? "Delete Folder" : "Delete Button",
+            style: theme.textTheme.headlineSmall?.copyWith(
+                color: theme.elevatedButtonTheme.style?.backgroundColor
+                    ?.resolve({})),
+          ),
+          content: Text(
+            itemType == "folder"
+                ? "Are you sure you want to delete this folder and all its contents?"
+                : "Are you sure you want to delete this button?",
+            style: theme.textTheme.bodyMedium,
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: theme
+                    .elevatedButtonTheme.style?.backgroundColor
+                    ?.resolve({}),
+              ),
+              child: const Text(
+                "Cancel",
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: theme.colorScheme.error,
+              ),
+              child: const Text("Delete"),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      setState(() {
+        getCurrentFolder()['buttons'].removeAt(index);
+      });
+      updateBoardInFirebase(childId, gridData);
+      print("$itemType with index $index removed for child ID $childId.");
+    } else {
+      print("$itemType deletion canceled by the user.");
+    }
   }
 }

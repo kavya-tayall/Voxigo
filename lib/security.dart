@@ -9,6 +9,7 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:test_app/widgets/child_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:test_app/widgets/parent_provider.dart';
 
 Uint8List generateSecureRandomKey(int length) {
   final random = Random.secure();
@@ -162,6 +163,8 @@ Future<Map<String, String>> encryptChildInfoWithIV(
   String username,
   String firstname,
   String lastname,
+  String childtheme,
+  String disclaimer,
   String mode,
 ) async {
   Uint8List key;
@@ -217,6 +220,11 @@ Future<Map<String, String>> encryptChildInfoWithIV(
   encryptedBytes = aesGcmEncrypt(textBytes, key, iv);
   String encryptedLastname = base64Encode(encryptedBytes);
 
+  // Encrypt disclaimer
+  textBytes = Uint8List.fromList(utf8.encode(disclaimer));
+  encryptedBytes = aesGcmEncrypt(textBytes, key, iv);
+  String encryptedDisclaimer = base64Encode(encryptedBytes);
+
   // Username remains unencrypted
   String encryptedUsername = username;
 
@@ -256,6 +264,7 @@ Future<Map<String, String>> encryptChildInfoWithIV(
     sentenceHelper: sentenceHelper,
   );
 
+  Timestamp timestamp = Timestamp.fromDate(DateTime.now());
   // Add or update the record in the collection
   final childCollection = ChildCollectionWithKeys.instance;
   childCollection.addOrUpdateChildData(
@@ -265,6 +274,9 @@ Future<Map<String, String>> encryptChildInfoWithIV(
     username,
     firstname,
     lastname,
+    childtheme,
+    disclaimer,
+    timestamp,
     finalChildSettings,
   );
 
@@ -272,12 +284,15 @@ Future<Map<String, String>> encryptChildInfoWithIV(
     'username': encryptedUsername,
     'first name': encryptedFirstname,
     'last name': encryptedLastname,
+    'disclaimer': encryptedDisclaimer,
     'iv': encodedIV,
+    'timestamp': timestamp.toString(),
     'settings': jsonEncode({
       'audio page': encryptedaudioPage,
       'emotion handling': encryptedemotionHandling,
       'grid editing': encryptedgridEditing,
       'sentence helper': encryptedsentenceHelper,
+      'theme': childtheme,
     }),
   };
 }
@@ -417,12 +432,22 @@ Future<Map<String, String>?> decryptParentDetails(String userId) async {
 }
 
 Future<List<dynamic>> decryptSelectedDataForChild(
-    String childId, List<dynamic> encryptedButtons) async {
+    String childId, List<dynamic> encryptedButtons,
+    {bool byChild = false}) async {
   try {
+    Uint8List? childkey;
     // Fetch the encryption key
-    final childCollection = ChildCollectionWithKeys.instance;
-    print('childId: $childId');
-    Uint8List? key = childCollection.getkey(childId);
+    if (byChild) {
+      childkey = await getEncryptionKey(forChild: true, childId: childId);
+    } else {
+      final childCollection = ChildCollectionWithKeys.instance;
+      print('childId: $childId');
+
+      childkey = childCollection.getkey(childId);
+    }
+
+    Uint8List? key = childkey;
+
     if (key == null) {
       throw Exception('Encryption key not found for childId: $childId');
     }
@@ -530,12 +555,16 @@ Future<Uint8List> getChildKey(String parentId, String childId,
   }
 }
 
-Future<void> setChildCollectionWithDecryptedData(String parentId,
-    String childId, Map<String, dynamic> encryptedChildData) async {
+Future<void> setChildCollectionWithDecryptedData(
+    String parentId,
+    String childId,
+    Map<String, dynamic> encryptedChildData,
+    Timestamp timestamp) async {
   try {
     String username = '';
     String firstname = '';
     String lastname = '';
+    String disclaimer = '';
 
     final childCollection = ChildCollectionWithKeys.instance;
 
@@ -563,6 +592,7 @@ Future<void> setChildCollectionWithDecryptedData(String parentId,
       username = encryptedChildData['username'] ?? '';
       firstname = encryptedChildData['first name'] ?? '';
       lastname = encryptedChildData['last name'] ?? '';
+      disclaimer = encryptedChildData['disclaimer'] ?? '';
     } else {
       // Decrypt the fields
       /* username = await decryptChildfield(
@@ -572,8 +602,32 @@ Future<void> setChildCollectionWithDecryptedData(String parentId,
           encryptedChildData['first name'], encryptionKey, iv);
       lastname = await decryptChildfield(
           encryptedChildData['last name'], encryptionKey, iv);
-    }
+      // First, check if 'disclaimer' exists in encryptedChildData and is not null
+      var encryptedDisclaimer = encryptedChildData['disclaimer'];
 
+// If it exists and is not null, proceed with decryption
+      print('encryptedDisclaimer: $encryptedDisclaimer');
+      if (encryptedDisclaimer != null) {
+        disclaimer = await decryptChildfield(
+          encryptedDisclaimer, // decrypt the disclaimer field
+          encryptionKey,
+          iv,
+        );
+      } else {
+        // Provide a fallback if 'disclaimer' is null or missing
+        disclaimer = ParentProvider().globaldisclaimer;
+      }
+      print('disclaimer 1: $disclaimer');
+// In case the decrypted disclaimer is empty, provide a default fallback message
+      if (disclaimer.isEmpty) {
+        disclaimer = ParentProvider().globaldisclaimer;
+      }
+    }
+    print('disclaimer 2: $disclaimer');
+
+    //child theme
+    String childtheme = 'default';
+    childtheme = encryptedChildData?['settings']?['theme'] ?? 'default';
     // Create a ChildSettings object
 
     ChildSettings childSettings =
@@ -581,7 +635,7 @@ Future<void> setChildCollectionWithDecryptedData(String parentId,
 
     // Add or update the record in the collection
     childCollection.addOrUpdateChildData(childId, encryptionKey, iv, username,
-        firstname, lastname, childSettings);
+        firstname, lastname, childtheme, disclaimer, timestamp, childSettings);
 
     print('Record added successfully for childId: $childId');
   } catch (e) {

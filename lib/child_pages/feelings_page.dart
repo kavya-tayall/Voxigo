@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:test_app/widgets/feelings_buttons.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 Map<String, Map<String, Widget>> suggestions = {
   "Angry": {},
@@ -9,6 +11,7 @@ Map<String, Map<String, Widget>> suggestions = {
   "Bored": {},
   "Nervous": {},
 };
+
 class FeelingsPage extends StatelessWidget {
   const FeelingsPage({super.key});
 
@@ -18,9 +21,13 @@ class FeelingsPage extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final isMobile = screenWidth < 600;
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
 
     return Scaffold(
-    
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(
           vertical: screenHeight * 0.05,
@@ -103,4 +110,3 @@ class FeelingsPage extends StatelessWidget {
     );
   }
 }
-

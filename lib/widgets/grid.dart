@@ -92,7 +92,7 @@ class GridState extends State<Grid> {
     context.findAncestorStateOfType<HomePageState>()?.updateGrid();
   }
 
-  void removeItem(String itemId) {
+  void removeItem(String itemId) async {
     final dataWidget = DataWidget.of(context);
     final pathWidget = PathWidget.of(context);
 
@@ -101,19 +101,70 @@ class GridState extends State<Grid> {
       return;
     }
 
-    setState(() {
-      dynamic nestedData = dataWidget.data;
-      for (var folder in pathWidget.pathOfBoard) {
-        nestedData = nestedData[folder];
-      }
+    // Show a confirmation dialog to the user
+    bool? confirmed = await showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        final theme = Theme.of(dialogContext);
 
-      nestedData.removeWhere((item) => item['id'] == itemId);
-      visibleButtons.removeWhere((item) => item['id'] == itemId);
-    });
+        return AlertDialog(
+          backgroundColor: theme.colorScheme.surface, // Use themed background
+          title: Text(
+            "Delete Item",
+            style: theme.textTheme.headlineSmall?.copyWith(
+                color: theme.elevatedButtonTheme.style?.backgroundColor
+                    ?.resolve({})),
+          ),
+          content: Text(
+            "Are you sure you want to delete this item?",
+            style: theme.textTheme.bodyMedium, // Use themed content text style
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: theme
+                    .elevatedButtonTheme.style?.backgroundColor
+                    ?.resolve({}), // Use themed primary color
+              ),
+              child: const Text(
+                "Cancel",
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor:
+                    theme.colorScheme.error, // Use themed error color
+              ),
+              child: const Text("Delete"),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
 
-    dataWidget.onDataChange(dataWidget.data);
-    print(
-        "Item with ID $itemId removed for child ID ${widget.childId}."); // Log with childId
+    if (confirmed == true) {
+      setState(() {
+        dynamic nestedData = dataWidget.data;
+        for (var folder in pathWidget.pathOfBoard) {
+          nestedData = nestedData[folder];
+        }
+
+        nestedData.removeWhere((item) => item['id'] == itemId);
+        visibleButtons.removeWhere((item) => item['id'] == itemId);
+      });
+
+      dataWidget.onDataChange(dataWidget.data);
+      print(
+          "Item with ID $itemId removed for child ID ${widget.childId}."); // Log with childId
+    } else {
+      print("Item deletion canceled by the user.");
+    }
   }
 
   Future<void> removeFolder(String folderId) async {
@@ -127,48 +178,54 @@ class GridState extends State<Grid> {
       return;
     }
 
-  // Show a confirmation dialog to the user
-bool? confirmed = await showDialog(
-  context: context,
-  builder: (BuildContext dialogContext) {
-    final theme = Theme.of(dialogContext);
+    // Show a confirmation dialog to the user
+    bool? confirmed = await showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        final theme = Theme.of(dialogContext);
 
-    return AlertDialog(
-      backgroundColor: theme.colorScheme.surface, // Use themed background
-      title: Text(
-        "Delete Folder",
-        style: theme.textTheme.headlineSmall?.copyWith(color: theme.elevatedButtonTheme.style?.backgroundColor?.resolve({})),
-        
-         // Use themed title style
-      ),
-      content: Text(
-        "Are you sure you want to delete this folder and all its contents?",
-        style: theme.textTheme.bodyMedium, // Use themed content text style
-      ),
-      actions: [
-        TextButton(
-          style: TextButton.styleFrom(
-            foregroundColor: theme.elevatedButtonTheme.style?.backgroundColor?.resolve({}) , // Use themed primary color
+        return AlertDialog(
+          backgroundColor: theme.colorScheme.surface, // Use themed background
+          title: Text(
+            "Delete Folder",
+            style: theme.textTheme.headlineSmall?.copyWith(
+                color: theme.elevatedButtonTheme.style?.backgroundColor
+                    ?.resolve({})),
+
+            // Use themed title style
           ),
-          child: const Text("Cancel",),
-          onPressed: () {
-            Navigator.of(dialogContext).pop(false);
-          },
-        ),
-        TextButton(
-          style: TextButton.styleFrom(
-            foregroundColor: theme.colorScheme.error, // Use themed error color
+          content: Text(
+            "Are you sure you want to delete this folder and all its contents?",
+            style: theme.textTheme.bodyMedium, // Use themed content text style
           ),
-          child: const Text("Delete"),
-          onPressed: () {
-            Navigator.of(dialogContext).pop(true);
-          },
-        ),
-      ],
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: theme
+                    .elevatedButtonTheme.style?.backgroundColor
+                    ?.resolve({}), // Use themed primary color
+              ),
+              child: const Text(
+                "Cancel",
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor:
+                    theme.colorScheme.error, // Use themed error color
+              ),
+              child: const Text("Delete"),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+            ),
+          ],
+        );
+      },
     );
-  },
-);
-
 
     if (confirmed == true) {
       try {

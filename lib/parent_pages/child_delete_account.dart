@@ -4,6 +4,8 @@ import '../auth_logic.dart';
 
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
 
 class DeleteChildForm extends StatefulWidget {
   const DeleteChildForm({super.key});
@@ -26,6 +28,11 @@ class _DeleteChildFormState extends State<DeleteChildForm> {
 
   @override
   Widget build(BuildContext context) {
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Form(
       key: _formKey,
       child: Column(

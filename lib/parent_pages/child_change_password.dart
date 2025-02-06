@@ -35,7 +35,8 @@ class _ChangeChildPasswordFormState extends State<ChangeChildPasswordForm> {
       TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
 
-  bool _isParentAuthenticated = false;
+  bool _isParentAuthenticated =
+      true; // set to true to supress parent password validation
   bool _showParentPassword = false;
   bool _showChildPassword = false;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -285,11 +286,11 @@ class ChangeChildPasswordDialog extends StatefulWidget {
 }
 
 class _ChangeChildPasswordDialogState extends State<ChangeChildPasswordDialog> {
-  bool _isParentAuthenticated = false;
+  bool _isParentAuthenticated = true; //false;
 
   void _updateParentAuthentication(bool isAuthenticated) {
     setState(() {
-      _isParentAuthenticated = isAuthenticated;
+      _isParentAuthenticated = true; //isAuthenticated;
     });
   }
 

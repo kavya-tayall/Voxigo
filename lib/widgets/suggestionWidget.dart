@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:test_app/ai_utility.dart';
 import 'package:gradient_borders/gradient_borders.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 import '../child_pages/home_page.dart';
@@ -161,10 +163,11 @@ class AISuggestion extends StatefulWidget {
   final dynamic pictogramsData;
   final GlobalKey<HomePageState> homePageKey;
 
-  AISuggestion(
-      {required this.phrase,
-      required this.pictogramsData,
-      required this.homePageKey});
+  AISuggestion({
+    required this.phrase,
+    required this.pictogramsData,
+    required this.homePageKey,
+  });
 
   @override
   State<AISuggestion> createState() => _AISuggestionState();
@@ -214,107 +217,87 @@ class _AISuggestionState extends State<AISuggestion> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> words = widget.phrase.split(' ');
     final isMobile = MediaQuery.of(context).size.width < 600;
-    final buttonSize = isMobile ? 30.0 : 60.0; // Smaller size for mobile
-    final iconSize = isMobile ? 15.0 : 30.0; // Adjusted icon size
+    final buttonSize = isMobile ? 40.0 : 50.0;
+    final iconSize = isMobile ? 20.0 : 30.0;
 
-    return SafeArea(
-      // Ensures proper spacing on devices with notches
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: isMobile ? 120 : 160, // Adjust height for mobile
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Phrase area with horizontal scrolling
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Flexible ListView to avoid overflow
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: words.length,
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: isMobile ? 2.0 : 6.0),
-                          child: PhraseColumn(
-                            word: words[index],
-                            pictogramsData: widget.pictogramsData,
-                            onImageAdded: (imageUrl) {
-                              setState(() {
-                                imageUrls.add(imageUrl);
-                              });
-                            },
-                          ),
-                        );
+                children: widget.phrase.split(' ').map((word) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: PhraseColumn(
+                      word: word,
+                      pictogramsData: widget.pictogramsData,
+                      onImageAdded: (imageUrl) {
+                        setState(() {
+                          imageUrls.add(imageUrl);
+                        });
                       },
                     ),
-                  ),
-                  // Spacing and buttons
-                  SizedBox(width: 8),
-                  Flexible(
-                    child: SizedBox(
-                      width: buttonSize,
-                      height: buttonSize,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          shape: CircleBorder(),
-                          padding: EdgeInsets.zero,
-                          backgroundColor: Colors.blue,
-                          minimumSize: Size(buttonSize, buttonSize),
-                        ),
-                        onPressed: () async {
-                          if (isPlaying) {
-                            await _stopPhrase();
-                          } else {
-                            await _speakPhrase();
-                          }
-                        },
-                        child: isPlaying
-                            ? Icon(Icons.stop,
-                                size: iconSize, color: Colors.white)
-                            : Icon(Icons.play_arrow_sharp,
-                                size: iconSize, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Flexible(
-                    child: SizedBox(
-                      width: buttonSize,
-                      height: buttonSize,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          shape: CircleBorder(),
-                          padding: EdgeInsets.zero,
-                          backgroundColor: Colors.blue,
-                          minimumSize: Size(buttonSize, buttonSize),
-                        ),
-                        onPressed: () {
-                          final homePageState = widget.homePageKey.currentState;
-                          if (homePageState != null) {
-                            homePageState.addPhraseToTopBar(
-                                widget.phrase, imageUrls);
-                          }
-                          Navigator.of(context).pop();
-                        },
-                        child: Icon(Icons.check,
-                            size: iconSize, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
+                  );
+                }).toList(),
               ),
             ),
-            Divider(
-              thickness: isMobile ? 1 : 1.5, // Adjust divider thickness
-              color: Colors.grey.shade300,
-              height: isMobile ? 8 : 10, // Adjust spacing
+          ),
+          // Play button
+          SizedBox(
+            width: buttonSize,
+            height: buttonSize,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: CircleBorder(),
+                padding: EdgeInsets.zero,
+                backgroundColor: Colors.blue,
+              ),
+              onPressed: () async {
+                if (isPlaying) {
+                  await _stopPhrase();
+                } else {
+                  await _speakPhrase();
+                }
+              },
+              child: Icon(
+                isPlaying ? Icons.stop : Icons.play_arrow,
+                size: iconSize,
+                color: Colors.white,
+              ),
             ),
-          ],
-        ),
+          ),
+          SizedBox(width: 8),
+          // Select button
+          SizedBox(
+            width: buttonSize,
+            height: buttonSize,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: CircleBorder(),
+                padding: EdgeInsets.zero,
+                backgroundColor: Colors.green,
+              ),
+              onPressed: () {
+                final homePageState = widget.homePageKey.currentState;
+                if (homePageState != null) {
+                  homePageState.addPhraseToTopBar(widget.phrase, imageUrls);
+                }
+                Navigator.of(context).pop();
+              },
+              child: Icon(
+                Icons.check,
+                size: iconSize,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -338,6 +321,8 @@ class PhraseColumn extends StatefulWidget {
 class _PhraseColumnState extends State<PhraseColumn> {
   late String imageUrl;
   bool imageLoaded = false;
+  late String brokenurl;
+  static const int maxRetries = 3;
 
   @override
   void initState() {
@@ -346,13 +331,48 @@ class _PhraseColumnState extends State<PhraseColumn> {
   }
 
   Future<void> _loadImage() async {
+    await _initializeBrokenUrl();
     String fetchedImageUrl =
-        await searchButtonData(widget.pictogramsData, widget.word);
+        await _retryLoadImage(widget.pictogramsData, widget.word);
     setState(() {
-      imageUrl = fetchedImageUrl;
+      imageUrl = fetchedImageUrl.isNotEmpty ? fetchedImageUrl : brokenurl;
       imageLoaded = true;
     });
     widget.onImageAdded(imageUrl);
+  }
+
+  Future<void> _initializeBrokenUrl() async {
+    brokenurl = await copyFallbackToLocalDir();
+  }
+
+  Future<String> copyFallbackToLocalDir() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final String localImagePath = '${directory.path}/fallback_image.png';
+
+    if (!File(localImagePath).existsSync()) {
+      final ByteData data =
+          await rootBundle.load('assets/imgs/fallback_image.png');
+      final buffer = data.buffer;
+      await File(localImagePath).writeAsBytes(
+        buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+      );
+    }
+    print("Local Image Path: $localImagePath");
+    return localImagePath;
+  }
+
+  Future<String> _retryLoadImage(List<dynamic> data, String keyword) async {
+    String result = "broken image";
+    for (int retryCount = 0; retryCount < maxRetries; retryCount++) {
+      result = await searchButtonData(data, keyword);
+      if (result != "broken image" && result.isNotEmpty) {
+        return result;
+      }
+      print("Retry #$retryCount failed for word: $keyword");
+      await Future.delayed(Duration(seconds: 1));
+    }
+    print("Failed to fetch image after $maxRetries retries for word: $keyword");
+    return result;
   }
 
   Future<String> searchButtonData(List<dynamic> data, String keyword) async {
@@ -361,6 +381,9 @@ class _PhraseColumnState extends State<PhraseColumn> {
       if (item is Map<String, dynamic> && item.containsKey("keywords")) {
         for (var keywordData in item["keywords"]) {
           if (keywordData["keyword"].toString().toLowerCase() == keyword) {
+            print("Found keyword: $keyword");
+            print(
+                "https://static.arasaac.org/pictograms/${item['_id']}/${item['_id']}_2500.png");
             return "https://static.arasaac.org/pictograms/${item['_id']}/${item['_id']}_2500.png";
           }
         }
@@ -371,10 +394,9 @@ class _PhraseColumnState extends State<PhraseColumn> {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile =
-        MediaQuery.of(context).size.width < 600; // Determine if on mobile
-    final imageSize = isMobile ? 50.0 : 100.0; // Adjust image size for mobile
-    final fontSize = isMobile ? 14.0 : 28.0; // Adjust font size for mobile
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final imageSize = isMobile ? 50.0 : 100.0;
+    final fontSize = isMobile ? 14.0 : 28.0;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 6.0),
@@ -382,21 +404,24 @@ class _PhraseColumnState extends State<PhraseColumn> {
         children: [
           imageLoaded
               ? CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  width: imageSize, // Dynamically adjusted image size
+                  imageUrl: imageUrl.startsWith('http')
+                      ? imageUrl
+                      : 'file://$imageUrl',
+                  width: imageSize,
                   placeholder: (context, url) => CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => Image.asset(
-                      "assets/imgs/angry.png",
-                      width: imageSize), // Adjust fallback image size
+                  errorWidget: (context, url, error) {
+                    print("Image failed to load: $url, Error: $error");
+                    return Image.file(File(brokenurl), width: imageSize);
+                  },
                 )
-              : Container(),
+              : CircularProgressIndicator(),
           SizedBox(height: 4),
           Text(
             widget.word,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.black,
-              fontSize: fontSize, // Dynamically adjusted font size
+              fontSize: fontSize,
             ),
           ),
         ],

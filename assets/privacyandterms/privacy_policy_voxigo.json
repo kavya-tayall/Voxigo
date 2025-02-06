@@ -1,0 +1,82 @@
+{
+    "title": "Privacy Policy for Voxigo",
+    "description": "This privacy policy applies to the use of the Voxigo application (the \"application\"). We are committed to protecting your privacy and handling your personal data in compliance with any applicable laws and regulations. Below, we detail the types of personal data we collect, how we use it, and the measures we take to protect it.",
+    "contactInformation": {
+        "email": "VoxigoAAC@gmail.com"
+    },
+    "dataTypes": [
+        {
+            "title": "User Interactions with the Application",
+            "details": [
+                "Clicked Phrases: When a user selects phrases from the Speech Generating Device (SGD) grid, these interactions are stored to enhance the user experience and improve predictive sentence generation.",
+                "Emotion Selections: Data regarding clicked emotions on the emotion-handling page is collected to support emotional communication features.",
+                "SGD Grid Information: We store customized grid layouts, including buttons, folders, and associated images.",
+                "Media Storage: Audio and image files uploaded or generated in the application, including on the music page and other designated sections, are stored for playback and customization purposes",
+                "Settings: User-specific preferences, such as themes and access to AI features, are stored to personalize the application."
+            ]
+        },
+        {
+            "title": "Child Accounts",
+            "details": [
+                "Username, password, and name to enable secure access.",
+                "Data regarding interactions within the application to support functionality and customization."
+            ]
+        },
+        {
+            "title": "Parent/Administrator Accounts",
+            "details": [
+                "Name, email address, linked child accounts, and password to facilitate account management and access control."
+            ]
+        },
+        {
+            "title": "AI-Powered Features",
+            "details": [
+                "The application uses data processed through third party APIs to power advanced AI features, including predictive sentence generation and chatbot functionalities. All data shared with APIs is anonymized."
+            ]
+        }
+    ],
+    "dataSecurity": {
+        "points": [
+            "Anonymized: Personal identifiers are removed wherever possible.",
+            "Encrypted: Data is secured using industry standard or equivalent encryption protocols to safeguard from unauthorized access, loss, or misuse.",
+            "Stored: Data is stored in a secure manner. No data is transmitted to unauthorized third parties."
+        ]
+    },
+    "minors": {
+        "description": "We recognize the importance of protecting the privacy of minors and are committed to adhering to applicable laws and regulations regarding their data. For users under the age of 18, the following provisions apply:",
+        "provisions": [
+            "Parental Consent: A parent or legal guardian must provide explicit consent at the time of account creation for children under the age of 18.",
+            "Parents or legal guardians will review and agree to the terms and conditions of the application before account setup."
+        ],
+        "accountManagement": [
+            "Child accounts are created and managed by parents, administrators, or caregivers.",
+            "Login credentials, including the username and password, are set up by the parent, administrator, or caregiver.",
+            "Permissions for accessing and operating the application are also configured and managed by the parent, administrator, or caregiver, ensuring appropriate controls and oversight."
+        ],
+        "dataLimitation": "Data collection for child accounts is strictly limited to the minimum necessary to provide core application functionalities. We do not collect sensitive or unnecessary information from minors."
+    },
+    "dataSharing": {
+        "description": "We do not sell personal data to third parties or use it for advertising, profiling, or marketing purposes. Personal data will only be shared in the following circumstances:",
+        "circumstances": [
+            "With service providers or subcontractors who assist in application functionality (\"processors\"), subject to strict data processing agreements.",
+            "With legal authorities, when required by law."
+        ]
+    },
+    "thirdParty": "We integrate with third-party APIs, such as Gemini. While we ensure they comply with applicable regulations, we are not liable for their independent actions, breaches, or misuse of data outside of our control.",
+    "googleAPI": "Voxigo use and transfer to any other app of information received from Google APIs will adhere to Google API Services User Data Policy, including the Limited Use requirements.",
+    "liability": "We employ industry-standard practices to protect your data. However, no system can be guaranteed to be 100% secure. By using the application, you acknowledge and agree that application developers and operators shall not be liable for unauthorized access, data breaches, or other risks beyond our control.",
+    "dataRetention": "We retain personal data only as long as necessary to fulfill the purposes outlined in this policy or to comply with legal obligations. Users may request the deletion of their data at any time, and we will respond within the statutory timeframe.",
+    "rights": {
+        "description": "You have the right to:",
+        "list": [
+            "Access, amend, or delete your personal data.",
+            "Restrict or object to certain processing activities.",
+            "Withdraw previously provided consent."
+        ],
+        "contact": "For inquiries or requests regarding your personal data, please contact us at VoxigoAAC@gmail.com."
+    },
+    "policyChanges": {
+        "description": "We may update this policy to reflect changes in legal requirements or application functionalities. Users will be notified of significant changes.",
+        "effectiveDate": "This policy is effective as of January,01,2025 ."
+    }
+}

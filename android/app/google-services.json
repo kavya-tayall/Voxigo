@@ -15,6 +15,30 @@
       },
       "oauth_client": [
         {
+          "client_id": "662430635566-bbdliim6l1vh9mm7o5l9g4sbi2atj1t7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.VoxigoAAC.appcore",
+            "certificate_hash": "d53991d7757705e941134fe51d4dda7bd3bd96bf"
+          }
+        },
+        {
+          "client_id": "662430635566-m9bp8qogcglaa10tb2ol147fq8bcqoob.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.VoxigoAAC.appcore",
+            "certificate_hash": "b72df4183714d565c14fbc6038a1d3463150a05e"
+          }
+        },
+        {
+          "client_id": "662430635566-v5lia4nni3guu2814qs5o66optrjkg70.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.VoxigoAAC.appcore",
+            "certificate_hash": "8caa62f05ed5d5e6ad609e3718443b2d2e096b90"
+          }
+        },
+        {
           "client_id": "662430635566-23knp70fd48nn009nfe3g5r4tc386rpd.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -122,6 +146,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "662430635566-go1d4qae6273e4ckhi77pp2k65cr1063.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mindbridge.appcore",
+            "certificate_hash": "8caa62f05ed5d5e6ad609e3718443b2d2e096b90"
+          }
+        },
         {
           "client_id": "662430635566-uqri6qbptce1669utidm8g6qgn63hgkf.apps.googleusercontent.com",
           "client_type": 1,

@@ -21,6 +21,7 @@ import 'cache_utility.dart';
 import 'package:bcrypt/bcrypt.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test_app/user_session_management.dart';
 
 class InvalidCredentialsException implements Exception {
   final String message;
@@ -67,6 +68,8 @@ Future<void> logOutUser(BuildContext context) async {
     print('All singleton classes disposed during logout');
     final childProvider = Provider.of<ChildProvider>(context, listen: false);
     childProvider.logout();
+    final parentProvider = Provider.of<ParentProvider>(context, listen: false);
+    parentProvider.clearParentData();
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     await FirebaseAuth.instance.signOut();
@@ -90,11 +93,12 @@ class AuthService {
     bool createUserOrNot = true,
   ]) async {
     // Check if the username already exists
+    /*
     bool usernameExists = await _checkUsernameExists(username);
 
     if (usernameExists) {
       throw UsernameAlreadyExistsException();
-    }
+    }*/
 
     // Enforce password requirement if creating a new user
     if (createUserOrNot && (password == null || password.isEmpty)) {
@@ -105,6 +109,7 @@ class AuthService {
     User? parent;
 
     try {
+      email = email.trim().toLowerCase();
       if (createUserOrNot) {
         // Create user with email and password
         UserCredential userCredential =
@@ -174,12 +179,8 @@ class AuthService {
 
     // Check if name or username fields are missing or empty
     String? name = parentData.firstname;
-    String? savedUsername = parentData.username;
 
-    if (name == null ||
-        name.trim().isEmpty ||
-        savedUsername == null ||
-        savedUsername.trim().isEmpty) {
+    if (name == null || name.trim().isEmpty) {
       return false;
     }
 
@@ -207,16 +208,32 @@ class AuthService {
 
       if (parent != null) {
         if (!parent.emailVerified) {
-          throw Exception(
-              "Email not verified. Please verify your email before signing in.");
+          throw EmailNotVerifiedException();
         }
         return await postParentLogin(parent!);
       } else {
         throw ParentDoesNotExistException();
       }
     } catch (e) {
-      print(e.toString());
-      throw e is Exception ? e : Exception("An error occurred");
+      print('hello');
+      if (e.toString().contains('firebase_auth/invalid-credential')) {
+        throw InvalidCredentialsException();
+      } else if (e is FirebaseAuthException) {
+        // Specific FirebaseAuthException handling
+        switch (e.code) {
+          case 'user-not-found':
+          case 'wrong-password':
+            throw InvalidCredentialsException();
+          case 'user-disabled':
+            throw Exception('User account has been disabled.');
+          default:
+            throw Exception('An unexpected error occurred.');
+        }
+      } else {
+        // Non-FirebaseAuthException handling
+        print(e.toString());
+        rethrow;
+      }
     } finally {
       print("Parent Login done");
     }
@@ -228,11 +245,15 @@ class AuthService {
     //   if (userDoc.exists && userDoc['role'] == 'parent') {
     //  await _fetchAndStoreChildrenData(userDoc['children'], context, email);
 
+    ChildCollectionWithKeys.instance.dispose();
+
     await ApiService.initialize();
 
     await setLoginUserKeys(parent, UserType.parent);
 
     await saveLoginType('parent'); // Save the login type
+    await setUserSessionActive(parent.uid!);
+    listenToUserSession(parent.uid);
 
     return parent;
     //  } else {
@@ -321,54 +342,85 @@ class AuthService {
   Future<void> signInChild(
       String username, String password, BuildContext context,
       {bool alreadyAuth = false}) async {
-    // Query Firestore for the username
-    QuerySnapshot childQuery = await _db
-        .collection('children')
-        .where('username', isEqualTo: username)
-        .limit(1)
-        .get();
+    try {
+      // Query Firestore for the username
+      QuerySnapshot childQuery = await _db
+          .collection('children')
+          .where('username', isEqualTo: username)
+          .limit(1)
+          .get();
 
-    if (childQuery.docs.isEmpty) {
-      throw ChildDoesNotExistException();
-    }
-
-    var childData = childQuery.docs.first.data() as Map<String, dynamic>;
-
-    if (!alreadyAuth) {
-      var storedHashedPassword = childData['password'] as String;
-      // Validate the entered password against the hashed password
-      if (!BCrypt.checkpw(password, storedHashedPassword)) {
-        throw InvalidCredentialsException(); // Custom exception for invalid credentials
+      if (childQuery.docs.isEmpty) {
+        throw ChildDoesNotExistException(); // Custom exception for missing child
       }
-    }
 
-    var childId = childQuery.docs.first.id;
+      String parentId = childQuery.docs.first['parents'][0];
 
-    await ApiService.initialize();
+      // Fetch parent document
+      DocumentSnapshot parentDoc =
+          await _db.collection('parents').doc(parentId).get();
 
-    final apiService = ApiService.instance;
+      if (!parentDoc.exists) {
+        throw Exception('Parent data not found.');
+      }
 
-    final firebaseToken = await apiService.getFirebaseToken(childId);
+      Map<String, dynamic> childData =
+          childQuery.docs.first.data() as Map<String, dynamic>;
 
-    UserCredential userCredential = await signInWithCustomToken(firebaseToken);
+      // Validate the password only if not already authenticated
+      if (!alreadyAuth) {
+        final storedHashedPassword = childData['password'] as String;
+        if (!BCrypt.checkpw(password, storedHashedPassword)) {
+          throw InvalidCredentialsException(); // Custom exception for invalid credentials
+        }
+      }
 
-    User? child = userCredential.user;
+      String childId = childQuery.docs.first.id;
 
-    if (child != null) {
+      // Initialize API service
+      await ApiService.initialize();
+      final apiService = ApiService.instance;
+
+      // Get Firebase custom token
+      final firebaseToken = await apiService.getFirebaseToken(childId);
+      if (firebaseToken.isEmpty) {
+        throw Exception('Failed to generate Firebase token.');
+      }
+
+      // Sign in with the custom token
+      UserCredential userCredential =
+          await signInWithCustomToken(firebaseToken);
+      final User? child = userCredential.user;
+
+      if (child == null) {
+        throw Exception("Invalid user or credentials."); // Ensure user is valid
+      }
+
+      // Perform session setup
       await setLoginUserKeys(child, UserType.child);
-    } else {
-      print("No user found");
+      saveChildToken(firebaseToken, username);
+      await setUserSessionActive(childId);
+      listenToUserSession(childId);
+
+      // Update child provider
+      final childProvider = Provider.of<ChildProvider>(context, listen: false);
+      childProvider.setChildData(childId, childData);
+
+      // Load the theme
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      await themeProvider.loadTheme(isChild: true);
+
+      print("Sign-in successful for child: $username");
+    } catch (e) {
+      // Clear session validity in case of any error
+      isSessionValid = false;
+
+      // Log or record error for debugging or analytics
+      print("Error during child sign-in: $e");
+
+      // Rethrow the exception for caller to handle
+      throw Exception("Sign-in failed: ${e.toString()}");
     }
-
-    saveChildToken(firebaseToken, username);
-
-    // Set child data in the provider
-    final childProvider = Provider.of<ChildProvider>(context, listen: false);
-    childProvider.setChildData(childId, childData);
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-
-    await themeProvider.loadTheme(
-        isChild: true); // Load the theme from Firebase
   }
 }
 
@@ -405,8 +457,13 @@ String generateFirebaseId() {
 class UserService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<String> encryptChildDataAndRegister(String parentId, String firstName,
-      String lastName, String username, String password) async {
+  Future<String> encryptChildDataAndRegister(
+      String parentId,
+      String firstName,
+      String lastName,
+      String username,
+      String password,
+      String disclaimer) async {
     try {
       // Check if the username already exists
       bool usernameExists = await _checkUsernameExists(username);
@@ -424,7 +481,14 @@ class UserService {
 
       // Encrypt the child data
       final Map<String, dynamic> encryptedData = await encryptChildInfoWithIV(
-          parentId, childId, username, firstName, lastName, 'add');
+          parentId,
+          childId,
+          username,
+          firstName,
+          lastName,
+          'default',
+          disclaimer,
+          'add');
       print('after encyrption registering child with id $childId');
       // Register the child with the encrypted data
       await registerChild(
@@ -432,8 +496,10 @@ class UserService {
         parentId,
         encryptedData['first name'],
         encryptedData['last name'],
+        encryptedData['disclaimer'],
         encryptedData['username'],
         hashedPassword,
+        encryptedData['timestamp'],
         jsonDecode(encryptedData['settings']),
         iv: encryptedData['iv'],
       );
@@ -514,6 +580,8 @@ class UserService {
 
       print('Child ID removed from parent\'s children array.');
 
+      await removeChildFromParentField(parentId, childId);
+
       // Reference to the child document in Firestore
       DocumentReference childRef = _db.collection('children').doc(childId);
 
@@ -540,8 +608,44 @@ class UserService {
       // Delete the child's local folder
       await deleteLocalChildFolder(childId);
       print('Child\'s local folder deleted.');
+
+      ChildCollectionWithKeys.instance.removeRecord(childId);
+      deleteUserSession(childId);
     } catch (e) {
       print('Error deleting child $childId: $e');
+      throw Exception('Failed to delete child. Please try again.');
+    }
+  }
+
+  Future<void> deleteParentAccount() async {
+    try {
+      // Fetch the parent ID from the current user
+      User? user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        throw Exception('No user is currently logged in.');
+      }
+      String parentId = user.uid;
+      print('Parent ID now deleteting own account: $parentId');
+      // Delete all child accounts associated with the parent
+      final childAccounts = await _db
+          .collection('children')
+          .where('parents', arrayContains: parentId)
+          .get();
+      print('childAccounts.docs.length ${childAccounts.docs.length}');
+      for (var doc in childAccounts.docs) {
+        print('Deleting child account: ${doc['username']}');
+        await deleteChildByUsername(doc['username']);
+      }
+      // Delete the parent document in Firestore
+      await _db.collection('parents').doc(parentId).delete();
+      print('Parent document deleted.');
+
+      // Delete the parent account from firebase auth
+      await user.delete();
+      deleteUserSession(parentId);
+    } catch (e) {
+      print('Error deleting parent account: $e');
       throw Exception('Failed to delete child. Please try again.');
     }
   }
@@ -552,8 +656,10 @@ class UserService {
       String parentId,
       String firstName,
       String lastName,
+      String disclaimer,
       String username,
       String password,
+      String timestamp,
       Map<String, dynamic> settings,
       {String iv = ''}) async {
     // Create a document reference with the custom ID
@@ -567,19 +673,23 @@ class UserService {
       'last name': lastName,
       'password': password,
       'parents': [parentId],
+      'disclaimer': disclaimer,
       if (iv.isNotEmpty) 'iv': iv,
       'data': {'selectedButtons': [], 'selectedFeelings': []},
       'settings': {
         'sentence helper': settings['sentence helper'],
         'emotion handling': settings['emotion handling'],
         'grid editing': settings['grid editing'],
-        'audio page': settings['audio page']
+        'audio page': settings['audio page'],
+        'theme': settings['childtheme'],
       }
     });
 
     await _db.collection('parents').doc(parentId).update({
-      'children': FieldValue.arrayUnion([childRef.id])
+      'children': FieldValue.arrayUnion(
+          [childRef.id]), // Keep the existing 'children' field intact
     });
+    await updateParentChildrenField(parentId, customDocIdForChild);
 
     await uploadJsonFromAssets('assets/board_info/board.json',
         '/user_folders/$customDocIdForChild/board.json');

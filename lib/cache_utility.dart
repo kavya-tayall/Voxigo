@@ -86,12 +86,14 @@ Future<String> fetchChildrenAnonDataforAI({
       for (var doc in feelingsSnapshot.docs) {
         selectedFeelings.add(doc.data() as Map<String, dynamic>);
       }
-
+      bool byChild = byParent ? false : true;
       // Decrypt the selected data for the child
-      List<dynamic> decryptedButtons =
-          await decryptSelectedDataForChild(childId, selectedButtons);
-      List<dynamic> decryptedFeelings =
-          await decryptSelectedDataForChild(childId, selectedFeelings);
+      List<dynamic> decryptedButtons = await decryptSelectedDataForChild(
+          childId, selectedButtons,
+          byChild: byChild);
+      List<dynamic> decryptedFeelings = await decryptSelectedDataForChild(
+          childId, selectedFeelings,
+          byChild: byChild);
 
       // Remove 'iv' from the decrypted data
       decryptedButtons.forEach((button) {
@@ -128,27 +130,49 @@ Future<String> fetchChildrenAnonDataforAI({
   }
 }
 
-/// Process all assets for login user , called from base page defined in main.dart
-Future<void> fetchLoginChildData(BuildContext context, bool forChild) async {
+Future<void> fetchSingleChildBoardData(BuildContext context, bool forChild,
+    {String? childIdPassed, // Optional parameter with null safety
+    String? childUsernamePassed}) async {
   try {
     final childProvider = Provider.of<ChildProvider>(context, listen: false);
 
+    // Fetch child username from provider
+    String? childUsername =
+        (childUsernamePassed != null && childUsernamePassed.isNotEmpty)
+            ? childUsernamePassed
+            : childProvider.childData?['username'];
+
+    // Determine the child ID to use
+    String? childId = (childIdPassed != null && childIdPassed.isNotEmpty)
+        ? childIdPassed
+        : childProvider.childId;
+
+    if (childId == null || childId.isEmpty) {
+      throw Exception("Child ID is not provided or invalid.");
+    }
+
     // Fetch and process board.json
-    String? childUsername = childProvider.childData?['username'];
-    String? childId = childProvider.childId;
     String? boardJsonString =
-        await childProvider.fetchJson("board.json", childId!);
-    final Map<String, dynamic> boardData = json.decode(boardJsonString!);
+        await childProvider.fetchJson("board.json", childId);
+    if (boardJsonString == null) {
+      throw Exception("Failed to fetch board.json for child ID: $childId");
+    }
+
+    final Map<String, dynamic> boardData = json.decode(boardJsonString);
 
     print(
-        'Inside fetchLoginChildData now Calling fetchButtonLogsAndDownloadImages for $childUsername');
+        'Inside fetchSingleChildData now calling fetchButtonLogsAndDownloadImagesForSingleChild for $childUsername');
 
-    // 1 First Step to fetch all the images from the board.json and download them as per the last update in button log
-    await fetchButtonLogsAndDownloadImages(
-        childUsername!, childId!, boardData["buttons"]!, forChild);
+    // Step 1: Fetch all the images from board.json and download them as per the last update in button log
+    await fetchButtonLogsAndDownloadImagesForSingleChild(
+      childUsername!,
+      childId,
+      boardData["buttons"]!,
+      forChild,
+    );
 
-    //2. Second step to fetch and process music.json
-    //fetchMusicFiles(context); -- commenting this code for optimization
+    // Step 2: Fetch and process music.json (if required)
+    // fetchMusicFiles(context); -- commenting this code for optimization
   } catch (e) {
     print('Error fetching or parsing JSON: $e');
   }
@@ -240,7 +264,7 @@ Future<QuerySnapshot<Object?>?> getAppInstallationsForUser(
 
 /// Fetches button logs from Firestore and downloads the images to the device.
 /// Also updates the app installation record to reflect the last time the app was updated for images.
-Future<void> fetchButtonLogsAndDownloadImages(
+Future<void> fetchButtonLogsAndDownloadImagesForSingleChild(
     String username, String childId, List listData, bool forChild) async {
   try {
     print('Fetching button logs and downloading images for $username');
@@ -704,55 +728,26 @@ Future<void> refreshGridFromLatestBoard(BuildContext context, String username,
   }
 }
 
-Future<void> fetchAndStoreChildrenData(
-    String parentId,
-    List<dynamic> childrenIds,
-    BuildContext context,
-    String parentusername,
-    bool forChild,
-    {bool refreshButtons = false}) async {
-  print('inside fetchAndStoreChildrenData');
-  final childProvider = Provider.of<ChildProvider>(context, listen: false);
+Future<void> fetchAndStoreAllChildrenDataForParent(String parentId,
+    String childId, BuildContext context, bool forChild, Timestamp timestamp,
+    {bool refreshButtons = false, bool disposeChildCollection = false}) async {
+  print('inside fetchAndStoreAllChildrenDataForParent');
   final FirebaseFirestore db = FirebaseFirestore.instance;
 
-  ChildCollectionWithKeys.instance.dispose();
+  DocumentSnapshot childDoc =
+      await db.collection('children').doc(childId).get();
 
-  for (String childId in childrenIds) {
-    DocumentSnapshot childDoc =
-        await db.collection('children').doc(childId).get();
+  if (childDoc.exists) {
+    var childData = childDoc.data() as Map<String, dynamic>;
 
-    if (childDoc.exists) {
-      var childData = childDoc.data() as Map<String, dynamic>;
-      String childUsername = childData['username'];
-      //  childProvider.setChildData(childId, childData);
+    await setChildCollectionWithDecryptedData(
+        parentId, childId, childData, timestamp);
 
-      await setChildCollectionWithDecryptedData(parentId, childId, childData);
-
-      //String childUsername = childData['username'];
-      if (refreshButtons) {
-        try {
-          String? boardJsonString =
-              await childProvider.fetchJson("board.json", childId);
-          final Map<String, dynamic> boardData = json.decode(boardJsonString!);
-
-          print(
-              ' inside fetchAndStoreChildrenData calling fetchButtonLogsAndDownloadImages for parent $parentusername and child $childUsername');
-          await fetchButtonLogsAndDownloadImages(
-              childUsername, childId, boardData["buttons"]!, forChild);
-          /*
-        String? musicJsonString = await childProvider.fetchJson("music.json");
-        final List<dynamic> musicData = json.decode(musicJsonString!);
-
-        for (int i = 0; i < musicData.length; i++) {
-          await downloadMp3(musicData[i]['link']);
-          await downloadCoverImage(musicData[i]['image']);
-        }*/
-        } catch (e) {
-          print(e);
-        }
-      }
-      print('end of fetchAndStoreChildrenData');
+    if (refreshButtons) {
+      await fetchSingleChildBoardData(context, forChild,
+          childIdPassed: childId);
     }
+    print('end of fetchAndStoreAllChildrenDataForParent');
   }
 }
 
@@ -872,6 +867,21 @@ Future<void> copyMusicToLocalHolderFromAsset(String childId) async {
 Future<void> copyAllAssetsToAppFolder(String childId) async {
   // Get the application directory
   final directory = await getApplicationDocumentsDirectory();
+
+  final String localImagePath = '${directory.path}/fallback_image.png';
+
+  // Check if the file already exists
+  if (!File(localImagePath).existsSync()) {
+    // Read the image data from the asset bundle
+    final ByteData data =
+        await rootBundle.load('assets/imgs/fallback_image.png');
+    final buffer = data.buffer;
+
+    // Write the image data to the local file
+    await File(localImagePath).writeAsBytes(
+      buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+    );
+  }
 
   // Create the child-specific board_images directory
   final String childBoardDirectory =
@@ -1004,5 +1014,188 @@ Future<void> deleteLocalChildFolder(String childId) async {
   } catch (e) {
     print('Error deleting local folder: $e');
     throw Exception('Failed to delete local folder for child $childId.');
+  }
+}
+
+Future<void> updateParentChildrenFieldold(
+    String parentId, String childId) async {
+  try {
+    print('inside updateParentChildrenField');
+    // Reference to the parent document
+    final parentRef =
+        FirebaseFirestore.instance.collection('parents').doc(parentId);
+
+    // Get the current data of the parent document
+    DocumentSnapshot parentSnapshot = await parentRef.get();
+
+    if (parentSnapshot.exists) {
+      Map<String, dynamic>? parentData =
+          parentSnapshot.data() as Map<String, dynamic>?;
+
+      // Initialize or update the `ChildrenList` field
+      List<dynamic> childrenList = parentData?['ChildrenList'] ?? [];
+
+      // Check if the child already exists in the list
+      int index =
+          childrenList.indexWhere((child) => child['ChildId'] == childId);
+
+      if (index != -1) {
+        // Update the existing child's timestamp
+        childrenList[index]['LastUpdatedTimeStamp'] =
+            FieldValue.serverTimestamp();
+      } else {
+        // Add a new entry for the child
+        childrenList.add({
+          'ChildId': childId,
+          'LastUpdatedTimeStamp': FieldValue.serverTimestamp(),
+        });
+      }
+
+      // Update the parent document with the updated ChildrenList
+      await parentRef.update({'ChildrenList': childrenList});
+      print('Parent Children field updated successfully!');
+    }
+  } catch (e) {
+    print('Error updating parent Children field: $e');
+  }
+}
+
+Future<void> updateParentChildrenField(String parentId, String childId) async {
+  try {
+    print('inside updateParentChildrenField');
+    // Reference to the parent document
+    final parentRef =
+        FirebaseFirestore.instance.collection('parents').doc(parentId);
+    DocumentSnapshot updatedParentSnapshot = await parentRef.get();
+
+    Map<String, dynamic>? parentData =
+        updatedParentSnapshot.data() as Map<String, dynamic>?;
+    List<dynamic> childrenList = parentData?['ChildrenList'] ?? [];
+
+    // Check if the child already exists in the list
+    int index = childrenList.indexWhere((child) => child['ChildId'] == childId);
+
+    if (index != -1) {
+      // Update the existing child's LastUpdatedTimeStamp
+      childrenList[index] = {
+        'ChildId': childId,
+        'LastUpdatedTimeStamp':
+            Timestamp.now(), // Use Timestamp.now() for consistency
+      };
+    } else {
+      // Add a new entry for the child
+      childrenList.add({
+        'ChildId': childId,
+        'LastUpdatedTimeStamp': Timestamp.now(),
+      });
+    }
+
+    // Update the parent document with the modified ChildrenList
+    await parentRef.update({'ChildrenList': childrenList});
+    print('ChildrenList updated successfully.');
+  } catch (e) {
+    print('Error while adding or updating child to parent: $e');
+  }
+}
+
+Future<void> removeChildFromParentField(String parentId, String childId) async {
+  try {
+    print('inside removeChildFromParentField');
+    // Reference to the parent document
+    final parentRef =
+        FirebaseFirestore.instance.collection('parents').doc(parentId);
+    DocumentSnapshot updatedParentSnapshot = await parentRef.get();
+
+    Map<String, dynamic>? parentData =
+        updatedParentSnapshot.data() as Map<String, dynamic>?;
+    List<dynamic> childrenList = parentData?['ChildrenList'] ?? [];
+
+    // Find the child in the list and remove it
+    int index = childrenList.indexWhere((child) => child['ChildId'] == childId);
+
+    if (index != -1) {
+      // Remove the child from the list
+      childrenList.removeAt(index);
+      // Update the parent document with the modified ChildrenList
+      await parentRef.update({'ChildrenList': childrenList});
+      print('Child removed successfully.');
+    } else {
+      print('Child not found in the list.');
+    }
+  } catch (e) {
+    print('Error while removing child from parent: $e');
+  }
+}
+
+Future<void> refreshChildCollection(
+    BuildContext context, String parentId) async {
+// Fetch the parent document
+  DocumentSnapshot parentSnapshot = await FirebaseFirestore.instance
+      .collection('parents')
+      .doc(parentId)
+      .get();
+
+  if (parentSnapshot.exists) {
+    Map<String, dynamic>? parentData =
+        parentSnapshot.data() as Map<String, dynamic>?;
+
+    List<dynamic> oldChildIdList = parentData?['children'] ?? [];
+
+    if (parentData != null && parentData['ChildrenList'] == null) {
+      print('old style of children list');
+      for (var childIds in oldChildIdList) {
+        print(
+            'calling old style fetchAndStoreAllChildrenDataForParent for child IDs: $childIds');
+        await fetchAndStoreAllChildrenDataForParent(
+          parentId,
+          childIds,
+          context,
+          true,
+          Timestamp.now(),
+          refreshButtons: true,
+        );
+      }
+      return;
+    }
+
+    if (parentData != null && parentData['ChildrenList'] != null) {
+      // Retrieve the child data from the ChildrenList in the parent document
+      List<dynamic> childrenList = List.from(parentData['ChildrenList']);
+      print(' new style of child list inside _buildChildCollectionForParent');
+
+      for (var childEntry in childrenList) {
+        String childId = childEntry['ChildId'];
+        Timestamp? timestampfromdb = childEntry['Timestamp'];
+
+        // Fetch the child record using ChildCollectionWithKeys.instance.getRecord(childId)
+        ChildRecord childRecord =
+            ChildCollectionWithKeys.instance.getRecord(childId) as ChildRecord;
+
+        // Check if the child record's username is empty or the timestamp is older than the current timestamp
+
+        String username = childRecord.username ?? '';
+        Timestamp recordtimestamp = childRecord.timestamp ?? Timestamp.now();
+
+        // Check the conditions
+        if (username == '' ||
+            (timestampfromdb != null &&
+                recordtimestamp.compareTo(timestampfromdb) < 0)) {
+          // Call your method here if conditions are met
+          timestampfromdb = timestampfromdb ?? Timestamp.now();
+          print(
+              'Calling fetchAndStoreAllChildrenDataForParent for child IDs: $childId');
+
+          // For example, call the method `fetchAndStoreAllChildrenDataForParent`
+          await fetchAndStoreAllChildrenDataForParent(
+            parentId,
+            childId,
+            context,
+            true,
+            timestampfromdb!,
+            refreshButtons: false,
+          );
+        }
+      }
+    }
   }
 }

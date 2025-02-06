@@ -6,6 +6,9 @@ import '../child_pages/home_page.dart';
 import '../widgets/buttons_table.dart';
 import '../widgets/feelings_timeline.dart';
 import 'package:test_app/security.dart';
+import 'package:test_app/auth_logic.dart';
+import 'package:test_app/user_session_management.dart';
+import 'package:test_app/widgets/globals.dart';
 
 class StatsPage extends StatefulWidget {
   @override
@@ -28,6 +31,7 @@ class _StatsPageState extends State<StatsPage>
   @override
   void initState() {
     super.initState();
+    atBasePage = true;
     fetchChildren();
     _tabController = TabController(length: 2, vsync: this);
 
@@ -116,13 +120,20 @@ class _StatsPageState extends State<StatsPage>
           }
           setState(() {
             selectedChildId = childIds.isNotEmpty ? childIds[0] : null;
-            fetchDataForCurrentTab();
+            isLoading = false; // Stop loading spinner
           });
+          if (childIds.isNotEmpty) {
+            fetchDataForCurrentTab();
+          }
+        } else {
+          setState(() => isLoading = false); // Stop loading spinner
         }
+      } else {
+        setState(() => isLoading = false); // Stop loading spinner
       }
     } catch (e) {
       print('Error fetching children: $e');
-      setState(() => isLoading = false);
+      setState(() => isLoading = false); // Stop loading spinner on error
     }
   }
 
@@ -252,6 +263,11 @@ class _StatsPageState extends State<StatsPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (isSessionValid == false) {
+      return SessionExpiredWidget(
+        onLogout: () => logOutUser(context),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -335,105 +351,124 @@ class _StatsPageState extends State<StatsPage>
               Row(
                 children: [
                   Expanded(
-                    child: Theme(
-                      data: Theme.of(
-                          context), // Applies your theme to the dropdown
-                      child: DropdownButtonFormField<String>(
-                        value: selectedChildId,
-                        focusColor: theme.primaryColor,
-                        onChanged: (String? newValue) {
+                    child: childIdToUsername.isEmpty
+                        ? Text(
+                            'No child available. Use the settings page to add a child.',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                            textAlign: TextAlign.center,
+                          )
+                        : Theme(
+                            data: Theme.of(context),
+                            child: DropdownButtonFormField<String>(
+                              value: selectedChildId,
+                              focusColor: theme.primaryColor,
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedChildId = newValue!;
+                                  fetchDataForCurrentTab();
+                                });
+                              },
+                              decoration: InputDecoration(
+                                labelText: 'Select Child',
+                                border: OutlineInputBorder(),
+                              ),
+                              items: childIdToUsername.entries.map((entry) {
+                                return DropdownMenuItem(
+                                  value: entry.key,
+                                  child: Text(entry.value),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+              if (childIdToUsername.isNotEmpty) ...[
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: TextField(
+                        decoration: InputDecoration(
+                          labelText: 'Search',
+                          prefixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (value) {
                           setState(() {
-                            selectedChildId = newValue!;
+                            searchText = value.toLowerCase();
                             fetchDataForCurrentTab();
                           });
                         },
-                        decoration: InputDecoration(
-                          labelText: 'Select Child',
-                          border: OutlineInputBorder(),
+                      ),
+                    ),
+                    SizedBox(width: 5),
+                    Expanded(
+                      flex: 3,
+                      child: Theme(
+                        data: Theme.of(context),
+                        child: DropdownButtonFormField<String>(
+                          value: selectedTimeFilter,
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedTimeFilter = newValue!;
+                              if (newValue == 'Custom') {
+                                _pickCustomDateRange();
+                              } else {
+                                fetchDataForCurrentTab();
+                              }
+                            });
+                          },
+                          decoration:
+                              InputDecoration(border: OutlineInputBorder()),
+                          items: [
+                            'Today',
+                            'This Week',
+                            'This Month',
+                            'All Time',
+                            'Custom'
+                          ]
+                              .map((filter) => DropdownMenuItem(
+                                    value: filter,
+                                    child: Text(filter),
+                                  ))
+                              .toList(),
                         ),
-                        items: childIdToUsername.entries.map((entry) {
-                          return DropdownMenuItem(
-                            value: entry.key,
-                            child: Text(entry.value),
-                          );
-                        }).toList(),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Search',
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          searchText = value.toLowerCase();
-                          fetchDataForCurrentTab();
-                        });
-                      },
-                    ),
-                  ),
-                  SizedBox(width: 5),
-                  Expanded(
-                    flex: 3,
-                    child: Theme(
-                      data: Theme.of(
-                          context), // Applies your theme to the dropdown
-                      child: DropdownButtonFormField<String>(
-                        value: selectedTimeFilter,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedTimeFilter = newValue!;
-                            if (newValue == 'Custom') {
-                              _pickCustomDateRange();
-                            } else {
-                              fetchDataForCurrentTab();
-                            }
-                          });
-                        },
-                        decoration:
-                            InputDecoration(border: OutlineInputBorder()),
-                        items: [
-                          'Today',
-                          'This Week',
-                          'This Month',
-                          'All Time',
-                          'Custom'
-                        ]
-                            .map((filter) => DropdownMenuItem(
-                                  value: filter,
-                                  child: Text(filter),
-                                ))
-                            .toList(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ]
             ],
           ),
         ),
-        Expanded(
-          child: label == 'Buttons Table'
-              ? ButtonsTable(
-                  searchText: searchText,
-                  selectedButtons: selectedButtons,
-                  isLoading: isLoading,
-                )
-              : FeelingsTable(
-                  searchText: searchText,
-                  selectedFeelings: selectedFeelings,
-                  isLoading: isLoading,
-                ),
-        ),
+        if (childIdToUsername.isNotEmpty)
+          Expanded(
+            child: items.isEmpty
+                ? Center(
+                    child: Text(
+                      'No data available for the selected child or time period.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                : label == 'Buttons Table'
+                    ? ButtonsTable(
+                        searchText: searchText,
+                        selectedButtons: selectedButtons,
+                        isLoading: isLoading,
+                      )
+                    : FeelingsTable(
+                        searchText: searchText,
+                        selectedFeelings: selectedFeelings,
+                        isLoading: isLoading,
+                      ),
+          ),
       ],
     );
   }

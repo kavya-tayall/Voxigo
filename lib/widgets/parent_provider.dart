@@ -60,6 +60,9 @@ class ParentProvider with ChangeNotifier {
 
   // Getter for parent data
   ParentRecord get parentData => _parentData;
+  String get globaldisclaimer {
+    return "I confirm that I will manage this account if the child is a minor. I take full responsibility for ensuring the app is used and operated appropriately and in compliance with Voxigo's Terms of Use and Privacy Policy. I understand that I am accountable for all content uploaded and interactions conducted within the app.";
+  }
 
   // Method to update the parent data
   void updateParentData({
@@ -94,19 +97,18 @@ class ParentProvider with ChangeNotifier {
       print('uid inside fetchParentData: $parentuid');
       // If successful, update the provider with real data
       if (parentDetails != null) {
+        print('parentDetails: $parentDetails');
         updateParentData(
           parentUid: parentuid,
           username: parentDetails['username'],
-          name: parentDetails['name'],
           firstname: parentDetails['firstname'],
           lastname: parentDetails['lastname'],
           email: parentDetails['email'],
-          parentSecureKey: parentDetails['parentSecureKey'] != null
-              ? Uint8List.fromList(parentDetails['parentSecureKey']!.codeUnits)
+          parentSecureKey: parentDetails['key'] != null
+              ? Uint8List.fromList(parentDetails['key']!.codeUnits)
               : null,
-          parentBaseRecordIv: parentDetails['parentBaseRecordIv'] != null
-              ? Uint8List.fromList(
-                  parentDetails['parentBaseRecordIv']!.codeUnits)
+          parentBaseRecordIv: parentDetails['iv'] != null
+              ? Uint8List.fromList(parentDetails['iv']!.codeUnits)
               : null,
         );
       } else {
@@ -115,5 +117,14 @@ class ParentProvider with ChangeNotifier {
     } catch (e) {
       print("Error in fetching or updating parent data: $e");
     }
+  }
+
+  void clearParentData() {
+    _parentData = ParentRecord(
+      parentUid: '',
+      parentSecureKey: Uint8List(16), // Empty secure key by default
+    );
+
+    notifyListeners(); // Notify listeners to update the UI
   }
 }
