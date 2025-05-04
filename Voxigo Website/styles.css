@@ -1,0 +1,351 @@
+html {
+    scroll-behavior: smooth;
+    height: 100%;
+}
+
+/* Root Variables */
+:root {
+    --primary: #000469;
+    --secondary: #95bbff;
+    --light-blue: #afcbff;
+    --medium-blue: #95bbff;
+    --light-purple: #f4e4ff;
+    --dark-purple: #e7c5ff;
+}
+
+/* General Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: var(--primary);
+    background-color: var(--light-blue);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Header Styles */
+header {
+    background-color: white;
+    color: var(--primary);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+header nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+header nav a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+    line-height: 2rem;
+    padding: 0.3rem 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+header nav a:hover {
+    color: var(--secondary);
+}
+
+header .download-now {
+    background-color: var(--primary);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.3s;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+}
+
+header .download-now:hover {
+    background-color: var(--secondary);
+    transform: scale(1.05);
+}
+
+/* Hero Section */
+.hero {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    padding: 2rem;
+    background-color: var(--medium-blue);
+    background-size: cover;
+    background-position: left;
+    background-repeat: no-repeat;
+    flex: 1; /* Makes sure it stretches to push footer down */
+}
+
+.hero-banner img {
+    height: auto;
+    max-height: 25vh;
+    margin-bottom: 1rem;
+}
+
+.hero .content {
+    max-width: 50%;
+}
+
+.hero h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.hero p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+.hero .store-buttons {
+    margin-top: 1.5rem;
+}
+
+.hero .store-buttons img.store-badge {
+    height: 50px;
+    width: auto;
+    margin-right: 1rem;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.hero .store-buttons img.store-badge:hover {
+    transform: scale(1.1);
+}
+
+/* Content Wrapper */
+.content-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+/* Scroll Section */
+.scroll-section {
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem;
+    background-color: var(--light-blue);
+}
+
+.scroll-section:nth-child(even) {
+    background-color: var(--medium-blue);
+}
+
+.scroll-section .text {
+    flex: 1;
+    padding: 1rem;
+}
+
+.scroll-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.scroll-section p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+.scroll-section .images {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.scroll-section img {
+    max-width: 80%;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Feature Section */
+.feature-section {
+    text-align: center;
+    padding: 60px 20px;
+    background-color: var(--medium-blue);
+}
+
+.feature-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: var(--primary);
+}
+
+.feature-grid {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+.feature {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 320px;
+    transition: transform 0.3s ease;
+}
+
+.feature:hover {
+    transform: translateY(-5px);
+}
+
+.feature-icon {
+    width: 80px;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+.feature h3 {
+    font-size: 22px;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+.feature p {
+    font-size: 16px;
+    color: #333;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .feature-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .feature {
+        max-width: 100%;
+    }
+}
+
+/* FAQ Section */
+.faq-section {
+    background-color: var(--medium-blue);
+    padding: 60px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.faq-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 20px;
+}
+
+/* Scrollable FAQ Container */
+.faq-container {
+    max-width: 900px;
+    height: 500px;
+    overflow-y: auto;
+    text-align: left;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer */
+footer {
+    background-color: var(--primary);
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    width: 100%;
+    margin-top: auto; /* Ensures footer snaps to bottom */
+}
+
+footer p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .content-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .ipad-image {
+        width: 80%;
+    }
+
+    .mobile-image {
+        width: 25%;
+    }
+
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    header nav {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .hero .content {
+        max-width: 100%;
+    }
+
+    .hero {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .hero img {
+        margin-top: 2rem;
+        max-width: 90%;
+    }
+}
+
+.accgrid {
+    position: absolute;
+    top: 200px;
+    right: 100px;
+    z-index: 10;
+}
+
+.accgrid img {
+    max-width: 600px;
+    height: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}

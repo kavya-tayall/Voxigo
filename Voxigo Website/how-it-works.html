@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voxigo - Empowering Neurodivergent Communication</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Root Variables */
+        :root {
+            --primary: #000469;
+            --secondary: #95bbff;
+            --dark-blue: #001e6b;
+            --white: #ffffff;
+            --light-blue: #afcbff;
+            --line-color: #c0d6ff;
+        }
+
+        /* General Styles */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            color: var(--primary);
+            background: var(--light-blue);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Full-Page Wrapper */
+        .container-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Header */
+        /* Slimmer Header */
+header {
+    background-color: white;
+    color: var(--primary);
+    padding: 0.8rem 1.5rem; /* REDUCED PADDING */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Slimmer Navbar Links */
+header nav a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+    line-height: 2rem;
+    padding: 0.3rem 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        header nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+    
+
+        header nav a:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        /* Section Styling */
+        .scroll-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 3rem 2rem;
+    width: 100%;
+    max-width: none;
+    background: transparent;
+    margin: 0;
+}
+
+
+        .scroll-section h2 {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+        }
+
+        .scroll-section p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: var(--dark-blue);
+            max-width: 80%;
+            margin-bottom: 2rem;
+        }
+
+        /* Feature Boxes */
+        .features-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .feature-box {
+            background: var(--dark-blue);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 330px;
+            text-align: center;
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+            font-size: 1.3rem;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .feature-box h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: white;
+        }
+
+        .feature-box p {
+            font-size: 1.2rem;
+            line-height: 1.5;
+            text-align: center;
+            color: white;
+            margin: 0;
+        }
+
+        /* Overview Section */
+        .overview-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-top: 4rem;
+            color: var(--dark-blue);
+        }
+
+        /* Video Section */
+        .videos {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .video-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
+            width: 600px;
+        }
+
+        .video-container h4 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            color: var(--dark-blue);
+        }
+
+        iframe {
+            border-radius: 10px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-blue);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            font-size: 1rem;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .footer-left {
+            font-weight: bold;
+        }
+
+        .footer-right a {
+            color: white;
+            text-decoration: none;
+            margin: 0 0.5rem;
+            font-weight: 500;
+        }
+
+        .footer-right a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-divider {
+            color: var(--line-color);
+            margin: 0 0.5rem;
+        }
+
+        /* Responsive Footer */
+        @media (max-width: 768px) {
+            footer {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-wrapper">
+        <header>
+            <h1>Voxigo</h1>
+            <nav>
+                <a href="home.html">Home</a>
+                <a href="how-it-works.html">How It Works</a>
+                <a href="features.html">Features</a>
+                <a href="faq.html">FAQs</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+        </header>
+
+        <section id="how-it-works" class="scroll-section">
+            <h2>How It Works</h2>
+            <p>Voxigo simplifies communication through intuitive features like pictograms and AI-powered assistance.</p>
+
+            <div class="features-container">
+                <div class="feature-box">
+                    <h3>Step 1</h3>
+                    <p>Parents create an account manually or sign in with Google.</p>
+                </div>
+                <div class="feature-box">
+                    <h3>Step 2</h3>
+                    <p>Secure login is created for the child.</p>
+                </div>
+                <div class="feature-box">
+                    <h3>Step 3</h3>
+                    <p>The child starts using interactive learning features.</p>
+                </div>
+            </div>
+
+            <h2 class="overview-title">Watch an Overview</h2>
+
+            <div class="videos">
+                <div class="video-container">
+                    <h4>Parent Experience</h4>
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/iubtEBF9884" allowfullscreen></iframe>
+                </div>
+                <div class="video-container">
+                    <h4>Child Experience</h4>
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/eNipWADpE_4" allowfullscreen></iframe>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p class="footer-left">&copy; 2025 Voxigo. All rights reserved.</p>
+            <div class="footer-right">
+                <a href="#privacy-policy">Privacy Policy</a>
+                <span class="footer-divider">|</span>
+                <a href="#terms-of-use">Terms of Use</a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

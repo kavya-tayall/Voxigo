@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voxigo - Contact Us</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+    <style>
+        /* Root Variables */
+        :root {
+            --primary: #000469;
+            --secondary: #95bbff;
+            --dark-blue: #001e6b;
+            --white: #ffffff;
+            --light-blue: #afcbff;
+            --line-color: #c0d6ff;
+        }
+
+        /* General Styles */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            color: var(--primary);
+            background: var(--light-blue);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        header {
+            background-color: white;
+            color: var(--primary);
+            padding: 0.6rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        header nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        header nav a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.3rem 0.8rem;
+            transition: all 0.3s ease-in-out;
+            border-radius: 8px;
+        }
+
+        header nav a:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 85vh;
+            padding-top: 1rem; /* Reduced padding to bring the form higher */
+        }
+
+        .contact-title {
+            font-size: 1.7rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: var(--dark-blue);
+        }
+
+        /* Contact Form */
+        .contact-form {
+            background: white;
+            padding: 1.5rem; /* Reduced padding to make it more compact */
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 50vw; /* Adjusted width for better balance */
+            max-width: 750px; /* Prevents excessive width */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Form Fields */
+        .input-group {
+            margin-bottom: 0.8rem; /* Reduced space between fields */
+            text-align: left;
+            width: 90%;
+        }
+
+        .input-group label {
+            font-weight: bold;
+            margin-bottom: 0.2rem;
+            color: var(--dark-blue);
+            display: block;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 10px; /* Reduced padding to shorten input field height */
+            border: 2px solid var(--line-color);
+            border-radius: 8px;
+            font-size: 0.95rem; /* Slightly smaller text for better balance */
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .input-group textarea {
+            height: 100px; /* Further reduced message box height */
+            resize: none;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            border-color: var(--secondary);
+        }
+
+        /* Submit Button */
+        .contact-form button {
+            width: 90%;
+            padding: 12px; /* Reduced button height */
+            font-size: 1rem; /* Slightly smaller button text */
+            font-weight: bold;
+            color: white;
+            background: var(--primary);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .contact-form button:hover {
+            background: var(--secondary);
+            transform: scale(1.05);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            font-size: 0.9rem;
+            margin-top: auto;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .contact-form {
+                width: 70vw;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .contact-form {
+                width: 85vw;
+            }
+
+            .contact-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Voxigo</h1>
+    <nav>
+        <a href="home.html">Home</a>
+        <a href="how-it-works.html">How It Works</a>
+        <a href="features.html">Features</a>
+        <a href="faq.html">FAQs</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+</header>
+
+<section class="contact-section">
+    <h2 class="contact-title">Get in Touch</h2>
+    <form id="contactForm" class="contact-form" action="https://script.google.com/macros/s/AKfycbzmnyKXjJl4SwRq6a-GuFDsmgw4dAEjP--gMXyFCmu_c7Bj9gkIhGlksopaouhbjnA2og/exec" method="POST">
+        <div class="input-group">
+            <label>Your Name</label>
+            <input type="text" name="name" required>
+        </div>
+        <div class="input-group">
+            <label>Your Email</label>
+            <input type="email" name="email" required>
+        </div>
+        <div class="input-group">
+            <label>Phone (Optional)</label>
+            <input type="tel" name="phone">
+        </div>
+        <div class="input-group">
+            <label>Subject</label>
+            <input type="text" name="subject" required>
+        </div>
+        <div class="input-group">
+            <label>Your Message</label>
+            <textarea name="message" required></textarea>
+        </div>
+        <button type="submit">Send Message</button>
+        <p id="responseMessage"></p>
+    </form>
+</section>
+
+
+
+<script>
+    document.getElementById("contactForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+        let form = this;
+        let responseMessage = document.getElementById("responseMessage");
+
+        responseMessage.textContent = "Sending...";
+        responseMessage.style.color = "blue";
+
+        try {
+            let response = await fetch(form.action, { method: "POST", body: new FormData(form) });
+            let data = await response.json();
+
+            responseMessage.textContent = data.success ? "Message sent successfully!" : "Error submitting form.";
+            responseMessage.style.color = data.success ? "green" : "red";
+            if (data.success) form.reset();
+        } catch (error) {
+            responseMessage.textContent = "Network error. Please try again.";
+            responseMessage.style.color = "red";
+        }
+    });
+</script>
+<footer style="
+        background-color: var(--primary); 
+        color: white; 
+        text-align: center; 
+        padding: 1rem 0; 
+        font-family: 'Roboto', sans-serif; 
+        font-size: 0.9rem;">
+        <div style="max-width: 1200px; margin: auto; padding: 0 1rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+        <p style="margin: 0; flex: 1; text-align: left;">
+            &copy; 2025 Voxigo. All rights reserved.
+        </p>
+        <div style="flex: 1; text-align: center;">
+            <a href="#privacy-policy" style="color: var(--light-blue); text-decoration: none; margin: 0 0.5rem;">Privacy Policy</a> 
+            |
+            <a href="#terms-of-use" style="color: var(--light-blue); text-decoration: none; margin: 0 0.5rem;">Terms of Use</a>
+        </div>
+        <div style="flex: 1; text-align: right;">
+            <a href="https://facebook.com" target="_blank" style="color: white; text-decoration: none; margin: 0 0.3rem;">
+                <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="https://twitter.com" target="_blank" style="color: white; text-decoration: none; margin: 0 0.3rem;">
+                <i class="fab fa-twitter"></i>
+            </a>
+            <a href="https://instagram.com" target="_blank" style="color: white; text-decoration: none; margin: 0 0.3rem;">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="https://linkedin.com" target="_blank" style="color: white; text-decoration: none; margin: 0 0.3rem;">
+                <i class="fab fa-linkedin-in"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

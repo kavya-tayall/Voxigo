@@ -1,237 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voxigo - Empowering Neurodivergent Communication</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #002366;
-            --secondary-color: #6E85B2;
-            --accent-color: #FFD700;
-            --background-color: #F9FAFB;
-            --text-color: #333;
-            --font-primary: 'Roboto', sans-serif;
-            --font-secondary: 'Montserrat', sans-serif;
-        }
+    <link rel="stylesheet" href="styles.css">
 
-        body {
-            margin: 0;
-            font-family: var(--font-primary);
-            background-color: var(--background-color);
-            color: var(--text-color);
-        }
-
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        header h1 {
-            font-family: var(--font-secondary);
-            font-size: 1.8rem;
-            margin: 0;
-        }
-
-        header nav a {
-            margin: 0 1rem;
-            text-decoration: none;
-            color: white;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        header nav a:hover {
-            color: var(--accent-color);
-        }
-
-        header .download-now {
-            background-color: var(--accent-color);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: bold;
-            text-decoration: none;
-            color: var(--primary-color);
-            transition: transform 0.3s;
-        }
-
-        header .download-now:hover {
-            transform: scale(1.1);
-        }
-
-        .hero {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 5rem 2rem;
-            min-height: 80vh;
-        }
-
-        .hero img {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 2rem;
-        }
-
-        .hero h2 {
-            font-family: var(--font-secondary);
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin-bottom: 2rem;
-        }
-
-        .hero .store-buttons img {
-            height: 60px;
-            margin: 0 10px;
-            transition: transform 0.3s;
-        }
-
-        .hero .store-buttons img:hover {
-            transform: scale(1.1);
-        }
-
-        .section {
-            padding: 4rem 2rem;
-            text-align: center;
-        }
-
-        .section h2 {
-            font-family: var(--font-secondary);
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
-            color: var(--primary-color);
-        }
-
-        .section p {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: var(--text-color);
-            margin-bottom: 2rem;
-        }
-
-        .features {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 2rem;
-        }
-
-        .feature {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-            max-width: 300px;
-            text-align: center;
-        }
-
-        .feature:hover {
-            transform: translateY(-10px);
-        }
-
-        .feature img {
-            max-width: 80px;
-            margin-bottom: 1rem;
-        }
-
-        .feature h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-        }
-
-        footer {
-            background-color: var(--primary-color);
-            color: white;
-            text-align: center;
-            padding: 2rem 1rem;
-            margin-top: 2rem;
-        }
-
-        footer p {
-            margin: 0;
-            font-size: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .features {
-                flex-direction: column;
-            }
-
-            .hero h2 {
-                font-size: 2rem;
-            }
-        }
-    </style>
 </head>
 <body>
-
-<header>
-    <h1>Voxigo</h1>
-    <nav>
-        <a href="#about">About</a>
-        <a href="#how-it-works">How It Works</a>
-        <a href="#features">Features</a>
-        <a href="#faq">FAQs</a>
-        <a href="#contact">Contact</a>
-        <a href="#download" class="download-now">Download Now</a>
-    </nav>
-</header>
-
-<section class="hero">
-    <img src="assets/voxigowebsitesmall.png" alt="Hero Image">
-    <h2>Empowering Neurodivergent Communication</h2>
-    <p>Voxigo is your ultimate companion for enhancing communication and understanding in the neurodivergent world.</p>
-    <div class="store-buttons">
-        <img src="assets/google-play-badge.png" alt="Google Play">
-        <img src="assets/app-store-badge.png" alt="App Store">
+    <header>
+        <h1>Voxigo</h1>
+        <nav>
+            <a href="#about">About</a>
+            <a href="#how-it-works" target="how-it-works.html" >How It Works</a>
+            <a href="#features">Features</a> <!-- Moved Features next to How It Works -->
+            <a href="#faq">FAQs</a>
+            <a href="contact.html" target="_blank">Contact</a> <!-- Opens in a new tab -->
+            <a href="#download" class="download-now">Download Now</a>
+        </nav>
+    </header>
+    <section class="hero fade-in">
+        <!-- Hero Banner Image -->
+        <div class="hero-banner">
+            <img src="assets/voxigowebsitesmall.png" alt="Hero Banner Image">
+        </div>
+        
+        <!-- Content and Images Layout -->
+        <div class="content-wrapper">
+            <!-- Text Content -->
+            <div class="content">
+                <h2>Empowering Communication for Neurodivergent Children</h2>
+                <p>Voxigo helps children express themselves with ease using pictograms, AI-powered sentence helpers, games, music, and more. Join us in creating a supportive, joyful environment for learning and growth.</p>
+                <div class="store-buttons">
+                    <a href="https://apps.apple.com/us/app/voxigoaac/id6738032801">
+                        <img src="assets/AppleStoreBadge.svg" alt="Download on the App Store" class="store-badge">
+                    </a>
+                    <a href="https://play.google.com/store/apps/details?id=com.VoxigoAAC.appcore">
+                        <img src="assets/GooglePlayBadge.png" alt="Get it on Google Play" class="store-badge">
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Accgrid Image -->
+            <div class="accgrid">
+                <img src="assets/aacgrid.png" alt="Accgrid Image">
+            </div>
+        </div>
+    </section>
+    
+    <section id="how-it-works" class="scroll-section">
+        <div class="text">
+            <h2>How It Works</h2>
+            <p>Voxigo simplifies communication through intuitive features like pictograms and AI-powered assistance. Designed to empower neurodivergent children, it provides a seamless and enjoyable experience for both kids and parents.</p>
+            
+            <h3>Getting Started</h3>
+            <p>To begin using Voxigo:</p>
+            <ul>
+                <li>Parents need to create an account first, either by signing up manually or using Google Sign-in for quick access.</li>
+                <li>Once logged in, parents can create a secure login for their child.</li>
+                <li>The child can then start using Voxigo's interactive features for communication and learning.</li>
+            </ul>
+            
+            <h3>Watch an Overview</h3>
+            <p>For a visual guide on how Voxigo works, check out these videos:</p>
+        </div>
+        
+        <div class="videos">
+            <div class="video-container">
+                <h4>Parent Experience</h4>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/iubtEBF9884" 
+                frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen></iframe>
+            </div>
+            <div class="video-container">
+                <h4>Child Experience</h4>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/eNipWADpE_4" 
+                frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen></iframe>
+            </div>
+        </div>
+    </section>
+    
+    <section id="features" class="feature-section">
+        <h2 class="feature-title">Exciting Features of Voxigo</h2>
+        <div class="feature-grid">
+            <div class="feature">
+                <img src="assets/aacgridicon.png" alt="AAC Grid Icon" class="feature-icon">
+                <h3>Communication & Expression</h3>
+                <p>Empower kids to express themselves using the intuitive AAC Grid with ease.</p>
+            </div>
+            <div class="feature">
+                <img src="assets/funforkids.png" alt="Fun Activities Icon" class="feature-icon">
+                <h3>Fun & Engagement</h3>
+                <p>Engage kids with safe activities like fidget spinners, music, rhymes, and audio stories.</p>
+            </div>
+            <div class="feature">
+                <img src="assets/voxiboticon.png" alt="Voxibot Insights Icon" class="feature-icon">
+                <h3>Parental Insights with Voxibot</h3>
+                <p>Gain AI-driven insights into your child's communication and emotional patterns.</p>
+            </div>
+        </div>
+    </section>
+    
+    <section id="faq" class="faq-section">
+        <h2 class="faq-title">Frequently Asked Questions</h2>
+        <div class="faq-container">
+            <div class="faq">
+                <h3>What is VoxigoAAC?</h3>
+                <p>VoxigoAAC is an assistive communication app for nonverbal and neurodivergent children, featuring an AI-powered AAC grid, customizable communication buttons, and fun activities.</p>
+            </div>
+            <div class="faq">
+                <h3>How does VoxigoAAC work?</h3>
+                <p>Parents sign up, create a child profile, and kids use the AAC grid to communicate. Parents receive insights, and kids can engage in activities like music, coloring, and breathing exercises.</p>
+            </div>
+            <div class="faq">
+                <h3>Is VoxigoAAC free?</h3>
+                <p>Yes! VoxigoAAC is completely free with no in-app purchases or hidden fees.</p>
+            </div>
+            <div class="faq">
+                <h3>Can I delete my profile?</h3>
+                <p>Yes, you can delete your profile at any time, and all personal data will be permanently removed.</p>
+            </div>
+            <div class="faq">
+                <h3>Can I delete my child’s profile?</h3>
+                <p>Yes, parents have full control over their child's profile and can delete it permanently if needed.</p>
+            </div>
+            <div class="faq">
+                <h3>Can I control which features my child can access?</h3>
+                <p>Yes! Parents can enable or disable specific features, set time limits, and restrict access to certain activities.</p>
+            </div>
+            <div class="faq">
+                <h3>How does the AI assistant help with communication?</h3>
+                <p>Voxigo’s AI assistant suggests words and phrases based on usage patterns, helping children communicate more effectively.</p>
+            </div>
+            <div class="faq">
+                <h3>Can kids customize the AAC grid?</h3>
+                <p>Yes, both kids and parents can add new words, images, and phrases to personalize their communication experience.</p>
+            </div>
+            <div class="faq">
+                <h3>Can parents track their child’s emotions and communication?</h3>
+                <p>Yes, VoxigoAAC provides insights into daily, weekly, and monthly communication history, allowing parents to monitor patterns and receive AI-generated suggestions.</p>
+            </div>
+        </div>
+    </section>
+    <footer style="
+        background-color: var(--primary); 
+        color: white; 
+        text-align: center; 
+        padding: 1rem 0; 
+        font-family: 'Roboto', sans-serif; 
+        font-size: 0.9rem;">
+        <div style="max-width: 1200px; margin: auto; padding: 0 1rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+        <p style="margin: 0; flex: 1; text-align: left;">
+            &copy; 2025 Voxigo. All rights reserved.
+        </p>
+        <div style="flex: 1; text-align: center;">
+            <a href="#privacy-policy" style="color: var(--light-blue); text-decoration: none; margin: 0 0.5rem;">Privacy Policy</a> 
+            |
+            <a href="#terms-of-use" style="color: var(--light-blue); text-decoration: none; margin: 0 0.5rem;">Terms of Use</a>
+        </div>
+        <div style="flex: 1; text-align: right;">
+            <a href="https://facebook.com" target="_blank" style="color: white; text-decoration: none; margin: 0 0.3rem;">
+                <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="https://twitter.com" target="_blank" style="color: white; text-decoration: none; margin: 0 0.3rem;">
+                <i class="fab fa-twitter"></i>
+            </a>
+            <a href="https://instagram.com" target="_blank" style="color: white; text-decoration: none; margin: 0 0.3rem;">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="https://linkedin.com" target="_blank" style="color: white; text-decoration: none; margin: 0 0.3rem;">
+                <i class="fab fa-linkedin-in"></i>
+            </a>
+        </div>
     </div>
-</section>
-
-<section class="section" id="features">
-    <h2>Features</h2>
-    <div class="features">
-        <div class="feature">
-            <img src="assets/feature1-icon.png" alt="Feature 1">
-            <h3>Feature 1</h3>
-            <p>Seamless communication tools tailored for neurodivergent individuals.</p>
-        </div>
-        <div class="feature">
-            <img src="assets/feature2-icon.png" alt="Feature 2">
-            <h3>Feature 2</h3>
-            <p>Intelligent speech-to-text and text-to-speech capabilities.</p>
-        </div>
-        <div class="feature">
-            <img src="assets/feature3-icon.png" alt="Feature 3">
-            <h3>Feature 3</h3>
-            <p>Real-time collaboration with caretakers and educators.</p>
-        </div>
-    </div>
-</section>
-
-<footer>
-    <p>&copy; 2025 Voxigo. All rights reserved.</p>
 </footer>
 
+    
 </body>
 </html>
