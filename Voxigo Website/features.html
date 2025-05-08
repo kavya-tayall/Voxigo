@@ -1,83 +1,358 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voxigo - Empowering Neurodivergent Communication</title>
+    <title>Voxigo - Features</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
     <link rel="stylesheet" href="styles.css">
-
 </head>
 <body>
     <header>
-        <h1>Voxigo</h1>
+        <a href="home.html" class="logo-container">
+            <img src="assets/logo_design.png" alt="Voxigo Logo" class="header-logo">
+            <h1>Voxigo</h1>
+        </a>
+        <div class="nav-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
         <nav>
             <a href="home.html">Home</a>
-            <a href="how-it-works.html"  >How It Works</a>
-            <a href="features.html">Features</a> <!-- Moved Features next to How It Works -->
+            <a href="how-it-works.html">How It Works</a>
+            <a href="features.html">Features</a>
             <a href="faq.html">FAQs</a>
-            <a href="contact.html" >Contact</a> <!-- Opens in a new tab -->
+            <a href="contact.html">Contact</a>
+            <a href="download.html" class="download-now">Download</a>
         </nav>
     </header>
-    
-    
-    <section id="features" class="feature-section">
-        <h2 class="feature-title">Exciting Features of Voxigo</h2>
-        <div class="feature-grid">
-            <div class="feature">
-                <img src="assets/aacgridicon.png" alt="AAC Grid Icon" class="feature-icon">
-                <h3>Communication & Expression</h3>
-                <p>Empower kids to express themselves using the intuitive AAC Grid with ease.</p>
-            </div>
-            <div class="feature">
-                <img src="assets/funforkids.png" alt="Fun Activities Icon" class="feature-icon">
-                <h3>Fun & Engagement</h3>
-                <p>Engage kids with safe activities like fidget spinners, music, rhymes, and audio stories.</p>
-            </div>
-            <div class="feature">
-                <img src="assets/voxiboticon.png" alt="Voxibot Insights Icon" class="feature-icon">
-                <h3>Parental Insights with Voxibot</h3>
-                <p>Gain AI-driven insights into your child's communication and emotional patterns.</p>
+
+    <!-- Hero Section -->
+    <section class="hero" style="background-image: linear-gradient(rgba(149, 187, 255, 0.8), rgba(236, 243, 255, 0.8)), url('assets/voxigowebsite.png'); padding: 3rem 2rem;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center" data-aos="fade-up">
+                    <h2>Features</h2>
+                    <p>Explore the powerful features designed to make communication easier and more intuitive for neurodivergent children.</p>
+                </div>
             </div>
         </div>
     </section>
-    
-   
-    <footer style="
-        background-color: var(--primary); 
-        color: white; 
-        text-align: center; 
-        padding: 1rem 0; 
-        font-family: 'Roboto', sans-serif; 
-        font-size: 0.9rem;">
-        <div style="max-width: 1200px; margin: auto; padding: 0 1rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
-        <p style="margin: 0; flex: 1; text-align: left;">
-            &copy; 2025 Voxigo. All rights reserved.
-        </p>
-        <div style="flex: 1; text-align: center;">
-            <a href="#privacy-policy" style="color: var(--light-blue); text-decoration: none; margin: 0 0.5rem;">Privacy Policy</a> 
-            |
-            <a href="#terms-of-use" style="color: var(--light-blue); text-decoration: none; margin: 0 0.5rem;">Terms of Use</a>
-        </div>
-        <div style="flex: 1; text-align: right;">
-            <a href="https://facebook.com" target="_blank" style="color: white; text-decoration: none; margin: 0 0.3rem;">
-                <i class="fab fa-facebook-f"></i>
-            </a>
-            <a href="https://twitter.com" target="_blank" style="color: white; text-decoration: none; margin: 0 0.3rem;">
-                <i class="fab fa-twitter"></i>
-            </a>
-            <a href="https://instagram.com" target="_blank" style="color: white; text-decoration: none; margin: 0 0.3rem;">
-                <i class="fab fa-instagram"></i>
-            </a>
-            <a href="https://linkedin.com" target="_blank" style="color: white; text-decoration: none; margin: 0 0.3rem;">
-                <i class="fab fa-linkedin-in"></i>
-            </a>
-        </div>
-    </div>
-</footer>
 
-    
+    <!-- Feature Categories -->
+    <section class="faq-categories" data-aos="fade-up">
+        <div class="container">
+            <div class="category-tabs">
+                <button class="category-tab active" data-category="child-features">For Children</button>
+                <button class="category-tab" data-category="parent-features">For Parents</button>
+                <button class="category-tab" data-category="unique-features">What Makes Us Unique</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature Sections -->
+    <section class="feature-sections" data-aos="fade-up">
+        <div class="container">
+            <!-- For Children Features -->
+            <div class="feature-container" id="child-features">
+                <div class="row mb-5">
+                    <div class="col-lg-6" data-aos="fade-right">
+                        <div class="feature-content">
+                            <div class="feature-icon-container mb-4">
+                                <i class="fas fa-comment-dots fa-3x feature-icon"></i>
+                            </div>
+                            <h3>AAC Communication Grid</h3>
+                            <p>Our intuitive AAC grid helps children express themselves with ease. Featuring customizable pictograms and categories, children can quickly find and select the symbols they need.</p>
+                            <ul class="feature-list">
+                                <li>Customizable categories and pictograms</li>
+                                <li>Voice output in multiple languages</li>
+                                <li>Sentence building capability</li>
+                                <li>Favorites section for commonly used phrases</li>
+                                <li>Adaptive learning that suggests words based on usage patterns</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6" data-aos="fade-left">
+                        <div class="feature-image">
+                            <img src="assets/aacgrid.png" alt="AAC Communication Grid" class="img-fluid rounded shadow">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-5">
+                    <div class="col-lg-6 order-lg-2" data-aos="fade-left">
+                        <div class="feature-content">
+                            <div class="feature-icon-container mb-4">
+                                <i class="fas fa-music fa-3x feature-icon"></i>
+                            </div>
+                            <h3>Fun Activities</h3>
+                            <p>Voxigo offers a variety of engaging activities designed to both entertain and support development. These activities help children express themselves in different ways.</p>
+                            <ul class="feature-list">
+                                <li>Digital musical instruments</li>
+                                <li>Coloring books with guided art therapy</li>
+                                <li>Fidget games for sensory engagement</li>
+                                <li>Audio stories and guided meditation</li>
+                                <li>Relaxation exercises and breathing games</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 order-lg-1" data-aos="fade-right">
+                        <div class="feature-image">
+                            <img src="assets/ChildFunSuggestions.png" alt="Fun Activities" class="img-fluid rounded shadow">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-5">
+                    <div class="col-lg-6" data-aos="fade-right">
+                        <div class="feature-content">
+                            <div class="feature-icon-container mb-4">
+                                <i class="fas fa-heart fa-3x feature-icon"></i>
+                            </div>
+                            <h3>Emotional Intelligence</h3>
+                            <p>Help children identify and express their emotions with our emotional intelligence tools. These features provide valuable learning opportunities for emotional regulation.</p>
+                            <ul class="feature-list">
+                                <li>Visual emotion cards for selection</li>
+                                <li>Strategies for coping with difficult emotions</li>
+                                <li>Calming exercises based on emotional state</li>
+                                <li>Emotion tracking to identify patterns</li>
+                                <li>Customizable responses for different emotions</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6" data-aos="fade-left">
+                        <div class="feature-image">
+                            <img src="assets/ChildFeelings.png" alt="Emotional Intelligence Features" class="img-fluid rounded shadow">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- For Parents Features -->
+            <div class="feature-container hidden" id="parent-features">
+                <div class="row mb-5">
+                    <div class="col-lg-6" data-aos="fade-right">
+                        <div class="feature-content">
+                            <div class="feature-icon-container mb-4">
+                                <i class="fas fa-chart-line fa-3x feature-icon"></i>
+                            </div>
+                            <h3>Communication Insights</h3>
+                            <p>Gain valuable insights into your child's communication patterns and development. Our analytics dashboard helps you understand how your child is progressing.</p>
+                            <ul class="feature-list">
+                                <li>Daily, weekly, and monthly usage statistics</li>
+                                <li>Most frequently used pictograms and phrases</li>
+                                <li>Communication pattern analysis</li>
+                                <li>Progress tracking over time</li>
+                                <li>Downloadable reports for sharing with therapists</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6" data-aos="fade-left">
+                        <div class="feature-image">
+                            <img src="assets/AdminHomePage.png" alt="Parent Dashboard" class="img-fluid rounded shadow">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-5">
+                    <div class="col-lg-6 order-lg-2" data-aos="fade-left">
+                        <div class="feature-content">
+                            <div class="feature-icon-container mb-4">
+                                <i class="fas fa-robot fa-3x feature-icon"></i>
+                            </div>
+                            <h3>Voxibot AI Assistant</h3>
+                            <p>Our AI assistant analyzes your child's usage patterns and provides personalized suggestions to improve communication and engagement.</p>
+                            <ul class="feature-list">
+                                <li>Personalized activity recommendations</li>
+                                <li>Communication improvement suggestions</li>
+                                <li>Emotional pattern insights</li>
+                                <li>Adaptive learning that evolves with your child</li>
+                                <li>Regular progress updates and milestones</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 order-lg-1" data-aos="fade-right">
+                        <div class="feature-image">
+                            <img src="assets/AdminVoxiBot.png" alt="Voxibot AI Assistant" class="img-fluid rounded shadow">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-5">
+                    <div class="col-lg-6" data-aos="fade-right">
+                        <div class="feature-content">
+                            <div class="feature-icon-container mb-4">
+                                <i class="fas fa-sliders-h fa-3x feature-icon"></i>
+                            </div>
+                            <h3>Complete Customization</h3>
+                            <p>Tailor the app to your child's specific needs with our extensive customization options. Control every aspect of the experience.</p>
+                            <ul class="feature-list">
+                                <li>Add custom pictograms and audio</li>
+                                <li>Create personalized categories</li>
+                                <li>Set feature access permissions</li>
+                                <li>Customize the visual appearance</li>
+                                <li>Set usage time limits and schedules</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6" data-aos="fade-left">
+                        <div class="feature-image">
+                            <img src="assets/AdminSettingsPage.png" alt="Customization Options" class="img-fluid rounded shadow">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What Makes Us Unique -->
+            <div class="feature-container hidden" id="unique-features">
+                <div class="row mb-5">
+                    <div class="col-lg-6" data-aos="fade-right">
+                        <div class="feature-content">
+                            <div class="feature-icon-container mb-4">
+                                <i class="fas fa-brain fa-3x feature-icon"></i>
+                            </div>
+                            <h3>Neurodivergent-First Design</h3>
+                            <p>Unlike many apps that are adapted for neurodivergent users, Voxigo was built from the ground up with neurodivergent children in mind.</p>
+                            <ul class="feature-list">
+                                <li>Developed with input from specialists in neurodiversity</li>
+                                <li>Tested extensively with neurodivergent children</li>
+                                <li>Sensory-friendly interface with adjustable settings</li>
+                                <li>Simplified navigation with consistent design</li>
+                                <li>Reduced cognitive load through thoughtful design</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6" data-aos="fade-left">
+                        <div class="feature-image">
+                            <img src="assets/ChildAACGrid.png" alt="Neurodivergent-First Design" class="img-fluid rounded shadow">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-5">
+                    <div class="col-lg-6 order-lg-2" data-aos="fade-left">
+                        <div class="feature-content">
+                            <div class="feature-icon-container mb-4">
+                                <i class="fas fa-gift fa-3x feature-icon"></i>
+                            </div>
+                            <h3>Completely Free</h3>
+                            <p>We believe that communication is a fundamental right. That's why Voxigo is completely free with no in-app purchases, subscriptions, or advertisements.</p>
+                            <ul class="feature-list">
+                                <li>No cost for any feature or functionality</li>
+                                <li>No advertisements ever</li>
+                                <li>No in-app purchases or premium upgrades</li>
+                                <li>No data selling or monetization</li>
+                                <li>Funded through grants and donations</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 order-lg-1" data-aos="fade-right">
+                        <div class="feature-image">
+                            <div class="placeholder-image d-flex align-items-center justify-content-center bg-light rounded shadow" style="height: 300px;">
+                                <i class="fas fa-gift fa-5x text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-5">
+                    <div class="col-lg-6" data-aos="fade-right">
+                        <div class="feature-content">
+                            <div class="feature-icon-container mb-4">
+                                <i class="fas fa-lock fa-3x feature-icon"></i>
+                            </div>
+                            <h3>Privacy-Focused</h3>
+                            <p>We take data privacy seriously, especially when it comes to children. All data is stored locally on your device with optional secure cloud backup.</p>
+                            <ul class="feature-list">
+                                <li>End-to-end encryption for all data</li>
+                                <li>No data shared with third parties</li>
+                                <li>Optional anonymized usage statistics only</li>
+                                <li>Full COPPA and GDPR compliance</li>
+                                <li>Complete data deletion option available</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6" data-aos="fade-left">
+                        <div class="feature-image">
+                            <div class="placeholder-image d-flex align-items-center justify-content-center bg-light rounded shadow" style="height: 300px;">
+                                <i class="fas fa-shield-alt fa-5x text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download CTA -->
+    <section class="cta-section" data-aos="fade-up">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Experience Voxigo?</h2>
+                <p>Download our free app today and empower your child's communication journey.</p>
+                <div class="cta-buttons">
+                    <a href="download.html" class="btn">Download Now</a>
+                    <a href="contact.html" class="btn btn-secondary">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Enhanced Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-col">
+                <h4>Voxigo</h4>
+                <p>Empowering neurodivergent children with tools for expression, communication, and growth.</p>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="home.html">Home</a></li>
+                    <li><a href="how-it-works.html">How It Works</a></li>
+                    <li><a href="features.html">Features</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="contact.html">Contact Us</a></li>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Download</h4>
+                <p>Get Voxigo on your device:</p>
+                <a href="https://apps.apple.com/us/app/voxigoaac/id6738032801">
+                    <img src="assets/AppleStoreBadge.svg" alt="Download on the App Store" class="store-badge" style="height: 40px; margin-bottom: 10px;">
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=com.VoxigoAAC.appcore">
+                    <img src="assets/GooglePlayBadge.png" alt="Get it on Google Play" class="store-badge" style="height: 40px;">
+                </a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Voxigo. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="scripts.js"></script>
 </body>
 </html>
