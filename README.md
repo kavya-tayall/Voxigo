@@ -1,4 +1,4 @@
-# Voxigo - AAC Communication Solution
+# Voxigo - AAC Communication for Everyone
 
 <p align="center">
   <img src="app_icon_512.png" alt="Voxigo Logo" width="150">
