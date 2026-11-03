@@ -10,7 +10,7 @@ Voxigo is a comprehensive Augmentative and Alternative Communication (AAC) appli
 
 **Official Website:** [voxigoaac.org](https://voxigoaac.org)
 
-**Developed by:** Kavya Tayal
+**Developed by:** Kavya Tayal & Nihanth Tatikonda
 
 ## Features
 
